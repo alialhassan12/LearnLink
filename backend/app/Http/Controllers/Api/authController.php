@@ -77,4 +77,16 @@ class authController extends Controller
             'message'=>'User logged out successfully',
         ],200); 
     }
+
+    public function checkAuth(Request $request){
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                'message'=>'User not found',
+            ],404); 
+        }
+        return response()->json([
+            'user'=>$user,
+        ],200); 
+    }
 }

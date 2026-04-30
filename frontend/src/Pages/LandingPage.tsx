@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import {Calendar, Lock, MessageCircle, Sparkles, Tag, Video} from 'lucide-react'
+import useAuthStore from "../store/authStore";
+import { Spinner } from "../components/ui/spinner";
 
 const LandingPage = () => {
     const tools=[
@@ -59,6 +62,12 @@ const LandingPage = () => {
         }
     ];
 
+    const navigate=useNavigate();
+
+    const handleGetStarted=async()=>{
+        navigate('/dashboard')
+    }
+
     return (
         <div>
             <Header/>
@@ -78,7 +87,7 @@ const LandingPage = () => {
                         </p>
                         {/* buttons */}
                         <div className="flex flex-row gap-6">
-                            <button className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer">
+                            <button onClick={handleGetStarted} className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer flex items-center justify-center gap-2">
                                 Get Started
                             </button>
                             <button className="px-6 py-3 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer">
