@@ -33,8 +33,11 @@ axiosInstance.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             console.error("Session expired. Logging out.");
             localStorage.removeItem("token");
-            // Force reload to login page to clear state
-            window.location.href = '/auth/login';
+            // Only force reload to login page if not already on auth pages
+            const path = window.location.pathname;
+            if (!path.includes('/auth/login') && !path.includes('/auth/register')) {
+                window.location.href = '/auth/login';
+            }
         }
         return Promise.reject(error);
     }

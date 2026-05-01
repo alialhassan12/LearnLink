@@ -1,10 +1,13 @@
+import { Link } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
 
 const Header = () => {
     return (
         <div className="flex flex-row justify-between items-center p-4 sticky top-0 border-b border-gray-400/30 transition-colors duration-300 bg-bg-1 z-1">
             {/* logo */}
-            <div className="text-2xl font-bold text-primary">LearnLink</div>
+            <div className="flex flex-row justify-center items-center gap-2">
+                <Link to={'/'} className="text-2xl font-bold text-primary">LearnLink</Link>
+            </div>
             {/* nav links */}
             <div>
                 <ThemeToggle/>

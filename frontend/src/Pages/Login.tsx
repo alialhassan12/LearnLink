@@ -5,12 +5,15 @@ import {
     FieldDescription,
     FieldGroup,
     FieldLabel,
-} from "../components/ui/field"
+} from "../components/ui/field";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Footer from "../components/Footer";
 import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import { Spinner } from "../components/ui/spinner";
+import { Button } from "../components/ui/button";
 
 const Login = () => {
     const {login,isloggingIn}=useAuthStore();
@@ -32,7 +35,9 @@ const Login = () => {
             [e.target.name]:e.target.value
         });
     }
-    const handleSubmit=async ()=>{
+    const handleSubmit=async (e:any)=>{
+        e.preventDefault();
+
         if(formData.email.trim()=== '' || formData.password.trim()=== '')
         {
             setError('Please fill all the fields');
@@ -62,52 +67,64 @@ const Login = () => {
 
     return (
         <>
+            <Header/>
             <div className="flex flex-col justify-center items-center h-screen bg-bg-2">
-                {/* title */}
-                <div className="flex flex-row items-center gap-3 text-primary text-2xl font-bold mb-10">
-                    <GraduationCap size={40}/>
-                    <p>LearnLink</p>
-                </div>
-                {/* form */}
-                <div className="bg-bg-1 border border-gray-400/30 flex flex-col justify-center items-center shadow-2xl shadow-primary/30 rounded-lg p-10">
-                    <div className="flex flex-col items-center gap-2 mb-10">
-                        <p className="text-text-strong font-bold text-2xl">Welcome Back</p>
-                        <p className="text-text-weak text-sm">Access your teaching and learning dashboard.</p>
+                <div className="" data-aos="zoom-in">
+                    {/* title */}
+                    <div className="flex flex-row justify-center items-center gap-3 text-primary text-2xl font-bold mb-10">
+                        <GraduationCap size={40}/>
+                        <p>LearnLink</p>
                     </div>
-                    <div className="w-full">
-                        <FieldGroup>
-                            <Field>
-                                <FieldLabel>Email Address</FieldLabel>
-                                <Input type="email" onChange={handleChange} name="email" placeholder="example@email.com" className="py-5" aria-invalid={hasError}></Input>
-                            </Field>
-                            <Field>
-                                <FieldLabel>Password</FieldLabel>
-                                <Input type="password" onChange={handleChange} name="password" placeholder="********" className="py-5" aria-invalid={hasError} ></Input>
-                                <FieldDescription className="text-xs">
-                                    <Link to="/auth/forget-password" className="text-primary">Forget your password?</Link>
-                                </FieldDescription>
-                            </Field>
-                            <Field>
-                                {error && (
-                                    <FieldDescription className="text-xs text-red-500">
-                                        {error}
+                    {/* form */}
+                    <form onSubmit={handleSubmit} className="bg-bg-1 border border-gray-400/30 flex flex-col justify-center items-center shadow-2xl shadow-primary/30 rounded-lg p-10">
+                        <div className="flex flex-col items-center gap-2 mb-10">
+                            <p className="text-text-strong font-bold text-2xl">Welcome Back</p>
+                            <p className="text-text-weak text-sm">Access your teaching and learning dashboard.</p>
+                        </div>
+                        <div className="w-full">
+                            <FieldGroup>
+                                <Field>
+                                    <FieldLabel>Email Address</FieldLabel>
+                                    <Input type="email" onChange={handleChange} disabled={isloggingIn} name="email" placeholder="example@email.com" className="py-5" aria-invalid={hasError}></Input>
+                                </Field>
+                                <Field>
+                                    <FieldLabel>Password</FieldLabel>
+                                    <Input type="password" onChange={handleChange} disabled={isloggingIn} name="password" placeholder="********" className="py-5" aria-invalid={hasError} ></Input>
+                                    <FieldDescription className="text-xs">
+                                        <Link to="/auth/forget-password" className="text-primary">Forget your password?</Link>
                                     </FieldDescription>
-                                )}
-                            </Field>
-                            <button 
-                                onClick={handleSubmit}
-                                className="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/80 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer">
-                                Login
-                            </button>
-                        </FieldGroup>
-                        <div className="w-full mt-5">
-                            <div className="flex flex-row items-center gap-2 w-full">
-                                <div className="w-full border-gray-400/30 border"></div>
-                                <p className="text-text-weak text-sm">or</p>
-                                <div className="w-full border-gray-400/30 border"></div>
+                                </Field>
+                                <Field>
+                                    {error && (
+                                        <FieldDescription className="text-xs text-red-500">
+                                            {error}
+                                        </FieldDescription>
+                                    )}
+                                </Field>
+                                {/* button to submit form */}
+                                <Button
+                                    disabled={isloggingIn}
+                                    type="submit"
+                                    className="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/80 cursor-pointer">
+                                    {isloggingIn
+                                        ? <><Spinner data-icon="inline-start" /> Logging In</>
+                                        : 'Login'
+                                    }
+                                </Button>
+                            </FieldGroup>
+                            <div className="w-full mt-5">
+                                <div className="flex flex-row items-center gap-2 w-full">
+                                    <div className="w-full border-gray-400/30 border"></div>
+                                    <p className="text-text-weak text-sm">or</p>
+                                    <div className="w-full border-gray-400/30 border"></div>
+                                </div>
+                            </div>
+                            <div className="flex gap-1 text-sm text-text-weak justify-center items-center mt-2">
+                                Don't have an account? 
+                                <Link to="/auth/register" className="text-primary hover:underline">Register</Link>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             <Footer/>

@@ -1,6 +1,7 @@
 import {create} from "zustand";
 import type { user } from "../@types/user";
 import axiosInstance from "../lib/axios";
+import { toast } from "sonner";
 
 interface useAuthStoreInterface{
     authUser:user |null,
@@ -9,6 +10,8 @@ interface useAuthStoreInterface{
     checkAuth:()=>Promise<boolean>,
     isCheckingAuth:boolean,
     logout:()=>Promise<boolean>,
+    isRegistering:boolean,
+    register:({name,email,password,password_confirmation,role}: {name:string,email:string,password:string,password_confirmation:string,role:string})=>Promise<boolean>,
 }
 
 const useAuthStore=create<useAuthStoreInterface>((set)=>({
@@ -21,9 +24,10 @@ const useAuthStore=create<useAuthStoreInterface>((set)=>({
             const response=await axiosInstance.post('/auth/login',{email,password});
             localStorage.setItem('token',response.data.token);
             set({authUser:response.data.user});
+            toast.success(response.data.message);
             return true;
         } catch (error:any) {
-            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
             return false;
         } finally{
             set({isloggingIn:false});
@@ -56,8 +60,25 @@ const useAuthStore=create<useAuthStoreInterface>((set)=>({
             set({authUser:null});
             return true;
         } catch (error:any) {
-            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
             return false;
+        }
+    },
+
+    isRegistering:false,
+    register:async({name,email,password,password_confirmation,role}: {name:string,email:string,password:string,password_confirmation:string,role:string})=>{
+        set({isRegistering:true});
+        try {
+            const response=await axiosInstance.post('/auth/register',{name,email,password,password_confirmation,role});
+            localStorage.setItem('token',response.data.token);
+            set({authUser:response.data.user});
+            toast.success(response.data.message);
+            return true;
+        } catch (error:any) {
+            toast.error(error.response.data.message);
+            return false;
+        } finally{
+            set({isRegistering:false});
         }
     }
 }));
