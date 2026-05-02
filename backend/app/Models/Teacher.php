@@ -13,6 +13,11 @@ class Teacher extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    // Courses
+    public function courses(){
+        return $this->hasMany(Course::class);
+    }
     
     // Casts
     protected function casts(): array{

@@ -9,6 +9,7 @@ interface useAuthStoreInterface{
     isloggingIn:boolean,
     checkAuth:()=>Promise<boolean>,
     isCheckingAuth:boolean,
+    isLoggingout:boolean,
     logout:()=>Promise<boolean>,
     isRegistering:boolean,
     register:({name,email,password,password_confirmation,role}: {name:string,email:string,password:string,password_confirmation:string,role:string})=>Promise<boolean>,
@@ -53,15 +54,20 @@ const useAuthStore=create<useAuthStoreInterface>((set)=>({
         }
     },
 
+    isLoggingout:false,
     logout:async()=>{
+        set({isLoggingout:true});
         try {
             await axiosInstance.post('/auth/logout');
             localStorage.removeItem('token');
             set({authUser:null});
+            toast.success('Logout successful');
             return true;
         } catch (error:any) {
             toast.error(error.response.data.message);
             return false;
+        } finally{
+            set({isLoggingout:false});
         }
     },
 

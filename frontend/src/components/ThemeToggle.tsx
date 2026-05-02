@@ -7,7 +7,7 @@ export function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded text-text-weak cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary "
+            className="rounded text-text-weak cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary "
         >
             {theme === "light" ? <Moon /> : <Sun />}
         </button>

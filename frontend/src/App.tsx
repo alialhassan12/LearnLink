@@ -76,7 +76,7 @@ function App() {
         }></Route>
 
         {/* Protected Route - Requires login */}
-        <Route path='/dashboard' element={
+        <Route path='/dashboard/*' element={
           <ProtectedRoute>
             <DashboardRouter />
           </ProtectedRoute>
