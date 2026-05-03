@@ -9,6 +9,7 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import useAuthStore from "../store/authStore";
 import { Bell } from "lucide-react";
+import CreateCourse from "./TeacherPages/CreateCourse";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -20,7 +21,7 @@ const TeacherDashboard=()=>{
                 {/* content */}
                 <div className="p-4 space-y-4 w-full">
                     {/* top bar */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between sticky top-0 z-50 bg-bg-1/50 backdrop-blur-xl border-b border-border">
                         <div className="flex items-center gap-4">
                             <SidebarTrigger />
                         </div>
@@ -44,7 +45,10 @@ const TeacherDashboard=()=>{
                     {/* content routes */}
                     <Routes>
                         <Route path="/" element={<Dashboard/>}/>
-                        <Route path="/my-courses" element={<MyCourses/>}/>
+                        <Route path="/my-courses" >
+                            <Route index element={<MyCourses/>}/>
+                            <Route path="create" element={<CreateCourse/>}/>
+                        </Route>
                     </Routes>
                 </div>
                 
