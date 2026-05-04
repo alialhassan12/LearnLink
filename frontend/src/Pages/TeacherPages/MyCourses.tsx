@@ -12,11 +12,11 @@ const MyCourses=()=>{
                     <p className="text-2xl font-medium text-text-strong">My Courses</p>
                     <p className="text-sm text-text-weak">Manage, edit, and track the performance of your educational content.</p>
                 </div>
-                <Button className="h-10 px-4 hover:bg-primary/80">
                     <Link to="/dashboard/my-courses/create" className="flex flex-row items-center gap-2">
-                        <Plus /> <span className="font-medium">Create Course</span>
+                        <Button className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
+                            <Plus /> <span className="font-medium">Create Course</span>
+                        </Button>
                     </Link>
-                </Button>
             </div>
             {/* filter section */}
             <div>
