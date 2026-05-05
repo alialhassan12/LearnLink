@@ -59,6 +59,7 @@ function App() {
 
   return (
     <>
+      
       <Routes>
         {/* Public Route - Loads instantly without waiting for auth check */}
         <Route path='/' element={<LandingPage/>}></Route>

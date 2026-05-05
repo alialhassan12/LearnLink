@@ -1,6 +1,7 @@
-export interface user{  
-    name:string,
-    email:string,
-    role:string,
-    avatar:string |null
+export interface user{ 
+    id:number, 
+    name:string, 
+    email:string, 
+    role:string, 
+    avatar:string |null 
 }

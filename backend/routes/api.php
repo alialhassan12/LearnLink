@@ -17,7 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/categories',[categoriesController::class,'getCategories'])->name('get_categories');
 
     // teacher routes
-    Route::middleware('checkRole:teacher')->group(function(){
+    Route::middleware(['checkRole:teacher'])->group(function(){
         Route::post('/courses/create-course',[coursesController::class,'createCourse'])->name('create_course');
     });
 });

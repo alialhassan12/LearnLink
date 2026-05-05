@@ -6,11 +6,12 @@ import CreateCourseStep1 from "../../components/teacherDashboardComponents/creat
 import useCreateCourseStore from "../../store/createCourseStore";
 import { toast } from "sonner";
 import CreateCourseStep2 from "../../components/teacherDashboardComponents/createCourseSteps/CreateCourseStep2";
+import CreateCourseStep3 from "../../components/teacherDashboardComponents/createCourseSteps/CreateCourseStep3";
 
 
 const CreateCourse=()=>{
     const [stepProgress,setStepProgress]=useState<number>(10);
-    const {courseData}=useCreateCourseStore();
+    const {courseData,courseSections}=useCreateCourseStore();
 
     const handleNextStep=()=>{
         if(stepProgress===10){
@@ -21,6 +22,10 @@ const CreateCourse=()=>{
             setStepProgress(50);
         }
         if(stepProgress===50){
+            if(courseSections.length===0){
+                toast.error("Please add at least one section");
+                return;
+            }
             setStepProgress(100);
         }
     }
@@ -92,11 +97,7 @@ const CreateCourse=()=>{
                 {/* step3: publish course */}
                 {
                     stepProgress===100 && (
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h1 className="text-2xl font-semibold">Publish Course</h1>
-                            </div>
-                        </div>
+                        <CreateCourseStep3/>
                     )
                 }
             </div>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { ChevronDown, ChevronRight, Folder, Plus, Upload, X } from "lucide-react";
 import { Input } from "../../ui/input";
+import { toast } from "sonner";
 
 const CreateCourseStep2=()=>{
     const {courseData, courseSections, addCourseSection, addFileToSection}=useCreateCourseStore();
@@ -14,9 +15,11 @@ const CreateCourseStep2=()=>{
 
     const handleAddSection=()=>{
         if(!sectionName){
+            toast.error("Please enter a section name");
             return;
         }
         if(courseSections.some((section)=>section.title.toLowerCase()===sectionName.trim().toLowerCase())){
+            toast.error("Section already exists");
             return;
         }
         addCourseSection(sectionName);
@@ -31,8 +34,12 @@ const CreateCourseStep2=()=>{
 
     const handleFileInput=(event:React.ChangeEvent<HTMLInputElement>)=>{
         const file=event.target.files?.[0];
+        const fileTitle=file?.name.split(".")[0];
+        const fileType=file?.type.split("/")[0];
+        const fileSize=file?.size/(1024*1024);
+        // const fileOrder=courseSections.find((section)=>section.title===selectedSection)?.files.length+1;
         if(file && selectedSection){
-            addFileToSection(selectedSection, file);
+            addFileToSection(selectedSection, file,fileTitle,fileSize,fileType);
         }
     };
     
@@ -137,8 +144,9 @@ const CreateCourseStep2=()=>{
                                 return(
                                     <div key={index} className="flex flex-row items-center justify-between gap-2 p-2 hover:bg-bg-1 rounded-md">
                                         <div className="flex flex-row items-center gap-2">
-                                            <p className="text-text-strong text-sm">{file.name}</p>
-                                            <p className="text-text-weak text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                            <p className="text-text-strong text-sm">{file.title}</p>
+                                            <p className="text-text-weak text-sm">{file.size.toFixed(2)} MB</p>
+                                            <p className="text-text-weak text-sm">{file.type}</p>
                                         </div>
                                     </div>
                                 )

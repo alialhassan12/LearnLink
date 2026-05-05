@@ -9,15 +9,13 @@ import { Button } from "../../ui/button";
 import useCategoryStore from "../../../store/categoryStore";
 
 const CreateCourseStep1=()=>{
-    const {courseData,setCourseData}=useCreateCourseStore();
+    const {courseData,setCourseData,imagePreview,setImagePreview}=useCreateCourseStore();
     const {categories,getCategories}=useCategoryStore();
 
     useEffect(()=>{
         getCategories();
     },[]);
 
-    const [imageFile,setImageFile]=useState<File | null>(null);
-    const [imagePreview,setImagePreview]=useState<string>("");
     const fileInputRef=useRef<HTMLInputElement>(null);
     // trigger file input
     const triggerFileInput=()=>{
@@ -25,9 +23,9 @@ const CreateCourseStep1=()=>{
     };
 
     // handle remove image
-    const handleRemoveImage=()=>{   
-        setImageFile(null);
+    const handleRemoveImage=()=>{
         setImagePreview("");
+        setCourseData({...courseData,thumbnail:null});
         if(fileInputRef.current){
             fileInputRef.current.value="";
         }
@@ -37,7 +35,7 @@ const CreateCourseStep1=()=>{
     const handleFileChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
         const file=e.target.files?.[0];
         if(file){
-            setImageFile(file);
+            setCourseData({...courseData,thumbnail:file});
             const reader=new FileReader();
             reader.onloadend=()=>{
                 setImagePreview(reader.result as string);
@@ -53,7 +51,7 @@ const CreateCourseStep1=()=>{
         e.preventDefault();
         const file=e.dataTransfer.files[0];
         if(file){
-            setImageFile(file);
+            setCourseData({...courseData,thumbnail:file});
             const reader=new FileReader();
             reader.onloadend=()=>{
                 setImagePreview(reader.result as string);
@@ -163,9 +161,6 @@ const CreateCourseStep1=()=>{
                                 <div className="bg-bg-1 p-4 rounded-full text-text-strong mb-3">
                                     <Upload size={20}/>
                                 </div>
-                                <p className="text-text-weak text-lg">
-                                    {imageFile? imageFile.name : "Upload Course Thumbnail"}
-                                </p>
                                 <p className="text-text-weak text-xs text-center">Drag and Drop, or click here to upload. Use .JPG, .JPEG, or .PNG Max 5MB.</p>
                             </div>
                             <Input 
