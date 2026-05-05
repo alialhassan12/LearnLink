@@ -1,16 +1,7 @@
 import {create} from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "sonner";
-
-interface publishCourseData{
-    category_id:number,
-    title:string,
-    description:string,
-    thumbnail:File,
-    language:string,
-    price:number,
-    sections:{title:string,order:number,materials:{file:File,type:string,size:number,title:string}[]}[]
-}
+import type { CoursePublish } from "../@types/coursePublish";
 
 interface CreateCourseStoreState{
     courseData:{
@@ -41,10 +32,8 @@ interface CreateCourseStoreState{
     addCourseSection:(title:string)=>void,
     addFileToSection:(sectionTitle:string,file:File,fileTitle:string,fileSize:number,fileType:string)=>void,
 
-    // publish course
-    isPublishing:boolean,
-    setIsPublishing:(isPublishing:boolean)=>void,
-    publishCourse:(data:publishCourseData)=>Promise<void>
+    // clear state
+    clearCourseAndSectionData:()=>void,
 }
 
 
@@ -94,21 +83,8 @@ const useCreateCourseStore=create<CreateCourseStoreState>((set)=>({
         )
     })),
 
-    // publis course
-    isPublishing:false,
-    setIsPublishing:(isPublishing:boolean)=>set((state)=>({...state,isPublishing})),
-
-    publishCourse:async(data:publishCourseData)=>{
-        set({isPublishing:true});
-        try{
-            const response=await axiosInstance.post('/courses/create-course',data);
-            toast.success(response.data.message);
-        }catch(error:any){
-            toast.error(error.response.data.message);
-        }finally{
-            set({isPublishing:false});
-        }
-    }
+    clearCourseAndSectionData:()=>set((state)=>({...state,courseData:{title:"",teacher_id:0,category_id:0,language:"",description:"",thumbnail:null,price:0}
+                                                ,courseSections:[],imagePreview:""})),
 
 }));
 

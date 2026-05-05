@@ -1,4 +1,4 @@
-import { Banknote, DollarSign, Eye, Upload } from "lucide-react";
+import { Banknote, DollarSign, Eye, Upload, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card";
 import { Field, FieldLabel } from "../../ui/field";
 import { Input } from "../../ui/input";
@@ -7,12 +7,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import useAuthStore from "../../../store/authStore";
 import { Button } from "../../ui/button";
 import { useState } from "react";
+import { useCourseStore } from "../../../store/courseStore";
+import { useNavigate } from "react-router-dom";
 
 
 const CreateCourseStep3=()=>{
-    const {courseData,setCourseData,imagePreview,courseSections,isPublishing,publishCourse}=useCreateCourseStore();
-    const [pricePreview,setPricePreview]=useState<number>(0);
+    const {courseData,setCourseData,imagePreview,courseSections}=useCreateCourseStore();
+    const {publishCourse,isPublishing}=useCourseStore();
     const {authUser}=useAuthStore();
+    const [pricePreview,setPricePreview]=useState<number>(0);
+    const navigate=useNavigate();
 
     const handlePriceInputChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
         const value=Number(e.target.value);
@@ -22,7 +26,7 @@ const CreateCourseStep3=()=>{
             price:value
         });
     };
-    const handlePublishCourse=()=>{
+    const handlePublishCourse=async ()=>{
         const data={
             "category_id":Number(courseData.category_id),
             "title":courseData.title,
@@ -38,16 +42,19 @@ const CreateCourseStep3=()=>{
                         return({
                             "file":file.file,
                             "type":file.type,
-                            "size":Number(file.size),
+                            "size":file.size,
                             "title":file.title
                         });
                     })
                 });
             })
         };
-        console.log(data);
-        publishCourse(data);
-        
+
+        const isPublished=await publishCourse(data);
+        if(isPublished){
+            // navigate to published successful page
+            navigate('/dashboard/my-courses/published-successful');
+        }
     };
 
     return(
@@ -82,8 +89,8 @@ const CreateCourseStep3=()=>{
                     </Field>
                 </CardContent>
                 {/* publish button */}
-                <Button onClick={handlePublishCourse} className="w-full cursor-pointer hover:bg-primary/80 h-10">
-                    <Upload/> Publish Course Now
+                <Button disabled={isPublishing} onClick={handlePublishCourse} className="w-full cursor-pointer hover:bg-primary/80 h-10">
+                    {isPublishing ? <Loader2 className="animate-spin" /> : <Upload/>} {isPublishing ? 'Publishing...' : 'Publish Course Now'}
                 </Button>
             </Card>
             <Card className="w-[37%]">

@@ -1,5 +1,5 @@
 import TeacherSidebar from "../components/teacherDashboardComponents/TeacherSidebar";
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "../components/ui/sidebar"
+import { SidebarProvider, SidebarTrigger } from "../components/ui/sidebar"
 import { Separator } from "../components/ui/separator";
 import { TooltipProvider } from "../components/ui/tooltip";
 import { Route, Routes } from "react-router-dom";
@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import useAuthStore from "../store/authStore";
 import { Bell } from "lucide-react";
 import CreateCourse from "./TeacherPages/CreateCourse";
+import PublishedSuccessful from "./TeacherPages/PublishedSuccessful";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -48,6 +49,7 @@ const TeacherDashboard=()=>{
                         <Route path="/my-courses" >
                             <Route index element={<MyCourses/>}/>
                             <Route path="create" element={<CreateCourse/>}/>
+                            <Route path="published-successful" element={<PublishedSuccessful/>}/>
                         </Route>
                     </Routes>
                 </div>

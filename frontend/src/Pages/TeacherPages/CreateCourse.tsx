@@ -11,7 +11,7 @@ import CreateCourseStep3 from "../../components/teacherDashboardComponents/creat
 
 const CreateCourse=()=>{
     const [stepProgress,setStepProgress]=useState<number>(10);
-    const {courseData,courseSections}=useCreateCourseStore();
+    const {courseData,courseSections,clearCourseAndSectionData}=useCreateCourseStore();
 
     const handleNextStep=()=>{
         if(stepProgress===10){
@@ -105,7 +105,10 @@ const CreateCourse=()=>{
             {/* bottom section */}
             <div className="flex justify-between items-center border-t border-border py-4 sticky bottom-0 z-50 bg-bg-1/50 backdrop-blur-xl">
                 <Button
-                    onClick={()=>window.history.back()}
+                    onClick={()=>{
+                        clearCourseAndSectionData();
+                        window.history.back();
+                    }}
                     className="px-4 h-10 cursor-pointer" 
                     variant="outline"
                 >
