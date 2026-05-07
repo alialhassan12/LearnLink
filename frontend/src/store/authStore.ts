@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 interface useAuthStoreInterface{
     authUser:user |null,
+    setAuthUser:(user:user)=>void,
     login:({email,password}: {email:string,password:string})=>Promise<boolean>,
     isloggingIn:boolean,
     checkAuth:()=>Promise<boolean>,
@@ -17,6 +18,7 @@ interface useAuthStoreInterface{
 
 const useAuthStore=create<useAuthStoreInterface>((set)=>({
     authUser:null,
+    setAuthUser:(user:user)=>set({authUser:user}),
 
     isloggingIn:false,
     login: async ({email,password}: {email:string,password:string})=>{

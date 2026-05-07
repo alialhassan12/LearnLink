@@ -10,6 +10,11 @@ interface CourseStore{
     isPublishing:boolean,
     setIsPublishing:(isPublishing:boolean)=>void,
     publishCourse:(data:CoursePublish)=>Promise<boolean>
+    
+    //teacher courses
+    teacherCourses:Course[],
+    getTeacherCourses:()=>Promise<boolean>,
+    isGettingTeacherCourses:boolean,
 }
 
 export const useCourseStore = create<CourseStore>((set) => ({
@@ -60,6 +65,22 @@ export const useCourseStore = create<CourseStore>((set) => ({
             return false;
         }finally{
             set({isPublishing:false});
+        }
+    },
+
+    isGettingTeacherCourses:false,
+    teacherCourses:[],
+    getTeacherCourses:async()=>{
+        set({isGettingTeacherCourses:true});
+        try{
+            const response=await axiosInstance.get('/courses/my-courses');
+            set({teacherCourses:response.data.courses});
+            return true;
+        }catch(error:any){
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        }finally{
+            set({isGettingTeacherCourses:false});
         }
     }
 }));

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -56,8 +57,14 @@ class authController extends Controller
                 'message'=>'Invalid credentials',
             ],401);
         }
+
+        // update user avatar
+        $avatarUrl=$user->avatar ? (new SupabaseStorageService)->getPublicUrl($user->avatar) : null;
+        $user->avatar=$avatarUrl;
+        $user->save();
         
         $token=$user->createToken('api_token')->plainTextToken;
+
         return response()->json([
             'message'=>'User logged in successfully',
             'user'=>$user,
@@ -85,6 +92,12 @@ class authController extends Controller
                 'message'=>'User not found',
             ],404); 
         }
+
+        // update user avatar
+        $avatarUrl=$user->avatar ? (new SupabaseStorageService)->getPublicUrl($user->avatar) : null;
+        $user->avatar=$avatarUrl;
+        $user->save();
+
         return response()->json([
             'user'=>$user,
         ],200); 

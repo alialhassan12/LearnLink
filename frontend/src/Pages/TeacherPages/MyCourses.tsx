@@ -1,9 +1,22 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Plus } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useEffect, useState} from "react";
+import { useCourseStore } from "../../store/courseStore";
+import { Separator } from "../../components/ui/separator";
+import { Skeleton } from "../../components/ui/skeleton";
 
 const MyCourses=()=>{
+    const {teacherCourses,getTeacherCourses,isGettingTeacherCourses}=useCourseStore();
+    const [filterTabs,setFilterTabs]=useState<string>("all");
+
+    useEffect(()=>{
+        getTeacherCourses();
+    },[teacherCourses.length]);
+
+    const filteredCourses=filterTabs==="all"? teacherCourses : teacherCourses.filter((course)=>course.status===filterTabs);
+
     return(
         <div className="flex flex-col gap-5">
             {/* top section */}
@@ -19,28 +32,91 @@ const MyCourses=()=>{
                     </Link>
             </div>
             {/* filter section */}
-            <div>
-                <Tabs defaultValue="all" className="flex flex-col gap-3">
-                    <TabsList>
+            <div className="py-1">
+                <Tabs defaultValue={filterTabs} onValueChange={(value)=>setFilterTabs(value)} className="flex flex-col gap-3">
+                    <TabsList className="w-[20%]">
                         <TabsTrigger value="all">All</TabsTrigger>
                         <TabsTrigger value="published">Published</TabsTrigger>
                         <TabsTrigger value="draft">Draft</TabsTrigger>
-                        <TabsTrigger value="archived">Archived</TabsTrigger>
                     </TabsList>
                     {/* courses section */}
-                    <div className="border border-border rounded-lg p-5">
-                        <TabsContent value="all">
-                            <p className="text-text-strong text-xl font-medium">All courses</p>
-                        </TabsContent>
-                        <TabsContent value="published">
-                            <p className="text-text-strong text-xl font-medium">Published courses</p>
-                        </TabsContent>
-                        <TabsContent value="draft">
-                            <p className="text-text-strong text-xl font-medium">Draft courses</p>
-                        </TabsContent>
-                        <TabsContent value="archived">
-                            <p className="text-text-strong text-xl font-medium">Archived courses</p>
-                        </TabsContent>
+                    <div className="border-t border-border pt-4">
+                        {isGettingTeacherCourses ? (
+                            <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
+                                {[...Array(4)].map((_, index) => (
+                                    <div key={index} className="flex flex-col rounded-lg overflow-hidden bg-card border border-border/50">
+                                        <Skeleton className="aspect-video w-full rounded-none" />
+                                        <div className="flex flex-col gap-3 p-4">
+                                            <div className="flex flex-col gap-2">
+                                                <Skeleton className="h-6 w-3/4" />
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-2/3" />
+                                            </div>
+                                            <Separator orientation="horizontal" />
+                                            <div className="flex flex-col gap-2">
+                                                <Skeleton className="h-4 w-1/3" />
+                                                <Skeleton className="h-4 w-1/4" />
+                                            </div>
+                                            <div className="flex flex-row justify-between items-center pt-2">
+                                                <Skeleton className="h-10 w-24 rounded-md" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
+                                {filteredCourses.map((course)=>(
+                                    <div key={course.id} className="flex flex-col relative rounded-lg overflow-hidden bg-card">
+                                        {/* thumbnail section */}
+                                        <div className="aspect-video w-full overflow-hidden">
+                                            <img src={course.thumbnail} className="w-full h-full object-cover" />
+                                        </div>
+                                        {/* course title and description section */}
+                                        <div className="flex flex-col gap-3 p-4">
+                                            <div>
+                                                <p className="text-lg font-medium text-text-strong">{course.title}</p>
+                                                <p className="text-sm text-text-weak line-clamp-2">{course.description}</p>
+                                            </div>
+                                            <Separator orientation="horizontal"/>
+                                            {/* language and price section */}
+                                            <div>
+                                                <p className="text-sm text-text-weak">{course.language}</p>
+                                                <p className="text-sm text-text-weak">{course.price}</p>
+                                            </div>
+
+                                            {/* status button and edit course button section */}
+                                            <div className="flex flex-row justify-between items-center">
+                                                {course.status==="draft" && (
+                                                    <Button className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
+                                                        Publish
+                                                    </Button>
+                                                )}
+                                                {course.status==="published" && (
+                                                    <Button variant="outline" className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
+                                                        Unpublish
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {/* badge */}
+                                        <div className="absolute top-2 right-2 ">
+                                            {course.status==="draft" && (
+                                                <span className="text-[10px] text-red-600 font-medium uppercase px-2 py-1 backdrop-blur-sm rounded">Draft</span>
+                                            )}
+                                            {course.status==="published" && (
+                                                <span className="text-[10px] text-green-600 font-medium uppercase px-2 py-1 backdrop-blur-sm rounded">Published</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {!isGettingTeacherCourses && filteredCourses.length === 0 && (
+                            <div className="flex items-center justify-center py-10">
+                                <p className="text-text-weak">No courses found</p>
+                            </div>
+                        )}
                     </div>
                 </Tabs>
             </div>

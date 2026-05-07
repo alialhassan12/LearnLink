@@ -91,6 +91,11 @@ class coursesController extends Controller
                     ]);
                 }
             }
+            
+            // make course published after successfully created
+            $course->status="published";
+            $course->save();
+
             return $course;
         });
 
@@ -99,5 +104,36 @@ class coursesController extends Controller
             "message"=>"Course created successfully",
             "course"=>$course
         ],201);
+    }
+
+    public function getTeacherCourses(Request $request, SupabaseStorageService $storage){
+        $user=$request->user();
+        $teacher=$user->teacher;
+        if(!$user || !$teacher){
+            return response()->json([
+                "success"=>false,
+                "message"=>"Unautharized Access"
+            ],403);
+        }
+
+        $courses=$teacher->courses()->with('category')->get();
+        
+        if($courses->isEmpty()){
+            return response()->json([
+                "success"=>false,
+                "message"=>"No courses found"
+            ],404);
+        }
+
+        // Add public url to thumbnail
+        $courses->each(function($course) use ($storage){
+            $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+        });
+
+        return response()->json([
+            "success"=>true,
+            "message"=>"Courses fetched successfully",
+            "courses"=>$courses
+        ],200);
     }
 }

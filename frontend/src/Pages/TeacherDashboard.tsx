@@ -2,18 +2,23 @@ import TeacherSidebar from "../components/teacherDashboardComponents/TeacherSide
 import { SidebarProvider, SidebarTrigger } from "../components/ui/sidebar"
 import { Separator } from "../components/ui/separator";
 import { TooltipProvider } from "../components/ui/tooltip";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Dashboard from "./TeacherPages/Dashboard";
 import MyCourses from "./TeacherPages/MyCourses";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import {DropdownMenu,DropdownMenuContent,DropdownMenuGroup,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from "../components/ui/dropdown-menu"
 import useAuthStore from "../store/authStore";
 import { Bell } from "lucide-react";
 import CreateCourse from "./TeacherPages/CreateCourse";
 import PublishedSuccessful from "./TeacherPages/PublishedSuccessful";
+import Profile from "./TeacherPages/Profile";
+import EditProfile from "./TeacherPages/EditProfile";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
+    const navigate=useNavigate();
+
     return(
         <SidebarProvider>
             <TooltipProvider>
@@ -31,7 +36,7 @@ const TeacherDashboard=()=>{
                             <Bell className="cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary text-text-strong" />
                             <div className="flex items-center gap-2">
                                 <Separator orientation="vertical" />
-                                <Avatar>
+                                <Avatar className="cursor-pointer" onClick={()=>navigate("/dashboard/profile")}>
                                     <AvatarImage src={authUser?.avatar} />
                                     <AvatarFallback>{authUser?.name?.charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
@@ -50,6 +55,10 @@ const TeacherDashboard=()=>{
                             <Route index element={<MyCourses/>}/>
                             <Route path="create" element={<CreateCourse/>}/>
                             <Route path="published-successful" element={<PublishedSuccessful/>}/>
+                        </Route>
+                        <Route path="/profile" >
+                            <Route index element={<Profile/>}></Route>
+                            <Route path="edit" element={<EditProfile/>}></Route>
                         </Route>
                     </Routes>
                 </div>

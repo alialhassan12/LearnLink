@@ -12,7 +12,7 @@ import {
     SidebarTrigger
 } from "../ui/sidebar"
 import {ThemeToggle} from "../ThemeToggle"
-import { BookOpen, Calendar, DollarSign, GraduationCap, LayoutDashboard, MessageCircle, Video, LogOut } from "lucide-react";
+import { BookOpen, Calendar, DollarSign, GraduationCap, LayoutDashboard, MessageCircle, Video, LogOut, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
 import { Spinner } from "../ui/spinner";
@@ -44,12 +44,7 @@ const TeacherSidebar = () => {
             icon:Calendar,
             // onClick:()=>navigate("/dashboard/bookings")
         },
-        {
-            label:"My Sessions",
-            path:"/dashboard/sessions",
-            icon:Video,
-            // onClick:()=>navigate("/dashboard/sessions")
-        },
+        
         {
             label:"Calendar",
             path:"/dashboard/calendar",
@@ -61,6 +56,12 @@ const TeacherSidebar = () => {
             path:"/dashboard/earnings",
             icon:DollarSign,
             // onClick:()=>navigate("/dashboard/earnings")
+        },
+        {
+            label:"Profile",
+            path:"/dashboard/profile",
+            icon:User,
+            onClick:()=>navigate("/dashboard/profile")
         }
     ];
     const LibraryNavItems=[
@@ -69,6 +70,12 @@ const TeacherSidebar = () => {
             path:"/dashboard/my-courses",
             icon:BookOpen,
             onClick:()=>navigate("/dashboard/my-courses")
+        },
+        {
+            label:"My Sessions",
+            path:"/dashboard/sessions",
+            icon:Video,
+            // onClick:()=>navigate("/dashboard/sessions")
         },
         {
             label:"Messages",

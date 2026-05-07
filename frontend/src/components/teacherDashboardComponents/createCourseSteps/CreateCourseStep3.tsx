@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const CreateCourseStep3=()=>{
-    const {courseData,setCourseData,imagePreview,courseSections}=useCreateCourseStore();
+    const {courseData,setCourseData,imagePreview,courseSections,clearCourseAndSectionData}=useCreateCourseStore();
     const {publishCourse,isPublishing}=useCourseStore();
     const {authUser}=useAuthStore();
     const [pricePreview,setPricePreview]=useState<number>(0);
@@ -52,6 +52,7 @@ const CreateCourseStep3=()=>{
 
         const isPublished=await publishCourse(data);
         if(isPublished){
+            clearCourseAndSectionData();
             // navigate to published successful page
             navigate('/dashboard/my-courses/published-successful');
         }

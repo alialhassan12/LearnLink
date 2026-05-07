@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
-#[Fillable(['user_id','bio','subjects','languages'])]
+#[Fillable(['user_id','headline','location','bio','subjects','languages','hourly_rate'])]
 class Teacher extends Model
 {
     // Relations
@@ -14,9 +14,12 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Courses
     public function courses(){
         return $this->hasMany(Course::class);
+    }
+
+    public function availabilities(){
+        return $this->hasMany(TeacherAvailability::class);
     }
     
     // Casts
@@ -24,6 +27,7 @@ class Teacher extends Model
         return [
             'subjects' => 'array',
             'languages' => 'array',
+            'hourly_rate' => 'decimal:2'
         ];
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\authController;
 use App\Http\Controllers\Api\categoriesController;
 use App\Http\Controllers\Api\coursesController;
+use App\Http\Controllers\Api\teacherController;
 use Illuminate\Support\Facades\Route;
 
 // public routes
@@ -18,6 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // teacher routes
     Route::middleware(['checkRole:teacher'])->group(function(){
+        Route::get('/teacher/profile',[teacherController::class,'teacherProfile'])->name('teacher_profile');
+        Route::put('/teacher/update-profile',[teacherController::class,'teacherUpdate'])->name('teacher_update');
         Route::post('/courses/create-course',[coursesController::class,'createCourse'])->name('create_course');
+        Route::get('/courses/my-courses',[coursesController::class,'getTeacherCourses'])->name('get_teacher_courses');
     });
 });
