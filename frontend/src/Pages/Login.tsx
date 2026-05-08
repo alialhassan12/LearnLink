@@ -16,7 +16,7 @@ import { Spinner } from "../components/ui/spinner";
 import { Button } from "../components/ui/button";
 
 const Login = () => {
-    const {login,isloggingIn}=useAuthStore();
+    const {login,isloggingIn,authUser}=useAuthStore();
     const navigate=useNavigate();
     const [formData, setFormData] = useState<{
         email: string;
@@ -61,7 +61,8 @@ const Login = () => {
         // send request to backend
         const success = await login(formData);
         if(success){
-            navigate('/dashboard');
+            if(authUser?.role==='teacher') navigate('/dashboard');
+            if(authUser?.role==='student') navigate('/marketplace');
         }
     }
 

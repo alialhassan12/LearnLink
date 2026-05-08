@@ -19,7 +19,7 @@ import { Spinner } from "../components/ui/spinner";
 
 const Register = () => {
 
-    const {register,isRegistering}=useAuthStore();
+    const {register,isRegistering,authUser}=useAuthStore();
     const navigate=useNavigate();
 
     const [formData,setFormData]=useState<{
@@ -124,9 +124,9 @@ const Register = () => {
         // send request to backend
         const success = await register(formData);
         if(success){
-            navigate('/dashboard');
+            if(authUser?.role==='teacher') navigate('/dashboard');
+            if(authUser?.role==='student') navigate('/marketplace');
         }
-        console.log(formData);
     }
 
     return (

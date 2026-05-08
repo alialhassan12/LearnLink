@@ -3,9 +3,9 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import {Calendar, Lock, MessageCircle, Sparkles, Tag, Video} from 'lucide-react'
 import useAuthStore from "../store/authStore";
-import { Spinner } from "../components/ui/spinner";
 
 const LandingPage = () => {
+    const {authUser}=useAuthStore();
     const tools=[
         {
             id:1,
@@ -65,7 +65,9 @@ const LandingPage = () => {
     const navigate=useNavigate();
 
     const handleGetStarted=async()=>{
-        navigate('/dashboard')
+        if(!authUser) navigate('/auth/login');
+        else if(authUser?.role==='teacher') navigate('/dashboard');
+        else if(authUser?.role==='student') navigate('/marketplace');
     }
 
     return (

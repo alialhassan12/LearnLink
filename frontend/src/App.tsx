@@ -5,13 +5,13 @@ import "aos/dist/aos.css"
 import Login from './Pages/Login';
 import useAuthStore from './store/authStore';
 import { useEffect } from 'react';
-import StudentDashboard from './Pages/StudentDashboard';
+import StudentMarketPlace from './Pages/StudentMarketPlace';
 import TeacherDashboard from './Pages/TeacherDashboard';
 import Register from './Pages/Register';
 import { Toaster } from "./components/ui/sonner";
 
 // Wrapper for routes that require the user to be logged in
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:[string] }) => {
   const { authUser, isCheckingAuth } = useAuthStore();
   if (isCheckingAuth) {
     return (
@@ -22,6 +22,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   if (!authUser) {
     return <Navigate to="/auth/login" />;
+  }
+  // check if the user has access to the route
+  if(allowedRoles && !allowedRoles.includes(authUser.role)){
+    return <Navigate to="/"/>
   }
   return <>{children}</>;
 };
@@ -37,14 +41,10 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   if (authUser) {
-    return <Navigate to="/dashboard" />;
+    if(authUser.role==='teacher') return <Navigate to="/dashboard"/>;
+    if(authUser.role==='student') return <Navigate to="/marketplace"/>;
   }
   return <>{children}</>;
-};
-
-const DashboardRouter = () => {
-  const { authUser } = useAuthStore();
-  return authUser?.role === 'student' ? <StudentDashboard/> : <TeacherDashboard/>;
 };
 
 function App() {
@@ -78,10 +78,17 @@ function App() {
 
         {/* Protected Route - Requires login */}
         <Route path='/dashboard/*' element={
-          <ProtectedRoute>
-            <DashboardRouter />
+          <ProtectedRoute allowedRoles={['teacher']}>
+            <TeacherDashboard/>
           </ProtectedRoute>
         }></Route>
+
+        <Route path='/marketplace/*' element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentMarketPlace />
+          </ProtectedRoute>
+        }></Route>
+
       </Routes>
       <Toaster position='bottom-right'/>
     </>

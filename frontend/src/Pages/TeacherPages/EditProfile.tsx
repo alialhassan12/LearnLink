@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import useAuthStore from "../../store/authStore";
 import useTeacherStore from "../../store/teacherStore";
 import { NativeSelect, NativeSelectOption } from "../../components/ui/native-select";
+import { toast } from "sonner";
 
 const EditProfile=()=>{
     const {authUser,setAuthUser}=useAuthStore();
@@ -90,8 +91,20 @@ const EditProfile=()=>{
     const handleAddSlot = () => {
         if(!newSlot.day_of_week||!newSlot.start_time||!newSlot.end_time)
             return;
-        if(formData.availability.some((slot)=>slot.day_of_week===newSlot.day_of_week))
+        if(formData.availability.some((slot)=>{
+            if(slot.day_of_week===newSlot.day_of_week){
+                const newStart=new Date(`1970-01-01T${newSlot.start_time}`);
+                const newEnd=new Date(`1970-01-01T${newSlot.end_time}`);
+                const existingStart=new Date(`1970-01-01T${slot.start_time}`);
+                const existingEnd=new Date(`1970-01-01T${slot.end_time}`);
+                const isOverlapping=newStart<existingEnd && newEnd>existingStart;
+                return isOverlapping;
+            }
+            return false;
+        })){
+            toast.error("Time slot is conflicting with an existing slot");
             return;
+        }
         setFormData(prev => ({
             ...prev,
             availability: [...prev.availability, newSlot]
