@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 interface BrowseStoreState{
     teachers:Teacher[];
+    teacher:Teacher | null;
     subjects:string[];
     languages:string[];
     getSubjects:()=>Promise<void>;
@@ -13,7 +14,8 @@ interface BrowseStoreState{
     setIsGettingFilters:(value:boolean)=>void;
     isGettingTeachers:boolean;
     getTeachers:()=>Promise<void>;
-    
+    isGettingTeacherById:boolean;
+    getTeacherById:(id:number)=>Promise<void>;
 }
 
 const useBrowseStore=create<BrowseStoreState>((set)=>({
@@ -40,6 +42,7 @@ const useBrowseStore=create<BrowseStoreState>((set)=>({
             toast.error(error.response?.data?.message);
         }
     },
+
     isGettingTeachers:false,
     getTeachers:async()=>{
         set({isGettingTeachers:true});
@@ -50,6 +53,20 @@ const useBrowseStore=create<BrowseStoreState>((set)=>({
             toast.error(error.response?.data?.message);
         } finally {
             set({isGettingTeachers:false});
+        }
+    },
+
+    teacher:null,
+    isGettingTeacherById:false,
+    getTeacherById:async (id:number)=>{
+        set({isGettingTeacherById:true});
+        try {
+            const response = await axiosInstance.get(`/teacher/${id}`);
+            set({teacher:response.data.teacher});
+        } catch (error:any) {
+            toast.error(error.response?.data?.message);
+        } finally {
+            set({isGettingTeacherById:false});
         }
     }
 

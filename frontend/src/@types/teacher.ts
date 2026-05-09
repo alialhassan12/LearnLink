@@ -1,5 +1,8 @@
+import type { Course } from "./course";
+
 export interface Teacher {
-    id: number;
+    id: number;    
+    user_id:number;
     name: string;
     email: string;
     avatar: string;
@@ -17,4 +20,5 @@ export interface Teacher {
         end_time: string;
     }[];
     courses_count?: number;
+    courses?: Course[];
 }

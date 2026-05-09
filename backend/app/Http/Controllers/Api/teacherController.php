@@ -210,5 +210,45 @@ class teacherController extends Controller
         ],200); 
     }
     
+    public function getTeacherById(Request $request,SupabaseStorageService $storage,$id){
+        $teacher=Teacher::with('user','courses','availabilities')->whereId($id)->first();
+
+        if(!$teacher){
+            return response()->json([
+                'message'=>'Teacher not found',
+            ],404); 
+        }
+
+        if($teacher->user->avatar){
+            $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);
+        }
+
+        if($teacher->courses->count()>0){
+            foreach($teacher->courses as $course){
+                $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+            }
+        }
+
+        return response()->json([
+            'message'=>'Teacher profile found successfully',
+            'teacher'=>[
+                'id'=>$teacher->id,
+                'user_id'=>$teacher->user_id,
+                'name'=>$teacher->user->name,
+                'email'=>$teacher->user->email,
+                'avatar'=>$teacher->user->avatar,
+                'bio'=>$teacher->bio,
+                'headline'=>$teacher->headline,
+                'hourly_rate'=>$teacher->hourly_rate,
+                'subjects'=>$teacher->subjects,
+                'languages'=>$teacher->languages,
+                'created_at'=>$teacher->user->created_at,
+                'updated_at'=>$teacher->user->updated_at,
+                'courses_count'=>$teacher->courses->count(),
+                'courses'=>$teacher->courses,
+                'availabilities'=>$teacher->availabilities,
+            ],
+        ],200); 
+    }
 }
 

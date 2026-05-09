@@ -5,6 +5,7 @@ import useAuthStore from "../store/authStore";
 import Browse from "./StudentMarketplacePages/Browse";
 import BrowseTeachers from "./StudentMarketplacePages/BrowsePages/BrowseTeachers";
 import BrowseCourses from "./StudentMarketplacePages/BrowsePages/BrowseCourses";
+import TeacherProfile from "./StudentMarketplacePages/BrowsePages/TeacherProfile";
 
 const StudentMarketPlace=()=>{
     const authUser=useAuthStore((state)=>state.authUser);
@@ -17,6 +18,7 @@ const StudentMarketPlace=()=>{
             <Routes>
                 <Route path="/" element={<Browse/>} />
                 <Route path="/browse/teachers" element={<BrowseTeachers/>} />
+                <Route path="/browse/teachers/:id" element={<TeacherProfile/>}/>
                 <Route path="/browse/courses" element={<BrowseCourses/>} />
             </Routes>
             <Footer/>

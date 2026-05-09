@@ -15,7 +15,7 @@ class Teacher extends Model
     }
 
     public function courses(){
-        return $this->hasMany(Course::class);
+        return $this->hasMany(Course::class)->where('status','published');
     }
 
     public function availabilities(){
