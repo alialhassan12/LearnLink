@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Teacher;
 use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 
@@ -149,4 +150,65 @@ class teacherController extends Controller
             ],
         ],200); 
     }
+
+    public function getTeachers(Request $request,SupabaseStorageService $storage){
+        $teachers=Teacher::query()
+                ->with('user')
+                ->orderBy('created_at','desc')
+                ->get()
+                ->map(function($teacher) use ($storage){
+                    if($teacher->user->avatar){
+                        $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);
+                    }
+                    return [
+                        'id'=>$teacher->id,
+                        'name'=>$teacher->user->name,
+                        'email'=>$teacher->user->email,
+                        'avatar'=>$teacher->user->avatar,
+                        'bio'=>$teacher->bio,
+                        'headline'=>$teacher->headline,
+                        'hourly_rate'=>$teacher->hourly_rate,
+                        'subjects'=>$teacher->subjects,
+                        'languages'=>$teacher->languages,
+                        'created_at'=>$teacher->user->created_at,
+                        'updated_at'=>$teacher->user->updated_at,
+                        'courses_count'=>$teacher->courses->count(),
+                    ];
+                });
+
+        return response()->json([
+            'message'=>'Teachers fetched successfully',
+            'teachers'=>$teachers
+        ],200); 
+    }
+
+    public function getSubjects(){
+        $subjects=Teacher::all()
+                ->pluck('subjects')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->toArray();
+        
+        return response()->json([
+            'message'=>'Subjects fetched successfully',
+            'subjects'=>$subjects,
+        ],200); 
+    }
+
+    public function getLanguages(){
+        $languages=Teacher::all()
+                ->pluck('languages')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->toArray();
+        
+        return response()->json([
+            'message'=>'Languages fetched successfully',
+            'languages'=>$languages,
+        ],200); 
+    }
+    
 }
+

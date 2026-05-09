@@ -24,4 +24,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/courses/create-course',[coursesController::class,'createCourse'])->name('create_course');
         Route::get('/courses/my-courses',[coursesController::class,'getTeacherCourses'])->name('get_teacher_courses');
     });
+
+    // student routes
+    Route::middleware(['checkRole:student'])->group(function(){
+        Route::get('/teachers',[teacherController::class,'getTeachers'])->name('get_teachers');
+        Route::get('/teachers/subjects',[teacherController::class,'getSubjects'])->name('get_subjects');
+        Route::get('/teachers/languages',[teacherController::class,'getLanguages'])->name('get_languages');
+    });
 });

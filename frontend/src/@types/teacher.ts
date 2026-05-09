@@ -1,4 +1,5 @@
 export interface Teacher {
+    id: number;
     name: string;
     email: string;
     avatar: string;
@@ -10,10 +11,10 @@ export interface Teacher {
     languages: string[];
     created_at: string;
     updated_at: string;
-    availabilities: {
+    availabilities?: {
         day_of_week: string;
         start_time: string;
         end_time: string;
     }[];
-    courses_count: number;
+    courses_count?: number;
 }
