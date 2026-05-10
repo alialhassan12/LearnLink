@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\authController;
+use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
 use App\Http\Controllers\Api\coursesController;
 use App\Http\Controllers\Api\teacherController;
@@ -31,5 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/teachers/subjects',[teacherController::class,'getSubjects'])->name('get_subjects');
         Route::get('/teachers/languages',[teacherController::class,'getLanguages'])->name('get_languages');
         Route::get('/teacher/{id}',[teacherController::class,'getTeacherById'])->name('get_teacher_by_id');
+        Route::post('/booking/new-booking',[bookingsController::class,'newBooking'])->name('new-booking');
     });
 });

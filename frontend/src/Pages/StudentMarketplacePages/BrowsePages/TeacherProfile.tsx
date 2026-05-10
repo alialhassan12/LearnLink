@@ -1,5 +1,5 @@
 import useBrowseStore from "../../../store/studentmarketplaceStores/browseStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Globe, MapPin, User } from "lucide-react";
@@ -7,6 +7,9 @@ import { Separator } from "../../../components/ui/separator";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Skeleton } from "../../../components/ui/skeleton";
+import { toast } from "sonner";
+import useBookingStore from "../../../store/bookingStore";
+import { Spinner } from "../../../components/ui/spinner";
 
 const TeacherProfileSkeleton = () => (
     <div className="flex flex-col gap-10 px-4 py-6 md:px-10 md:py-10 max-w-7xl mx-auto animate-pulse">
@@ -92,14 +95,58 @@ const TeacherProfileSkeleton = () => (
 );
 
 const TeacherProfile = () => {
-    const {teacher,getTeacherById,isGettingTeacherById}=useBrowseStore();
     const {id}=useParams();
+    const {teacher,getTeacherById,isGettingTeacherById}=useBrowseStore();
+    const {createBooking,isCreatingBooking}=useBookingStore();
 
-    const day_of_week=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const day_of_week=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     
+    const [selectedDate,setSelectedDate]=useState("");
+    const [dateError,setDateError]=useState(false);
+
     useEffect(()=>{
         getTeacherById(Number(id));
     },[]);
+
+    const handleBookSession= async()=>{
+        const date=selectedDate.split("T")[0];
+        const time=selectedDate.split("T")[1];
+
+        if(date && time){
+            setDateError(false);
+            const day=new Date(date).getDay();
+            // console.log(day);
+            // console.log(day_of_week[day]);
+            if(teacher.availabilities.some((slot)=>{
+                if(slot.day_of_week==day_of_week[day]){
+                    // console.log(slot.start_time,slot.end_time);
+                    // console.log(time);
+                    if(slot.start_time<=time && slot.end_time>=time){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+                return false;
+            })){
+                await createBooking({
+                    teacher_id:Number(id),
+                    scheduled_day:day_of_week[day],
+                    scheduled_time:time,
+                    price:teacher.hourly_rate
+                });
+                setDateError(false);
+                setSelectedDate("");
+            }else{
+                setDateError(true);
+                toast.error("Not available on this day or at this time. Please check teacher's availability.");
+            }
+        }else{
+            setDateError(true);
+            toast.error("Please select a date and time");
+        }
+    }
 
     if (isGettingTeacherById) {
         return <TeacherProfileSkeleton />;
@@ -249,13 +296,29 @@ const TeacherProfile = () => {
                             <Input 
                                 type="datetime-local" 
                                 min={new Date().toISOString()} 
+                                value={selectedDate}
+                                onChange={(e)=>setSelectedDate(e.target.value)}
+                                aria-invalid={dateError}
                                 className="w-full h-11 rounded-xl border-border focus:border-primary transition-colors"
                             />
                         </div>
 
                         {/* buttons */}
                         <div className="flex flex-col gap-3 pt-2">
-                            <Button className="w-full h-11 cursor-pointer font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">Book Session</Button>
+                            <Button 
+                                className="w-full h-11 cursor-pointer font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                                onClick={handleBookSession}
+                                disabled={isCreatingBooking}
+                            >
+                                {isCreatingBooking?(
+                                    <>
+                                        <Spinner className="mr-2" />
+                                        Booking...
+                                    </>
+                                ):(
+                                    "Book Session"
+                                )}
+                            </Button>
                             <Button variant="outline" className="w-full h-11 cursor-pointer font-bold rounded-xl hover:bg-muted transition-colors">Message Teacher</Button>
                         </div>
                     </div>

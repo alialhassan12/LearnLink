@@ -27,6 +27,8 @@ const BrowseTeachers = () => {
         getTeachers();
     }, []);
 
+    // handlers
+
     return (
         <div className="px-10 py-10">
 
