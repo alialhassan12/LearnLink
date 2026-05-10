@@ -14,6 +14,7 @@ import CreateCourse from "./TeacherPages/CreateCourse";
 import PublishedSuccessful from "./TeacherPages/PublishedSuccessful";
 import Profile from "./TeacherPages/Profile";
 import EditProfile from "./TeacherPages/EditProfile";
+import Bookings from "./TeacherPages/Bookings";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -51,6 +52,7 @@ const TeacherDashboard=()=>{
                     {/* content routes */}
                     <Routes>
                         <Route path="/" element={<Dashboard/>}/>
+                        <Route path="/bookings" element={<Bookings/>}/>
                         <Route path="/my-courses" >
                             <Route index element={<MyCourses/>}/>
                             <Route path="create" element={<CreateCourse/>}/>

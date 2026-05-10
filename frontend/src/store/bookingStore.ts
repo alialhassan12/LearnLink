@@ -5,6 +5,9 @@ import { toast } from "sonner";
 
 interface BookingStore{
     newBooking:Booking |null;
+    teacherBookings:Booking[] | null;
+    isGettingTeacherBookings:boolean;
+    getTeacherBookings:()=>Promise<void>;
     createBooking:(booking:Booking)=>Promise<void>;
     isCreatingBooking:boolean;
 }
@@ -26,6 +29,22 @@ const useBookingStore =create<BookingStore>((set)=>({
             set({isCreatingBooking:false});
         }
     },
+
+    teacherBookings:[],
+    isGettingTeacherBookings:false,
+    getTeacherBookings:async()=>{
+        set({isGettingTeacherBookings:true});
+        try{
+            const response=await axiosInstance.get('/bookings/teacher-bookings');
+            set({teacherBookings:response.data.bookings});
+            console.log(response.data.bookings);
+        }
+        catch(error){
+            toast.error('Failed to get teacher bookings: ',error.response?.data?.message || 'Unknown error');
+        } finally{
+            set({isGettingTeacherBookings:false});
+        }
+    }
 }));
 
 export default useBookingStore;

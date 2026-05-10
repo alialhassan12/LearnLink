@@ -42,7 +42,7 @@ const TeacherSidebar = () => {
             label:"Bookings",
             path:"/dashboard/bookings",
             icon:Calendar,
-            // onClick:()=>navigate("/dashboard/bookings")
+            onClick:()=>navigate("/dashboard/bookings")
         },
         
         {

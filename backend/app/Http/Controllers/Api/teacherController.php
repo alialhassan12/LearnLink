@@ -211,7 +211,7 @@ class teacherController extends Controller
     }
     
     public function getTeacherById(Request $request,SupabaseStorageService $storage,$id){
-        $teacher=Teacher::with('user','courses','availabilities')->whereId($id)->first();
+        $teacher=Teacher::with('user','publishedCourses','availabilities')->whereId($id)->first();
 
         if(!$teacher){
             return response()->json([
@@ -223,8 +223,8 @@ class teacherController extends Controller
             $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);
         }
 
-        if($teacher->courses->count()>0){
-            foreach($teacher->courses as $course){
+        if($teacher->publishedCourses->count()>0){
+            foreach($teacher->publishedCourses as $course){
                 $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
             }
         }
@@ -244,8 +244,8 @@ class teacherController extends Controller
                 'languages'=>$teacher->languages,
                 'created_at'=>$teacher->user->created_at,
                 'updated_at'=>$teacher->user->updated_at,
-                'courses_count'=>$teacher->courses->count(),
-                'courses'=>$teacher->courses,
+                'courses_count'=>$teacher->publishedCourses->count(),
+                'courses'=>$teacher->publishedCourses,
                 'availabilities'=>$teacher->availabilities,
             ],
         ],200); 

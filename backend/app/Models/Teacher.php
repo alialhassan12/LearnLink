@@ -14,8 +14,14 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function courses(){
+    // courses for public view
+    public function publishedCourses(){
         return $this->hasMany(Course::class)->where('status','published');
+    }
+
+    // all courses for teacher
+    public function courses(){
+        return $this->hasMany(Course::class);
     }
 
     public function availabilities(){

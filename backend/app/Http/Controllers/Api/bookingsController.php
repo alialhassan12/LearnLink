@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Student;
+use App\Models\Teacher;
+use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 
 class bookingsController extends Controller
@@ -43,5 +45,34 @@ class bookingsController extends Controller
             'message'=>'Booking created successfully',
             'booking'=>$booking,
         ],200); 
+    }
+
+    public function getTeacherBookings(Request $request, SupabaseStorageService $storage){
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401); 
+        }
+
+        $teacher=Teacher::where('user_id',$user->id)->first();
+        if(!$teacher){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401); 
+        }
+
+        $bookings=Booking::with('student.user')->where('teacher_id',$teacher->id)->get();
+
+        foreach($bookings as $booking){
+            if($booking->student->user->avatar){
+                $booking->student->user->avatar=$storage->getPublicUrl($booking->student->user->avatar);
+            }
+        }
+
+        return response()->json([
+            'message'=>'Bookings fetched successfully',
+            'bookings'=>$bookings,
+        ],200);
     }
 }
