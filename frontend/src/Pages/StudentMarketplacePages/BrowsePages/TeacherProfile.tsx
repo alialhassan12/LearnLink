@@ -115,12 +115,10 @@ const TeacherProfile = () => {
         if(date && time){
             setDateError(false);
             const day=new Date(date).getDay();
-            // console.log(day);
-            // console.log(day_of_week[day]);
+            const scheduled_date=new Date(date).toDateString();
+
             if(teacher.availabilities.some((slot)=>{
                 if(slot.day_of_week==day_of_week[day]){
-                    // console.log(slot.start_time,slot.end_time);
-                    // console.log(time);
                     if(slot.start_time<=time && slot.end_time>=time){
                         return true;
                     }
@@ -134,6 +132,7 @@ const TeacherProfile = () => {
                     teacher_id:Number(id),
                     scheduled_day:day_of_week[day],
                     scheduled_time:time,
+                    scheduled_date:scheduled_date,
                     price:teacher.hourly_rate
                 });
                 setDateError(false);

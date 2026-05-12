@@ -12,7 +12,7 @@ const MyCourses=()=>{
     const [filterTabs,setFilterTabs]=useState<string>("all");
 
     useEffect(()=>{
-        getTeacherCourses();
+        if(teacherCourses.length === 0) getTeacherCourses();
     },[teacherCourses.length]);
 
     const filteredCourses=filterTabs==="all"? teacherCourses : teacherCourses.filter((course)=>course.status===filterTabs);

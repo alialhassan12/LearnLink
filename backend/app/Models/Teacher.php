@@ -27,6 +27,10 @@ class Teacher extends Model
     public function availabilities(){
         return $this->hasMany(TeacherAvailability::class);
     }
+
+    public function bookings(){
+        return $this->hasMany(Booking::class);
+    }
     
     // Casts
     protected function casts(): array{

@@ -6,6 +6,7 @@ export interface Booking{
     teacher_id:number;
     student_id?:number;
     scheduled_day:string;
+    scheduled_date:string;
     scheduled_time:string;
     price:number;
     status?:string;

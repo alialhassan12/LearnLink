@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\LiveSession;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class bookingsController extends Controller
 {
     public function newBooking(Request $request){   
         $request->validate([
             'teacher_id'=>'required|exists:teachers,id',
+            'scheduled_date'=>'required|date',
             'scheduled_day'=>'required|string',
             'scheduled_time'=>'required|date_format:H:i',
             'price'=>'required|decimal:2|min:0'
@@ -37,6 +40,7 @@ class bookingsController extends Controller
             'teacher_id'=>$request->teacher_id,
             'student_id'=>$student->id,
             'scheduled_day'=>$request->scheduled_day,
+            'scheduled_date'=>$request->scheduled_date,
             'scheduled_time'=>$request->scheduled_time,
             'price'=>$request->price,
         ]);
@@ -62,7 +66,7 @@ class bookingsController extends Controller
             ],401); 
         }
 
-        $bookings=Booking::with('student.user')->where('teacher_id',$teacher->id)->get();
+        $bookings=Booking::with('student.user')->where('teacher_id',$teacher->id)->orderBy('scheduled_date','asc')->get();
 
         foreach($bookings as $booking){
             if($booking->student->user->avatar){
@@ -72,6 +76,133 @@ class bookingsController extends Controller
 
         return response()->json([
             'message'=>'Bookings fetched successfully',
+            'bookings'=>$bookings,
+        ],200);
+    }
+
+    public function getStudentBookings(Request $request, SupabaseStorageService $storage){
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401); 
+        }
+
+        $student=Student::where('user_id',$user->id)->first();
+        if(!$student){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401); 
+        }
+
+        $bookings=Booking::with('teacher.user')->where('student_id',$student->id)->orderBy('scheduled_date','asc')->get();
+
+        foreach($bookings as $booking){
+            if($booking->teacher->user->avatar){
+                $booking->teacher->user->avatar=$storage->getPublicUrl($booking->teacher->user->avatar);
+            }
+        }
+
+        return response()->json([
+            'message'=>'Bookings fetched successfully',
+            'bookings'=>$bookings,
+        ],200);
+    }
+
+    public function rejectBooking(Request $request, SupabaseStorageService $storage){
+        $request->validate([
+            'booking_id'=>'required|exists:bookings,id',
+        ]);
+        
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401);
+        }
+        $teacher=$user->teacher;
+        if(!$teacher){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401);
+        }
+
+        $booking = $teacher->bookings()->find($request->booking_id);
+        if(!$booking){
+            return response()->json([
+                'message'=>'Booking not found or unauthorized access',
+            ],401);
+        }
+
+        $booking->status='rejected';
+        $booking->save();
+
+        $bookings=Booking::with('student.user')->where('teacher_id',$teacher->id)->orderBy('scheduled_date','asc')->get();
+
+        foreach($bookings as $b){
+            if($b->student && $b->student->user && $b->student->user->avatar){
+                $b->student->user->avatar=$storage->getPublicUrl($b->student->user->avatar);
+            }
+        }
+        
+        return response()->json([
+            'message'=>'Booking rejected successfully',
+            'bookings'=>$bookings,
+        ],200);
+    }
+
+    public function approveBooking(Request $request,SupabaseStorageService $storage){
+        $request->validate([
+            'booking_id'=>'required|exists:bookings,id'
+        ]);
+
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401);
+        }
+        $teacher=$user->teacher;
+        if(!$teacher){
+            return response()->json([
+                'message'=>'Unauthorized Access',
+            ],401);
+        }
+
+        $booking = $teacher->bookings()->find($request->booking_id);
+        if(!$booking){
+            return response()->json([
+                'message'=>'Booking not found or unauthorized access',
+            ],401);
+        }
+        if($booking->status !== 'pending'){
+            return response()->json([
+                'message'=>'Booking is not pending',
+            ],400);
+        }
+
+        DB::transaction(function() use ($booking) {
+            LiveSession::create([
+                'booking_id'=>$booking->id,
+                'scheduled_date'=>$booking->scheduled_date,
+                'scheduled_day'=>$booking->scheduled_day,
+                'scheduled_time'=>$booking->scheduled_time,
+            ]);
+
+            $booking->status='approved';
+            $booking->save();
+        });
+        
+        $bookings=Booking::with('student.user')->where('teacher_id',$teacher->id)->orderBy('scheduled_date','asc')->get();
+
+        foreach($bookings as $b){
+            if($b->student && $b->student->user && $b->student->user->avatar){
+                $b->student->user->avatar=$storage->getPublicUrl($b->student->user->avatar);
+            }
+        }
+        
+        return response()->json([
+            'message'=>'Booking approved successfully',
             'bookings'=>$bookings,
         ],200);
     }

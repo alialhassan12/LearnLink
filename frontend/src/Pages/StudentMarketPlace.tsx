@@ -6,6 +6,7 @@ import Browse from "./StudentMarketplacePages/Browse";
 import BrowseTeachers from "./StudentMarketplacePages/BrowsePages/BrowseTeachers";
 import BrowseCourses from "./StudentMarketplacePages/BrowsePages/BrowseCourses";
 import TeacherProfile from "./StudentMarketplacePages/BrowsePages/TeacherProfile";
+import MyBookings from "./StudentMarketplacePages/MyBookings";
 
 const StudentMarketPlace=()=>{
     const authUser=useAuthStore((state)=>state.authUser);
@@ -20,6 +21,7 @@ const StudentMarketPlace=()=>{
                 <Route path="/browse/teachers" element={<BrowseTeachers/>} />
                 <Route path="/browse/teachers/:id" element={<TeacherProfile/>}/>
                 <Route path="/browse/courses" element={<BrowseCourses/>} />
+                <Route path="/bookings" element={<MyBookings/>} />
             </Routes>
             <Footer/>
         </div>

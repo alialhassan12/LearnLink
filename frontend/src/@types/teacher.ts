@@ -1,4 +1,5 @@
 import type { Course } from "./course";
+import type { user } from "./user";
 
 export interface Teacher {
     id: number;    
@@ -21,4 +22,5 @@ export interface Teacher {
     }[];
     courses_count?: number;
     courses?: Course[];
+    user?:user;
 }

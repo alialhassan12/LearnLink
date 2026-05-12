@@ -23,8 +23,12 @@ const BrowseTeachers = () => {
     }
 
     useEffect(() => {
-        getFilters();
-        getTeachers();
+        if(languages.length === 0 && subjects.length === 0){
+            getFilters();
+        }
+        if(teachers.length === 0){
+            getTeachers();
+        }
     }, []);
 
     // handlers
@@ -98,10 +102,8 @@ const BrowseTeachers = () => {
                 <main className="flex-1 flex flex-col gap-6">
                     {/* sort by */}
                     <div data-aos="fade-left" className="flex flex-row justify-between items-center">
-                        <div>
-                            <p className="text-xl font-bold text-text-strong">
-                                {isGettingTeachers ? <Skeleton className="h-6 w-32" /> : `${teachers.length} Teachers Found`}
-                            </p>
+                        <div className="text-xl font-bold text-text-strong">
+                            {isGettingTeachers ? <Skeleton className="h-6 w-32" /> : `${teachers.length} Teachers Found`}
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-text-weak hidden sm:inline">Sort by:</span>

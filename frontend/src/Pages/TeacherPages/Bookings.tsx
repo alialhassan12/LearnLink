@@ -5,9 +5,11 @@ import { Separator } from "../../components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
+import { Spinner } from "../../components/ui/spinner";
 
 const Bookings = () => {
-    const {teacherBookings,isGettingTeacherBookings,getTeacherBookings}=useBookingStore();
+    const {teacherBookings,isGettingTeacherBookings,getTeacherBookings,isRejectingBooking,rejectBooking,approveBooking,isApprovingBooking}=useBookingStore();
+    const [selectedBooking,setSelectedBooking]=useState<number | null>(null);
     const pendingBookings=teacherBookings.filter((booking)=>booking.status==="pending");
     const approvedBookings=teacherBookings.filter((booking)=>booking.status==="approved");
     const rejectedBookings=teacherBookings.filter((booking)=>booking.status==="rejected");
@@ -34,6 +36,13 @@ const Bookings = () => {
     useEffect(() => {
         getTeacherBookings();
     }, []);
+
+    const handleRejectBooking=async(booking_id:number)=>{
+        await rejectBooking(booking_id);
+    }
+    const handleApproveBooking=async(booking_id:number)=>{
+        await approveBooking(booking_id);
+    }
 
     if(isGettingTeacherBookings){
         return <SkeletonBookingState />;
@@ -85,7 +94,7 @@ const Bookings = () => {
                                             <div className="flex items-center gap-3 mt-1">
                                                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
                                                     <Calendar className="w-3.5 h-3.5" />
-                                                    <span>{booking.scheduled_day}</span>
+                                                    <span>{booking.scheduled_day} | {booking.scheduled_date}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
                                                     <Clock className="w-3.5 h-3.5" />
@@ -109,13 +118,49 @@ const Bookings = () => {
                                     <div className="flex items-center gap-2 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-border/40">
                                         {booking.status === 'pending' && (
                                             <>
-                                                <Button variant="default" size="sm" className="flex-1 md:flex-none bg-primary hover:bg-primary/90 text-white h-9">
-                                                    <Check className="w-4 h-4 mr-2" />
-                                                    Approve
+                                                <Button 
+                                                    variant="default" 
+                                                    size="sm" 
+                                                    className="flex-1 md:flex-none bg-primary hover:bg-primary/90 text-white h-9"
+                                                    disabled={isApprovingBooking}
+                                                    onClick={()=>{
+                                                        setSelectedBooking(booking.id);
+                                                        handleApproveBooking(booking.id);
+                                                    }}
+                                                >
+                                                    {isApprovingBooking && selectedBooking === booking.id ?(  
+                                                        <>
+                                                            <Spinner/>
+                                                            Approving...
+                                                        </>
+                                                    ):   
+                                                        <>
+                                                            <Check className="w-4 h-4 mr-2" />
+                                                            Approve
+                                                        </>
+                                                    }
                                                 </Button>
-                                                <Button variant="outline" size="sm" className="flex-1 md:flex-none border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-9">
-                                                    <X className="w-4 h-4 mr-2" />
-                                                    Reject
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="flex-1 md:flex-none border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-9"
+                                                    disabled={isRejectingBooking}
+                                                    onClick={()=>{
+                                                        setSelectedBooking(booking.id);
+                                                        handleRejectBooking(booking.id);
+                                                    }}
+                                                >
+                                                    {isRejectingBooking && selectedBooking === booking.id ?(  
+                                                        <>
+                                                            <Spinner/>
+                                                            Rejecting...
+                                                        </>
+                                                    ):   
+                                                        <>
+                                                            <X className="w-4 h-4 mr-2" />
+                                                            Reject
+                                                        </>
+                                                    }
                                                 </Button>
                                             </>
                                         )}

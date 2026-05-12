@@ -25,8 +25,8 @@ const Header = () => {
             },
             {
                 id:3,
-                title:'Wishlist',
-                path:'/wishlist'
+                title:'My Bookings',
+                path:'/marketplace/bookings'
             },
             {
                 id:4,

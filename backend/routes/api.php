@@ -25,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/courses/create-course',[coursesController::class,'createCourse'])->name('create_course');
         Route::get('/courses/my-courses',[coursesController::class,'getTeacherCourses'])->name('get_teacher_courses');
         Route::get('/bookings/teacher-bookings',[bookingsController::class,'getTeacherBookings'])->name('get-teacher-bookings');
+        Route::post('/bookings/reject-booking',[bookingsController::class,'rejectBooking'])->name('reject-booking');
+        Route::post('/bookings/approve-booking',[bookingsController::class,'approveBooking'])->name('approve-booking');
     });
 
     // student routes
@@ -34,5 +36,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/teachers/languages',[teacherController::class,'getLanguages'])->name('get_languages');
         Route::get('/teacher/{id}',[teacherController::class,'getTeacherById'])->name('get_teacher_by_id');
         Route::post('/booking/new-booking',[bookingsController::class,'newBooking'])->name('new-booking');
+        Route::get('/bookings/student-bookings',[bookingsController::class,'getStudentBookings'])->name('get-student-bookings');
     });
 });
