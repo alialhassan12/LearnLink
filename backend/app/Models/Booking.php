@@ -16,4 +16,8 @@ class Booking extends Model
     public function teacher(){
         return $this->belongsTo(Teacher::class);
     }
+
+    public function liveSession(){
+        return $this->hasOne(LiveSession::class);
+    }
 }

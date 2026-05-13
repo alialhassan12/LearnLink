@@ -7,7 +7,6 @@ import Dashboard from "./TeacherPages/Dashboard";
 import MyCourses from "./TeacherPages/MyCourses";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import {DropdownMenu,DropdownMenuContent,DropdownMenuGroup,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from "../components/ui/dropdown-menu"
 import useAuthStore from "../store/authStore";
 import { Bell } from "lucide-react";
 import CreateCourse from "./TeacherPages/CreateCourse";
@@ -15,6 +14,10 @@ import PublishedSuccessful from "./TeacherPages/PublishedSuccessful";
 import Profile from "./TeacherPages/Profile";
 import EditProfile from "./TeacherPages/EditProfile";
 import Bookings from "./TeacherPages/Bookings";
+import MySessions from "./TeacherPages/Sessions/MySessions";
+import SessionView from "./TeacherPages/Sessions/SessionView";
+import SessionRoom from "./TeacherPages/Sessions/SessionRoom";
+import { useLiveSessionStore } from "../store/liveSessionsStore";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -57,6 +60,11 @@ const TeacherDashboard=()=>{
                             <Route index element={<MyCourses/>}/>
                             <Route path="create" element={<CreateCourse/>}/>
                             <Route path="published-successful" element={<PublishedSuccessful/>}/>
+                        </Route>
+                        <Route path="/my-sessions">
+                            <Route index element={<MySessions/>}/>
+                            <Route path="view/:id" element={<SessionView/>}/>
+                            
                         </Route>
                         <Route path="/profile" >
                             <Route index element={<Profile/>}></Route>

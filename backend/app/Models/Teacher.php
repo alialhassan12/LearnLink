@@ -31,7 +31,11 @@ class Teacher extends Model
     public function bookings(){
         return $this->hasMany(Booking::class);
     }
-    
+
+    public function approvedBookings(){
+        return $this->hasMany(Booking::class)->where('status','approved');
+    }
+
     // Casts
     protected function casts(): array{
         return [

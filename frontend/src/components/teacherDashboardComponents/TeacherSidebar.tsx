@@ -73,9 +73,9 @@ const TeacherSidebar = () => {
         },
         {
             label:"My Sessions",
-            path:"/dashboard/sessions",
+            path:"/dashboard/my-sessions",
             icon:Video,
-            // onClick:()=>navigate("/dashboard/sessions")
+            onClick:()=>navigate("/dashboard/my-sessions")
         },
         {
             label:"Messages",

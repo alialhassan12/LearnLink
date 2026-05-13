@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\authController;
 use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
 use App\Http\Controllers\Api\coursesController;
+use App\Http\Controllers\Api\liveSessionsController;
 use App\Http\Controllers\Api\teacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout',[authController::class,'logout'])->name('logout_user');
     Route::get('/auth/me',[authController::class,'checkAuth'])->name('check_auth');
     Route::get('/categories',[categoriesController::class,'getCategories'])->name('get_categories');
+    Route::post('/livekit/token',[liveSessionsController::class,'getToken'])->name('get_livekit_token');
 
     // teacher routes
     Route::middleware(['checkRole:teacher'])->group(function(){
@@ -27,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/bookings/teacher-bookings',[bookingsController::class,'getTeacherBookings'])->name('get-teacher-bookings');
         Route::post('/bookings/reject-booking',[bookingsController::class,'rejectBooking'])->name('reject-booking');
         Route::post('/bookings/approve-booking',[bookingsController::class,'approveBooking'])->name('approve-booking');
+        Route::get('/live-sessions/teacher-sessions',[liveSessionsController::class,'getTeacherLiveSessions'])->name('get-teacher-sessions');
     });
 
     // student routes

@@ -9,10 +9,13 @@ import StudentMarketPlace from './Pages/StudentMarketPlace';
 import TeacherDashboard from './Pages/TeacherDashboard';
 import Register from './Pages/Register';
 import { Toaster } from "./components/ui/sonner";
+import { useLiveSessionStore } from './store/liveSessionsStore';
+import SessionRoom from './Pages/TeacherPages/Sessions/SessionRoom';
 
 // Wrapper for routes that require the user to be logged in
-const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:[string] }) => {
+const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:string[] }) => {
   const { authUser, isCheckingAuth } = useAuthStore();
+
   if (isCheckingAuth) {
     return (
       <div className='flex justify-center items-center h-screen'>
@@ -49,6 +52,7 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const { checkAuth } = useAuthStore();
+  const {token,url}=useLiveSessionStore();
 
   useEffect(() => {
     Aos.init({
@@ -88,6 +92,15 @@ function App() {
             <StudentMarketPlace />
           </ProtectedRoute>
         }></Route>
+
+{/* <Route path="room/:roomName" element={<SessionRoom token={token} serverUrl={url}/>}/> */}
+        <Route path='/room/:roomName' element={
+          <ProtectedRoute allowedRoles={['student','teacher']}>
+            <SessionRoom token={token} serverUrl={url}/>
+          </ProtectedRoute>
+        }>
+
+        </Route>
 
       </Routes>
       <Toaster position='bottom-right'/>
