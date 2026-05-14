@@ -13,6 +13,14 @@ export interface LiveSessionState{
     teacherLiveSessions:LiveSession[];
     isGettingTeacherLiveSessions:boolean;
     getTeacherLiveSessions:()=>Promise<void>;
+
+    studentLiveSessions:LiveSession[];
+    isGettingStudentLiveSessions:boolean;
+    getStudentLiveSessions:()=>Promise<void>;
+
+    teacherSelectedSession:LiveSession | null;
+    isGettingTeacherSelectedSession:boolean;
+    getTeacherSelectedSession:(id:number)=>Promise<void>;
 }
 
 export const useLiveSessionStore=create<LiveSessionState>((set)=>({
@@ -47,5 +55,36 @@ export const useLiveSessionStore=create<LiveSessionState>((set)=>({
         } finally{
             set({isGettingToken:false});
         }
+    },
+
+    studentLiveSessions:[],
+    isGettingStudentLiveSessions:false,
+    getStudentLiveSessions:async()=>{
+        set({isGettingStudentLiveSessions:true});
+        try {
+            const response=await axiosInstance.get('/live-sessions/student-sessions');
+            set({studentLiveSessions:response.data.live_sessions});
+            console.log("student live sessions fetched",response.data.live_sessions);
+        } catch (error:any) {
+            console.error('Error fetching live sessions:', error?.response?.data?.message || error?.message || 'Unknown error');
+        } finally{
+            set({isGettingStudentLiveSessions:false});
+        }
+    },
+
+    teacherSelectedSession:null,
+    isGettingTeacherSelectedSession:false,
+    getTeacherSelectedSession:async(id:number)=>{
+        set({isGettingTeacherSelectedSession:true});
+        try {
+            const response =await axiosInstance.get(`/live-sessions/teacher-session/${id}`);
+            set({teacherSelectedSession:response.data.session});
+            console.log("teacher selected session fetched",response.data.session);
+        } catch (error:any) {
+            console.error('Error fetching teacher selected session:', error?.response?.data?.message || error?.message || 'Unknown error');
+        } finally{
+            set({isGettingTeacherSelectedSession:false});
+        }
     }
+
 }));

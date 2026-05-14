@@ -52,6 +52,16 @@ class SupabaseStorageService{
         return $path;
     }
 
+    public function uploadSessionMaterials(UploadedFile $file, int $session_id,string $fileTitle):string{
+        $ext=$file->getClientOriginalExtension();
+        $filename=strtolower($fileTitle) . '-' . time() . '.' . $ext;
+        $path="session_materials/session_" . strval($session_id) . "/" . $filename;
+
+        $this->disk->put($path,file_get_contents($file));
+
+        return $path;
+    }
+
     public function getPublicUrl(string $path):string{
         if (!$path) return "";
         
@@ -68,6 +78,20 @@ class SupabaseStorageService{
         $baseUrl = str_replace('.storage.supabase.co/storage/v1/s3', '.supabase.co', $endpoint);
         
         return "{$baseUrl}/storage/v1/object/public/{$bucket}/" . ltrim($path, '/');
+    }
+
+    /**
+     * Generate a signed URL for a private file.
+     */
+    public function getTemporaryUrl(string $path, int $minutes = 60): string {
+        if (!$path) return "";
+
+        // If it's already a full URL, return it
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return $this->disk->temporaryUrl($path, now()->addMinutes($minutes));
     }
     
 }

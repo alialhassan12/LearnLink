@@ -15,10 +15,15 @@ class LiveSession extends Model
     }
 
     public function student(){
-        return $this->hasOneThrough(Student::class,Booking::class);
+        return $this->hasOneThrough(Student::class, Booking::class, 'id', 'id', 'booking_id', 'student_id');
     }
 
     public function teacher(){
-        return $this->hasOneThrough(Teacher::class,Booking::class);
+        return $this->hasOneThrough(Teacher::class, Booking::class, 'id', 'id', 'booking_id', 'teacher_id');
     }
+
+    public function sessionMaterials(){
+        return $this->hasMany(SessionMaterial::class);
+    }
+
 }

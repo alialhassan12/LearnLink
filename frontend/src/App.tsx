@@ -10,7 +10,7 @@ import TeacherDashboard from './Pages/TeacherDashboard';
 import Register from './Pages/Register';
 import { Toaster } from "./components/ui/sonner";
 import { useLiveSessionStore } from './store/liveSessionsStore';
-import SessionRoom from './Pages/TeacherPages/Sessions/SessionRoom';
+import SessionRoom from './Pages/SessionRoom';
 
 // Wrapper for routes that require the user to be logged in
 const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:string[] }) => {
@@ -93,7 +93,6 @@ function App() {
           </ProtectedRoute>
         }></Route>
 
-{/* <Route path="room/:roomName" element={<SessionRoom token={token} serverUrl={url}/>}/> */}
         <Route path='/room/:roomName' element={
           <ProtectedRoute allowedRoles={['student','teacher']}>
             <SessionRoom token={token} serverUrl={url}/>

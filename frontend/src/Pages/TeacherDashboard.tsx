@@ -16,7 +16,7 @@ import EditProfile from "./TeacherPages/EditProfile";
 import Bookings from "./TeacherPages/Bookings";
 import MySessions from "./TeacherPages/Sessions/MySessions";
 import SessionView from "./TeacherPages/Sessions/SessionView";
-import SessionRoom from "./TeacherPages/Sessions/SessionRoom";
+import SessionRoom from "./SessionRoom";
 import { useLiveSessionStore } from "../store/liveSessionsStore";
 
 const TeacherDashboard=()=>{

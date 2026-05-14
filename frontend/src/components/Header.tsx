@@ -30,8 +30,8 @@ const Header = () => {
             },
             {
                 id:4,
-                title:'Live Events',
-                path:'/events'
+                title:'Live Sessions',
+                path:'/marketplace/live-sessions'
             },
             {
                 id:5,

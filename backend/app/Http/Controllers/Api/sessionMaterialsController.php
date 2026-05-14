@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\LiveSession;
+use App\Models\SessionMaterial;
+use App\Services\SupabaseStorageService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class sessionMaterialsController extends Controller
+{
+    public function uploadSessionMaterials(Request $request, SupabaseStorageService $storage){
+        $request->validate([
+            "session_id"=>"required|exists:live_sessions,id",
+            "files"=>"required|array",
+            "files.*.fileTitle"=>"required|string",
+            "files.*.fileType"=>"required|string",
+            "files.*.file"=>"required|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,webp|max:20480"
+        ]);
+
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"unauthenticated user"
+            ],401);
+        }
+
+        $teacher=$user->teacher;
+        if(!$teacher){
+            return response()->json([
+                "message"=>"Unautharized Access"
+            ],403);
+        }
+
+        $session=LiveSession::findOrFail($request->session_id);
+        
+        $materials=[];
+
+        DB::transaction(function () use($request,$storage,$session,$materials) {
+            foreach ($request->files as $file){
+                $path=$storage->uploadSessionMaterials($file['file'],$session->id,$file['fileTitle']);
+                if($path){
+                    $material=SessionMaterial::create([
+                        "live_session_id"=>$session->id,
+                        "title"=>$file['fileTitle'],
+                        "file_type"=>$file['fileType'],
+                        "file_url"=>$path
+                    ]);
+                    array_push($materials,$material);
+                }
+            }
+        });
+
+        return response()->json([
+            "message"=>"Materials uploaded successfully",
+            "session_materials"=>$materials
+        ],200);
+    }
+
+    public function getSessionMaterials(Request $request,SupabaseStorageService $storage){
+        $request->validate([
+            "session_id"=>"required|exists:live_sessions,id"
+        ]);
+
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"unauthenticated user"
+            ],401);
+        }
+
+        $session=LiveSession::with('sessionMaterials')->where('id',$request->session_id)->first();
+        $materials=$session->sessionMaterials;
+        
+        if($materials->isEmpty()){
+            return response()->json([
+                "message"=>"no materials found"
+            ],200);
+        }
+
+        $materials->each(function($material) use($storage){
+            $material->file_url=$storage->getTemporaryUrl($material->file_url);
+        });
+
+        return response()->json([
+            "message"=>"Materials retrieved successfully",
+            "session_materials"=>$materials
+        ],200);
+    }
+}

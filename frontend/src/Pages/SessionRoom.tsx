@@ -30,7 +30,7 @@ function SessionRoom({
     }
 
     return (
-        <div className="h-screen w-full bg-slate-900 flex flex-col overflow-hidden">
+        <div className="h-screen w-full flex flex-col overflow-hidden">
             <LiveKitRoom
                 token={token}
                 serverUrl={serverUrl}
@@ -41,13 +41,8 @@ function SessionRoom({
                 className="flex-1 flex flex-col h-full"
                 onDisconnected={() => navigate(-1)}
             >
-                {/* Custom Video Conference layout or default one */}
                 <VideoConference />
-                
-                {/* Audio renderer is required for audio playback */}
                 <RoomAudioRenderer />
-                
-                {/* You can also add a custom control bar or use the one inside VideoConference */}
             </LiveKitRoom>
         </div>
     );
