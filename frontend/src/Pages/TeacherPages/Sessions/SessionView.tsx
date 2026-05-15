@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLiveSessionStore } from "../../../store/liveSessionsStore";
 import { Button } from "../../../components/ui/button";
 import { useEffect, useRef, useState } from "react";
-import { Calendar, Clock, Download, Trash2, Upload, Video } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Download, Mail, Trash2, Upload, Video } from "lucide-react";
 import { Separator } from "../../../components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import useAuthStore from "../../../store/authStore";
@@ -225,9 +225,30 @@ const SessionView =()=>{
                         <p className="text-text-strong text-center">{teacherSelectedSession?.scheduled_day.slice(0,3).toUpperCase()}, {teacherSelectedSession?.scheduled_date}</p>
                         <p className="text-text-strong text-center">{teacherSelectedSession?.scheduled_time}</p>
                     </div>
-                    <Button className="py-8 px-10 cursor-pointer hover:scale-105 hover:text-primary transition-all duration-300 rounded-xl bg-text-strong/80  " variant="outline" onClick={handleStartSession}>
-                        Start Session   
-                    </Button>
+                    <div className="flex flex-row flex-wrap justify-center gap-4 w-full">
+                        <Button 
+                            className="flex-1 py-8 px-10 cursor-pointer hover:scale-105 hover:text-primary transition-all duration-300 rounded-xl bg-text-strong/80  " 
+                            variant="outline"
+                            onClick={handleStartSession}
+                            disabled={isGettingToken}
+                        >
+                            {isGettingToken
+                            ? <Spinner/>
+                            : <>
+                                Start Session
+                                <ArrowRight/>
+                            </>
+                            }
+                        </Button>
+                        <Button 
+                            className="flex-1 py-8 px-10 cursor-pointer hover:scale-105 hover:text-primary transition-all duration-300 rounded-xl bg-text-strong/80  " 
+                            variant="outline"
+                            disabled={isGettingToken}
+                        >
+                            Message Student   
+                            <Mail/>
+                        </Button>
+                    </div>
                 </div>
                 {/* details card */}
                 <div className="flex flex-col gap-2 h-fit items-center bg-card border border-border rounded-lg p-6 w-full md:w-[35%]">
@@ -364,7 +385,10 @@ const SessionViewSkeleton=()=>{
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="h-4 w-24" />
                     </div>
-                    <Skeleton className="h-14 w-40 rounded-xl" />
+                    <div className="flex flex-row gap-4 w-full justify-center">
+                        <Skeleton className="h-14 w-40 rounded-xl" />
+                        <Skeleton className="h-14 w-40 rounded-xl" />
+                    </div>
                 </div>
                 <div className="flex flex-col gap-4 h-fit bg-card border border-border rounded-lg p-6 w-full md:w-[35%]">
                     <Skeleton className="h-6 w-20" />

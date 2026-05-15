@@ -130,4 +130,41 @@ class liveSessionsController extends Controller
             "session"=>$session
         ],200);
     }
+
+    public function getStudentSessionById(Request $request,SupabaseStorageService $storage,int $id){
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"Unauthorized"
+            ],401);
+        }
+        $student=$user->student;
+        if(!$student){
+            return response()->json([
+                "message"=>"Unauthorized"
+            ],401);
+        }
+        
+        $session=LiveSession::where("id",$id)->with("sessionMaterials","teacher.user")->first();
+        if(!$session){
+            return response()->json([
+                "message"=>"Session not found"
+            ],404);
+        }
+
+        if($session->teacher->user->avatar){
+            $session->teacher->user->avatar=$storage->getPublicUrl($session->teacher->user->avatar);
+        }
+
+        if($session->sessionMaterials->count()>0){
+            foreach($session->sessionMaterials as $material){
+                $material->file_url=$storage->getTemporaryUrl($material->file_url);
+            }
+        }
+
+        return response()->json([
+            "message"=>"Session fetched successfully",
+            "session"=>$session
+        ],200);
+    }
 }

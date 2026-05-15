@@ -45,5 +45,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/booking/new-booking',[bookingsController::class,'newBooking'])->name('new-booking');
         Route::get('/bookings/student-bookings',[bookingsController::class,'getStudentBookings'])->name('get-student-bookings');
         Route::get('/live-sessions/student-sessions',[liveSessionsController::class,'getStudentliveSessions'])->name('get-student-live-sessions');
+        Route::get('/live-sessions/student-session/{id}',[liveSessionsController::class,'getStudentSessionById'])->name('get-student-session-by-id');
     });
 });

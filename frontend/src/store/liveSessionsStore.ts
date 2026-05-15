@@ -21,6 +21,10 @@ export interface LiveSessionState{
     teacherSelectedSession:LiveSession | null;
     isGettingTeacherSelectedSession:boolean;
     getTeacherSelectedSession:(id:number)=>Promise<LiveSession | null>;
+
+    studentSelectedSession:LiveSession |null;
+    isGettingStudentSelectedSession:boolean;
+    getStudentSelectedSession:(id:number)=>Promise<LiveSession | null>;
 }
 
 export const useLiveSessionStore=create<LiveSessionState>((set)=>({
@@ -85,6 +89,22 @@ export const useLiveSessionStore=create<LiveSessionState>((set)=>({
             return null;
         } finally{
             set({isGettingTeacherSelectedSession:false});
+        }
+    },
+
+    studentSelectedSession:null,
+    isGettingStudentSelectedSession:false,
+    getStudentSelectedSession:async(id:number)=>{
+        set({isGettingStudentSelectedSession:true});
+        try {
+            const response=await axiosInstance.get(`/live-sessions/student-session/${id}`);
+            set({studentSelectedSession:response.data.session});
+            return response.data.session;
+        } catch (error:any) {
+            console.error('Error fetching student selected session:', error?.response?.data?.message || error?.message || 'Unknown error');
+            return null;
+        } finally{
+            set({isGettingStudentSelectedSession:false});
         }
     }
 

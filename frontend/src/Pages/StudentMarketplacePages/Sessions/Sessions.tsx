@@ -134,7 +134,7 @@ const Sessions = ()=>{
                             </p>
 
                             <Button
-                                onClick={() => navigate(`/sessions/${nextSession.id}`)}
+                                onClick={() => navigate(`/marketplace/live-sessions/${nextSession.id}`)}
                                 className="w-full sm:w-fit h-12 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 Join Preparation Room
@@ -209,7 +209,7 @@ const Sessions = ()=>{
 
                                         <div className="flex items-center gap-3 w-full md:w-auto">
                                             <Button
-                                                onClick={() => navigate(`/sessions/${session.id}`)}
+                                                onClick={() => navigate(`/marketplace/live-sessions/${session.id}`)}
                                                 variant={session.status === 'booked' ? "default" : "outline"}
                                                 className="w-full md:w-auto h-11 px-8 rounded-xl font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
                                             >
