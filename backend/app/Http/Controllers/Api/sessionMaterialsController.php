@@ -13,7 +13,7 @@ class sessionMaterialsController extends Controller
 {
     public function uploadSessionMaterials(Request $request, SupabaseStorageService $storage){
         $request->validate([
-            "session_id"=>"required|exists:live_sessions,id",
+            "live_session_id"=>"required|exists:live_sessions,id",
             "files"=>"required|array",
             "files.*.fileTitle"=>"required|string",
             "files.*.fileType"=>"required|string",
@@ -34,21 +34,26 @@ class sessionMaterialsController extends Controller
             ],403);
         }
 
-        $session=LiveSession::findOrFail($request->session_id);
+        $session=LiveSession::findOrFail($request->live_session_id);
         
         $materials=[];
+        $filesInput = $request->input('files');
 
-        DB::transaction(function () use($request,$storage,$session,$materials) {
-            foreach ($request->files as $file){
-                $path=$storage->uploadSessionMaterials($file['file'],$session->id,$file['fileTitle']);
-                if($path){
-                    $material=SessionMaterial::create([
-                        "live_session_id"=>$session->id,
-                        "title"=>$file['fileTitle'],
-                        "file_type"=>$file['fileType'],
-                        "file_url"=>$path
-                    ]);
-                    array_push($materials,$material);
+        DB::transaction(function () use($request,$storage,$session,&$materials, $filesInput) {
+            foreach ($filesInput as $index => $fileData){
+                $file = $request->file("files.$index.file");
+                
+                if($file){
+                    $path=$storage->uploadSessionMaterials($file,$session->id,$fileData['fileTitle']);
+                    if($path){
+                        $material=SessionMaterial::create([
+                            "live_session_id"=>$session->id,
+                            "title"=>$fileData['fileTitle'],
+                            "file_type"=>$fileData['fileType'],
+                            "file_url"=>$path
+                        ]);
+                        array_push($materials,$material);
+                    }
                 }
             }
         });

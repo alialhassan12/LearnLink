@@ -5,7 +5,9 @@ use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
 use App\Http\Controllers\Api\coursesController;
 use App\Http\Controllers\Api\liveSessionsController;
+use App\Http\Controllers\Api\sessionMaterialsController;
 use App\Http\Controllers\Api\teacherController;
+use App\Models\LiveSession;
 use Illuminate\Support\Facades\Route;
 
 // public routes
@@ -31,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bookings/approve-booking',[bookingsController::class,'approveBooking'])->name('approve-booking');
         Route::get('/live-sessions/teacher-sessions',[liveSessionsController::class,'getTeacherLiveSessions'])->name('get-teacher-sessions');
         Route::get('/live-sessions/teacher-session/{id}',[liveSessionsController::class,'getTeacherSessionById'])->name('get-teacher-session-by-id');
+        Route::post('/live-sessions/upload-materials',[sessionMaterialsController::class,'uploadSessionMaterials'])->name('upload-session-materials');
     });
 
     // student routes

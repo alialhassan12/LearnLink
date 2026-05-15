@@ -1,4 +1,5 @@
 import type { Booking } from "./booking";
+import type { SessionMaterial } from "./sessionMaterial";
 import type { Student } from "./student";
 import type { Teacher } from "./teacher";
 
@@ -13,8 +14,10 @@ export interface LiveSession{
     recording_url:string;
     created_at:string;
     updated_at:string;
+    session_materials?:SessionMaterial[];
 
     booking?:Booking;
     teacher?:Teacher;
     student?:Student;
 }
+

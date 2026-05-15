@@ -20,7 +20,7 @@ export interface LiveSessionState{
 
     teacherSelectedSession:LiveSession | null;
     isGettingTeacherSelectedSession:boolean;
-    getTeacherSelectedSession:(id:number)=>Promise<void>;
+    getTeacherSelectedSession:(id:number)=>Promise<LiveSession | null>;
 }
 
 export const useLiveSessionStore=create<LiveSessionState>((set)=>({
@@ -79,9 +79,10 @@ export const useLiveSessionStore=create<LiveSessionState>((set)=>({
         try {
             const response =await axiosInstance.get(`/live-sessions/teacher-session/${id}`);
             set({teacherSelectedSession:response.data.session});
-            console.log("teacher selected session fetched",response.data.session);
+            return response.data.session;
         } catch (error:any) {
             console.error('Error fetching teacher selected session:', error?.response?.data?.message || error?.message || 'Unknown error');
+            return null;
         } finally{
             set({isGettingTeacherSelectedSession:false});
         }
