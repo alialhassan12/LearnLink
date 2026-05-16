@@ -178,3 +178,7 @@ code {
     @apply font-sans;
   }
 }
+
+.lk-disconnect-button{
+  display: none !important;
+}

@@ -29,6 +29,48 @@ class liveSessionsController extends Controller
         ],200);
     }
 
+    public function endSession(Request $request){
+        $request->validate([
+            "session_id"=>"required|integer",
+        ]);
+
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"Unauthorized"
+            ],401);
+        }
+
+        $teacher=$user->teacher;
+        if(!$teacher){
+            return response()->json([
+                "message"=>"Unautharized Access"
+            ],401);
+        }
+
+        $session=LiveSession::with('booking')->where("id",$request->session_id)->first();
+        if(!$session){
+            return response()->json([
+                "message"=>"Session not found"
+            ],404);
+        }
+
+        $booking=$session->booking;
+        if($booking->teacher_id !== $teacher->id){
+            return response()->json([
+                "message"=>"Unauthorized Access"
+            ],401);
+        }
+
+        $session->status="completed";
+        $session->save();
+
+        return response()->json([
+            "message"=>"Session ended successfully",
+            "session"=>$session
+        ],200);
+    }
+
     public function getTeacherLiveSessions(Request $request, SupabaseStorageService $storage){
         $user=$request->user();
         if(!$user){

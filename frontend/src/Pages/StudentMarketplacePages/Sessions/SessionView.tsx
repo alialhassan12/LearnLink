@@ -25,7 +25,7 @@ const SessionView = () => {
     const handleStartSession=async()=>{
         if(id){
             const roomName=`session-${id}`;
-            await getToken(roomName);
+            await getToken(roomName,Number(id));
             navigate(`/room/${roomName}`);
         }
     }

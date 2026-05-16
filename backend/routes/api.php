@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/bookings/teacher-bookings',[bookingsController::class,'getTeacherBookings'])->name('get-teacher-bookings');
         Route::post('/bookings/reject-booking',[bookingsController::class,'rejectBooking'])->name('reject-booking');
         Route::post('/bookings/approve-booking',[bookingsController::class,'approveBooking'])->name('approve-booking');
+        Route::post('/live-session/end-session',[liveSessionsController::class,'endSession'])->name('teacher-end-session');
         Route::get('/live-sessions/teacher-sessions',[liveSessionsController::class,'getTeacherLiveSessions'])->name('get-teacher-sessions');
         Route::get('/live-sessions/teacher-session/{id}',[liveSessionsController::class,'getTeacherSessionById'])->name('get-teacher-session-by-id');
         Route::post('/live-sessions/upload-materials',[sessionMaterialsController::class,'uploadSessionMaterials'])->name('upload-session-materials');

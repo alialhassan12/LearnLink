@@ -6,9 +6,12 @@ import axiosInstance from '../lib/axios';
 export interface LiveSessionState{
     token:string;
     url:string;
-    roomName:string;
+    session_id:number | null;
     isGettingToken:boolean;
-    getToken:(roomName:string)=>Promise<void>;
+    getToken:(roomName:string,session_id:number)=>Promise<void>;
+
+    isEndingSession:boolean;
+    endSession:(session_id:number)=>Promise<void>;
 
     teacherLiveSessions:LiveSession[];
     isGettingTeacherLiveSessions:boolean;
@@ -46,18 +49,31 @@ export const useLiveSessionStore=create<LiveSessionState>((set)=>({
 
     token:"",
     url:"",
-    roomName:"",
+    session_id:null,
     isGettingToken:false,
-    getToken:async(roomName:string)=>{
+    getToken:async(roomName:string,session_id:number)=>{
         set({isGettingToken:true});
         try {
             const response=await axiosInstance.post('/livekit/token',{room_name:roomName});
-            set({token:response.data.token,url:response.data.url});
+            set({token:response.data.token,url:response.data.url,session_id:session_id});
             
         } catch (error:any) {
             console.error('Error fetching token:', error?.response?.data?.message || error?.message || 'Unknown error');
         } finally{
             set({isGettingToken:false});
+        }
+    },
+
+    isEndingSession:false,
+    endSession:async(session_id:number)=>{
+        set({isEndingSession:true});
+        try {
+            const response=await axiosInstance.post('/live-session/end-session',{session_id});
+            console.log(response.data.message);
+        } catch (error:any) {
+            console.error('Error ending session:', error?.response?.data?.message || error?.message || 'Unknown error');
+        }finally{
+            set({isEndingSession:false});
         }
     },
 

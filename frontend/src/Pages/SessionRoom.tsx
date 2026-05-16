@@ -5,15 +5,23 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { useNavigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
+import CustomLeaveButton from "../components/CustomLeaveButton";
 
 function SessionRoom({
     token,
     serverUrl,
+    session_id,
 }: {
     token: string;
     serverUrl: string;
+    session_id:number;
 }) {
+    
+    const {authUser}=useAuthStore();
     const navigate = useNavigate();
+    const isTeacher=authUser?.role==="teacher";
+
 
     if (!token || !serverUrl) {
         return (
@@ -30,7 +38,7 @@ function SessionRoom({
     }
 
     return (
-        <div className="h-screen w-full flex flex-col overflow-hidden">
+        <div className="h-screen w-full flex flex-col">
             <LiveKitRoom
                 token={token}
                 serverUrl={serverUrl}
@@ -38,11 +46,16 @@ function SessionRoom({
                 audio={true}
                 video={true}
                 data-lk-theme="default"
-                className="flex-1 flex flex-col h-full"
-                onDisconnected={() => navigate(-1)}
+                className=""
+                onDisconnected={() => {
+                    navigate(-1);
+                }}
             >
                 <VideoConference />
                 <RoomAudioRenderer />
+                <div className="absolute top-4 left-4 z-50 md:top-auto md:bottom-4 md:left-4 md:right-auto">
+                    <CustomLeaveButton isTeacher={isTeacher} session_id={session_id}/>
+                </div>
             </LiveKitRoom>
         </div>
     );

@@ -52,7 +52,7 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const { checkAuth } = useAuthStore();
-  const {token,url}=useLiveSessionStore();
+  const {token,url,session_id}=useLiveSessionStore();
 
   useEffect(() => {
     Aos.init({
@@ -95,7 +95,7 @@ function App() {
 
         <Route path='/room/:roomName' element={
           <ProtectedRoute allowedRoles={['student','teacher']}>
-            <SessionRoom token={token} serverUrl={url}/>
+            <SessionRoom token={token} serverUrl={url} session_id={session_id}/>
           </ProtectedRoute>
         }>
 
