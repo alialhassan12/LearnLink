@@ -62,6 +62,10 @@ class SupabaseStorageService{
         return $path;
     }
 
+    public function deleteSessionMaterial(string $path):bool{
+        return $this->disk->delete($path);
+    }
+
     public function getPublicUrl(string $path):string{
         if (!$path) return "";
         

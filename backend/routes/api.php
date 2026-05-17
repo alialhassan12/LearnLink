@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/live-sessions/teacher-sessions',[liveSessionsController::class,'getTeacherLiveSessions'])->name('get-teacher-sessions');
         Route::get('/live-sessions/teacher-session/{id}',[liveSessionsController::class,'getTeacherSessionById'])->name('get-teacher-session-by-id');
         Route::post('/live-sessions/upload-materials',[sessionMaterialsController::class,'uploadSessionMaterials'])->name('upload-session-materials');
+        Route::delete('/live-sessions/delete-material',[sessionMaterialsController::class,'deleteSessionMaterial'])->name('delte-session-material');
     });
 
     // student routes

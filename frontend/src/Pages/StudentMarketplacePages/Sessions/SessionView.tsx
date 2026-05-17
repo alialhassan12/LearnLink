@@ -1,19 +1,22 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useLiveSessionStore } from "../../../store/liveSessionsStore";
 import { Skeleton } from "../../../components/ui/skeleton";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Download, Mail, Video } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Separator } from "../../../components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import useAuthStore  from "../../../store/authStore";
 import { Spinner } from "../../../components/ui/spinner";
+import { toast } from "sonner";
 
 const SessionView = () => {
     const {id}=useParams();
     const {authUser}=useAuthStore();
     const {studentSelectedSession,isGettingStudentSelectedSession,getStudentSelectedSession,getToken,isGettingToken}=useLiveSessionStore();
     const navigate=useNavigate();
+    const [selectedMaterialId,setSelectedMaterialId]=useState<number|null>(null);
+    const [isDownloadingMaterial,setIsDownloadingMaterial]=useState<boolean>(false);
 
     useEffect(()=>{
         if(id){
@@ -30,6 +33,26 @@ const SessionView = () => {
         }
     }
 
+    const handleDownloadMaterial=(url:string,fileTitle:string,materialId:number)=>{
+        setSelectedMaterialId(materialId);
+        setIsDownloadingMaterial(true);
+        try {
+            const link=document.createElement("a");
+            link.href=url;
+            link.download=fileTitle;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            toast.success("Downloading...");
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to download file");
+        } finally {
+            setIsDownloadingMaterial(false);
+            setSelectedMaterialId(null);
+        }
+    }
     
     if(isGettingStudentSelectedSession){
         return (<SessionViewSkeleton/>);
@@ -166,8 +189,10 @@ const SessionView = () => {
                                     variant="ghost" 
                                     size="icon" 
                                     className="h-9 w-9 rounded-full hover:bg-primary/10 hover:text-primary text-text-weak shrink-0 transition-colors"
+                                    onClick={()=>handleDownloadMaterial(material.file_url,material.title,material.id)}
+                                    disabled={isDownloadingMaterial && selectedMaterialId===material.id}
                                 >
-                                    <Download size={18}/>
+                                    {isDownloadingMaterial && selectedMaterialId===material.id ? <Spinner/>:<Download size={18}/>}
                                 </Button>
                             </div>
                         ))

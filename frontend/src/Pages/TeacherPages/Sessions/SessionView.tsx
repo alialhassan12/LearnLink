@@ -7,7 +7,6 @@ import { Separator } from "../../../components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import useAuthStore from "../../../store/authStore";
 import { toast } from "sonner";
-import type { SessionMaterial } from "../../../@types/sessionMaterial";
 import { useSessionMaterialsStore } from "../../../store/sessionMaterialsStore";
 import { Spinner } from "../../../components/ui/spinner";
 import { Skeleton } from "../../../components/ui/skeleton";
@@ -16,8 +15,9 @@ const SessionView =()=>{
     const {id}=useParams();
     const {authUser}=useAuthStore();
     const {getToken,isGettingToken,teacherSelectedSession,isGettingTeacherSelectedSession,getTeacherSelectedSession}=useLiveSessionStore();
-    const {sessionMaterials,setSessionMaterials,uploadMaterials,isuploadingMaterials}=useSessionMaterialsStore();
+    const {sessionMaterials,setSessionMaterials,uploadMaterials,isuploadingMaterials,deleteSessionMaterial,isDeletingSessionMaterial}=useSessionMaterialsStore();
     const navigate=useNavigate();
+    const [selectedMaterialId,setSelectedMaterialId]=useState<number|null>(null);
 
     const inputRef=useRef<HTMLInputElement>(null);
     const [filesData,setFilesData]=useState<{
@@ -38,12 +38,18 @@ const SessionView =()=>{
         fetchSession();
     },[id,getTeacherSelectedSession]);
 
-    // handle remove file
-    const handleRemoveFile=(fileTitle:string)=>{
+    // handle remove uploaded file
+    const handleRemoveUploadedFile=(fileTitle:string)=>{
         setFilesData((prev)=>prev.filter((item)=>item.fileTitle!==fileTitle));
         if(inputRef.current){
             inputRef.current.value="";
         }
+    }
+    // handle delete file
+    const handleDeleteSessionMaterial=async(sessionMaterialId:number)=>{
+        setSelectedMaterialId(sessionMaterialId);
+        await deleteSessionMaterial(sessionMaterialId);
+        setSelectedMaterialId(null);
     }
 
     // handle file upload
@@ -309,7 +315,17 @@ const SessionView =()=>{
                                     </div>
                                     <div className="flex flex-row items-center gap-2">
                                         <Button variant="outline" size="icon" className="h-8 w-8 cursor-pointer"><Download size={16}/></Button>
-                                        <Button variant="outline" size="icon" className="h-8 w-8 cursor-pointer" onClick={()=>handleRemoveFile(file.title)}><Trash2 size={16}/></Button>
+                                        <Button 
+                                            variant="outline" 
+                                            size="icon" 
+                                            className="h-8 w-8 cursor-pointer" 
+                                            onClick={()=>handleDeleteSessionMaterial(file.id)}
+                                            disabled={isDeletingSessionMaterial && selectedMaterialId!==file.id}
+                                        >
+                                            {isDeletingSessionMaterial && selectedMaterialId===file.id
+                                            ? <Spinner/>
+                                            : <Trash2 size={16}/>}
+                                        </Button>
                                     </div>
                                 </div>
                             ))}
@@ -322,7 +338,7 @@ const SessionView =()=>{
                                     </div>
                                     <div className="flex flex-row items-center gap-2">
                                         <Button variant="outline" size="icon" className="h-8 w-8 cursor-pointer"><Download size={16}/></Button>
-                                        <Button variant="outline" size="icon" className="h-8 w-8 cursor-pointer" onClick={()=>handleRemoveFile(file.fileTitle)}><Trash2 size={16}/></Button>
+                                        <Button variant="outline" size="icon" className="h-8 w-8 cursor-pointer" onClick={()=>handleRemoveUploadedFile(file.fileTitle)}><Trash2 size={16}/></Button>
                                     </div>
                                 </div>
                             ))

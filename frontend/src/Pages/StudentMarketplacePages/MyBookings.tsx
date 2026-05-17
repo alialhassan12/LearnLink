@@ -11,19 +11,17 @@ const MyBookings = () => {
     const [filterTabs, setFilterTabs] = useState("all");
 
     useEffect(() => {
-        if (studentBookings.length === 0) {
-            getStudentBookings();
-        }
+        getStudentBookings();
     }, []);
 
-    const filteredBookings = studentBookings.filter((booking) => 
+    const filteredBookings = studentBookings.filter((booking) =>
         filterTabs === "all" || booking.status === filterTabs
     );
 
     const stats = [
         {
             title: "Total Spent",
-            value: `$${studentBookings.reduce((acc, curr) => acc + curr.price, 0)}`,
+            value: `$${studentBookings.reduce((total,booking)=>booking.status==="approved"?total+Number(booking.price):total,0)}`,
             icon: Wallet,
             color: "text-blue-600",
             bg: "bg-blue-100"

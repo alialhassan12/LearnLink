@@ -15,6 +15,8 @@ interface SessionMaterialsStore{
             file:File
         }[]
     })=>Promise<void>;
+    isDeletingSessionMaterial:boolean;
+    deleteSessionMaterial:(sessionMaterialId:number)=>Promise<void>;
 }
 
 export const useSessionMaterialsStore = create<SessionMaterialsStore>((set)=>({
@@ -61,6 +63,24 @@ export const useSessionMaterialsStore = create<SessionMaterialsStore>((set)=>({
             set({isuploadingMaterials:false});
         }
     },
+
+    isDeletingSessionMaterial:false,
+    deleteSessionMaterial:async(sessionMaterialId:number)=>{
+        set({isDeletingSessionMaterial:true});
+        try {
+            const response=await axiosInstance.delete('/live-sessions/delete-material',{data:{sessionMaterialId:sessionMaterialId}});
+            set((state)=>{
+                const updatedMaterials=state.sessionMaterials.filter((material)=>material.id !==sessionMaterialId);
+                return {sessionMaterials:updatedMaterials};
+            });
+            toast.success(response.data.message);
+        } catch (error:any) {
+            console.log(error?.response?.data?.message||"Failed to delete material");
+            throw error;
+        }finally{
+            set({isDeletingSessionMaterial:false});
+        }
+    }
 
 
 }));

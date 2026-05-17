@@ -94,4 +94,43 @@ class sessionMaterialsController extends Controller
             "session_materials"=>$materials
         ],200);
     }
+
+    public function deleteSessionMaterial(Request $request, SupabaseStorageService $storage ){
+        $request->validate([
+            'sessionMaterialId'=>'required|exists:session_materials,id'
+        ]);
+
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"unauthenticated user"
+            ],401);
+        }
+
+        $teacher=$user->teacher;
+        if(!$teacher){
+            return response()->json([
+                "message"=>"Unautharized Access"
+            ],403);
+        }
+
+        $sessionMaterial=SessionMaterial::findOrFail($request->sessionMaterialId);
+        
+        $deleted=DB::transaction(function() use($storage,$sessionMaterial){
+            if($storage->deleteSessionMaterial($sessionMaterial->file_url)){
+                return SessionMaterial::destroy($sessionMaterial->id);
+            }
+            return false;
+        });
+
+        if($deleted){
+            return response()->json([
+                "message"=>"material deleted successfully",
+            ],200);
+        }else{
+            return response()->json([
+                "message"=>"deletion failed",
+            ],500);
+        }
+    }
 }
