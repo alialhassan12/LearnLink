@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\authController;
 use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
+use App\Http\Controllers\Api\courseEnrollmentController;
 use App\Http\Controllers\Api\coursesController;
 use App\Http\Controllers\Api\liveSessionsController;
 use App\Http\Controllers\Api\sessionMaterialsController;
@@ -50,5 +51,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/live-sessions/student-session/{id}',[liveSessionsController::class,'getStudentSessionById'])->name('get-student-session-by-id');
         Route::get('/courses/get-courses',[coursesController::class,'getCourses'])->name('get_courses');
         Route::get('/courses/get-course/{id}',[coursesController::class,'getCourseById'])->name('get-course-by-id');
+        Route::post('/courses/enroll',[courseEnrollmentController::class,'createEnrollment'])->name('create-enrollment');
     });
 });
