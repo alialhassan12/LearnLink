@@ -7,7 +7,7 @@ import { Skeleton } from "../../../components/ui/skeleton";
 import { NativeSelect, NativeSelectOption } from "../../../components/ui/native-select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../../../components/ui/sheet";
 import { Filter } from "lucide-react";
-import FilterSection from "../../../components/studentMarketplaceComponents/FilterSection";
+import TeacherFilterSection from "../../../components/studentMarketplaceComponents/TeacherFilterSection";
 import TeacherCard from "../../../components/studentMarketplaceComponents/TeacherCard";
 import TeacherCardSkeleton from "../../../components/studentMarketplaceComponents/TeacherCardSkeleton";
 
@@ -77,7 +77,7 @@ const BrowseTeachers = () => {
                                 <SheetTitle>Filters</SheetTitle>
                             </SheetHeader>
                             <div className="py-6 overflow-y-auto h-full">
-                                <FilterSection 
+                                <TeacherFilterSection 
                                     subjects={subjects} 
                                     languages={languages} 
                                     isGettingFilters={isGettingFilters} 
@@ -90,7 +90,7 @@ const BrowseTeachers = () => {
                 {/* desktop filters */}
                 <aside className="hidden lg:block w-[280px] shrink-0">
                     <div data-aos="fade-right" className="sticky top-24 flex flex-col gap-6 p-6 bg-bg-1 border border-border rounded-xl shadow-sm">
-                        <FilterSection 
+                        <TeacherFilterSection 
                             subjects={subjects} 
                             languages={languages} 
                             isGettingFilters={isGettingFilters} 

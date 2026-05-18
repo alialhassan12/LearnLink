@@ -179,7 +179,7 @@ class teacherController extends Controller
         return response()->json([
             'message'=>'Teachers fetched successfully',
             'teachers'=>$teachers
-        ],200); 
+        ],200);
     }
 
     public function getSubjects(){

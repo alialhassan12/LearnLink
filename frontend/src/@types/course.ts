@@ -1,4 +1,6 @@
 import type { Category } from "./category";
+import type { CourseSection } from "./course_section";
+import type { Teacher } from "./teacher";
 
 export interface Course{
     id:number;
@@ -15,5 +17,6 @@ export interface Course{
 
     //teacher courses
     category?:Category,
-    
+    teacher?:Teacher,
+    sections?:CourseSection[],
 }

@@ -136,4 +136,54 @@ class coursesController extends Controller
             "courses"=>$courses
         ],200);
     }
+
+    public function getCourses(Request $request, SupabaseStorageService $storage){
+        $courses=Course::query()
+                ->with('teacher.user','category')
+                ->where('status','published')
+                ->orderBy('created_at','desc')
+                ->get();
+        
+        if($courses->isEmpty()){
+            return response()->json([
+                "success"=>false,
+                "message"=>"No courses found"
+            ],404);
+        }
+
+        $courses->each(function($course) use ($storage){
+            if($course->thumbnail){
+                $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+            }
+            if($course->teacher->user->avatar){
+                $course->teacher->user->avatar=$storage->getPublicUrl($course->teacher->user->avatar);
+            }
+        });
+
+        return response()->json([
+            "message"=>"Courses fetched successfully",
+            "courses"=>$courses
+        ],200);
+    }
+
+    public function getCourseById($id,Request $request,SupabaseStorageService $storage){
+        $course=Course::whereId($id)->with('teacher.user','category','sections')->first();
+        if(!$course){
+            return response()->json([
+                'message'=>'No course found'
+            ],404);
+        }
+
+        if($course->thumbnail){
+            $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+        }
+        if($course->teacher->user->avatar){
+            $course->teacher->user->avatar=$storage->getPublicUrl($course->teacher->user->avatar);
+        }
+
+        return response()->json([
+            "message"=>"Course fetched successfully",
+            "course"=>$course
+        ],200);
+    }
 }

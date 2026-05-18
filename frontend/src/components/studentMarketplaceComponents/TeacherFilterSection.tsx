@@ -4,7 +4,7 @@ import { Input } from "../ui/input";
 import { NativeSelectOption,NativeSelect } from "../ui/native-select";
 import { Skeleton } from "../ui/skeleton";
 
-const FilterSection = ({ subjects, languages, isGettingFilters }: { subjects: string[], languages: string[], isGettingFilters: boolean }) => (
+const TeacherFilterSection = ({ subjects, languages, isGettingFilters }: { subjects: string[], languages: string[], isGettingFilters: boolean }) => (
     <div className="flex flex-col gap-6">
         {/* filter header */}
         <div className="flex flex-row justify-between items-center border-b border-border pb-2">
@@ -93,4 +93,4 @@ const FilterSection = ({ subjects, languages, isGettingFilters }: { subjects: st
     </div>
 );
 
-export default FilterSection;
+export default TeacherFilterSection;

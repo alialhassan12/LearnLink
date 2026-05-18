@@ -15,6 +15,16 @@ interface CourseStore{
     teacherCourses:Course[],
     getTeacherCourses:()=>Promise<boolean>,
     isGettingTeacherCourses:boolean,
+
+    //all courses
+    courses:Course[],
+    getCourses:()=>Promise<boolean>,
+    isGettingCourses:boolean,
+
+    // single course
+    course:Course | null,
+    getCourseById:(id:number)=>Promise<boolean>,
+    isGettingCourseById:boolean,
 }
 
 export const useCourseStore = create<CourseStore>((set) => ({
@@ -81,6 +91,38 @@ export const useCourseStore = create<CourseStore>((set) => ({
             return false;
         }finally{
             set({isGettingTeacherCourses:false});
+        }
+    },
+
+    courses:[],
+    isGettingCourses:false,
+    getCourses:async()=>{
+        set({isGettingCourses:true});
+        try{
+            const response=await axiosInstance.get('/courses/get-courses');
+            set({courses:response.data.courses});
+            return true;
+        }catch(error:any){
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        }finally{
+            set({isGettingCourses:false});
+        }
+    },
+
+    course:null,
+    isGettingCourseById:false,
+    getCourseById:async(id:number)=>{
+        set({isGettingCourseById:true});
+        try{
+            const response=await axiosInstance.get(`/courses/get-course/${id}`);
+            set({course:response.data.course});
+            return true;
+        }catch(error:any){
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        }finally{
+            set({isGettingCourseById:false});
         }
     }
 }));
