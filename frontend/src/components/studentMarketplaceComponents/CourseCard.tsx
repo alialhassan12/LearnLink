@@ -4,9 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { useNavigate } from "react-router-dom";
+import { useCourseEnrollmentStore } from "../../store/studentmarketplaceStores/courseEnrollmentStore";
 
 const CourseCard=({course}:{course:Course})=>{
+    const {enrolledCoursesIds}=useCourseEnrollmentStore();
     const navigate=useNavigate();
+    
 
     return (
         <div className="flex flex-col rounded-xl overflow-hidden border border-border hover:shadow-lg hover:-translate-y-[4px] hover:shadow-primary/10 hover:border-primary/30 hover:duration-300 transition-all">
@@ -29,12 +32,22 @@ const CourseCard=({course}:{course:Course})=>{
                 <Separator/>
                 <div className="flex flex-row justify-between items-center">
                     <p className="text-lg font-semibold text-primary">${course.price}</p>
-                    <Button 
-                        onClick={()=>navigate(`/marketplace/browse/courses/${course.id}`)}
-                        size="icon" 
-                        className="rounded-full bg-primary hover:bg-primary/80 text-white font-medium cursor-pointer">
-                        <ArrowRight />
-                    </Button>
+                    {enrolledCoursesIds.includes(course.id) ? (
+                        <Button
+                            size="sm"
+                            className="rounded-full bg-primary hover:bg-primary/80 text-white font-medium cursor-pointer"
+                        >
+                            Go to Course
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={() => navigate(`/marketplace/browse/courses/${course.id}`)}
+                            size="icon"
+                            className="rounded-full bg-primary hover:bg-primary/80 text-white font-medium cursor-pointer"
+                        >
+                            <ArrowRight />
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

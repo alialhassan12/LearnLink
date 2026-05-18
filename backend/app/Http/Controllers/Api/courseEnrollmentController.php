@@ -12,7 +12,6 @@ class courseEnrollmentController extends Controller
     public function createEnrollment(Request $request){
         $request->validate([
             "course_id"=>"required|exists:courses,id",
-            "student_id"=>"required|exists:students,id",
         ]);
 
         $user=$request->user();
@@ -35,7 +34,6 @@ class courseEnrollmentController extends Controller
             
             if($existingEnrollment){
                 return response()->json([
-                    "success"=>false,
                     "message"=>"You are already enrolled in this course"
                 ],409);
             }
@@ -49,9 +47,30 @@ class courseEnrollmentController extends Controller
         });
 
         return response()->json([
-            "success"=>true,
             "message"=>"You are successfully enrolled in this course",
             "enrollment"=>$enrollment
         ],201);
+    }
+
+    public function getEnrolledCoursesIds(Request $request){
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"Unauthenticated",
+                
+            ],401);
+        }
+        $student=$user->student;
+        if(!$student){
+            return response()->json([
+                "message"=>"Unautharized Access"
+            ],403);
+        }
+
+        $enrolledCourses=CourseEnrollment::where('student_id',$student->id)->pluck('course_id')->toArray();
+
+        return response()->json([
+            "enrolled_courses_ids"=>$enrolledCourses
+        ],200);
     }
 }

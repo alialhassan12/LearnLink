@@ -6,10 +6,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avat
 import { Button } from "../../../components/ui/button";
 import { Bookmark, PlayCircle } from "lucide-react";
 import { Skeleton } from "../../../components/ui/skeleton";
+import { useCourseEnrollmentStore } from "../../../store/studentmarketplaceStores/courseEnrollmentStore";
+import useAuthStore from "../../../store/authStore";
+import { toast } from "sonner";
+import { Spinner } from "../../../components/ui/spinner";
 
 const CourseDetails=()=>{
     const {id}=useParams();
+    const {authUser}=useAuthStore();
     const {course,getCourseById,isGettingCourseById}=useCourseStore();
+    const {enroll,isEnrolling,enrolledCoursesIds}=useCourseEnrollmentStore();
     const navigate=useNavigate();
 
     useEffect(()=>{
@@ -17,6 +23,18 @@ const CourseDetails=()=>{
             getCourseById(Number(id));
         }
     },[id]);
+
+    const handleEnroll=()=>{
+        if(!authUser){
+            toast.error("Unauthenticated");
+            return;
+        }
+        if(authUser.role!=="student"){
+            toast.error("Unauthorized Access");
+            return;
+        }
+        enroll(Number(id));
+    }
 
     if(isGettingCourseById){
         return <CourseDetailsSkeleton />;
@@ -109,7 +127,26 @@ const CourseDetails=()=>{
                         </div>
                         {/* buttons */}
                         <div className="flex flex-col gap-3 mt-2">
-                            <Button className="w-full py-6 text-base font-bold hover:scale-105 hover:bg-primary/80 active:scale-95 cursor-pointer">Enroll Now</Button>
+                            {enrolledCoursesIds.includes(Number(id))
+                                ?(
+                                    <Button className="w-full py-6 text-base font-bold hover:scale-105 hover:bg-primary/80 active:scale-95 cursor-pointer">
+                                        Go to Course
+                                    </Button>
+                                )
+                                :(
+                                    <Button 
+                                        className="w-full py-6 text-base font-bold hover:scale-105 hover:bg-primary/80 active:scale-95 cursor-pointer"
+                                        disabled={isEnrolling}
+                                        onClick={handleEnroll}
+                                    >
+                                        {isEnrolling ? <>
+                                            <Spinner/>
+                                            <span>Enrolling...</span>
+                                            </>:"Enroll Now"
+                                        }
+                                    </Button>
+                                )
+                            }
                             <Button variant="outline" className="w-full py-6 text-base font-semibold hover:scale-105 hover:bg-primary/10 cursor-pointer text-text-strong"><Bookmark className="mr-2 h-5 w-5" /> Save Course</Button>
                         </div>
                     </div>

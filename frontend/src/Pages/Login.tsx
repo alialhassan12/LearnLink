@@ -14,9 +14,12 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { Spinner } from "../components/ui/spinner";
 import { Button } from "../components/ui/button";
+import { useCourseEnrollmentStore } from "../store/studentmarketplaceStores/courseEnrollmentStore";
 
 const Login = () => {
     const {login,isloggingIn,authUser}=useAuthStore();
+    const {getEnrolledCoursesIds}=useCourseEnrollmentStore();
+
     const navigate=useNavigate();
     const [formData, setFormData] = useState<{
         email: string;
@@ -62,7 +65,11 @@ const Login = () => {
         const success = await login(formData);
         if(success){
             if(authUser?.role==='teacher') navigate('/dashboard');
-            if(authUser?.role==='student') navigate('/marketplace');
+            if(authUser?.role==='student'){ 
+                // fetch enrolled courses ids before navigating
+                getEnrolledCoursesIds();
+                navigate('/marketplace')
+            };
         }
     }
 

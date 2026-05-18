@@ -11,6 +11,7 @@ import Register from './Pages/Register';
 import { Toaster } from "./components/ui/sonner";
 import { useLiveSessionStore } from './store/liveSessionsStore';
 import SessionRoom from './Pages/SessionRoom';
+import { useCourseEnrollmentStore } from './store/studentmarketplaceStores/courseEnrollmentStore';
 
 // Wrapper for routes that require the user to be logged in
 const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:string[] }) => {
@@ -53,12 +54,22 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   const { checkAuth } = useAuthStore();
   const {token,url,session_id}=useLiveSessionStore();
+  const {getEnrolledCoursesIds}=useCourseEnrollmentStore();
 
   useEffect(() => {
     Aos.init({
       duration: 1000
     });
-    checkAuth();
+    
+    const initialize = async () => {
+      const loggedIn = await checkAuth();
+      // If user is logged in and is a student, fetch enrolled courses
+      if (loggedIn && useAuthStore.getState().authUser?.role === 'student'){
+        await getEnrolledCoursesIds();
+      }
+    };
+    
+    initialize();
   }, []);
 
   return (
