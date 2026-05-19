@@ -10,6 +10,7 @@ import MyBookings from "./StudentMarketplacePages/MyBookings";
 import Sessions from "./StudentMarketplacePages/Sessions/Sessions";
 import SessionView from "./StudentMarketplacePages/Sessions/SessionView";
 import CourseDetails from "./StudentMarketplacePages/BrowsePages/CourseDetails";
+import MessagesLayout from "./MessagesLayout";
 
 const StudentMarketPlace=()=>{
     const authUser=useAuthStore((state)=>state.authUser);
@@ -28,6 +29,7 @@ const StudentMarketPlace=()=>{
                 <Route path="/bookings" element={<MyBookings/>} />
                 <Route path="/live-sessions" element={<Sessions/>} />
                 <Route path="/live-sessions/:id" element={<SessionView/>} />
+                <Route path="/chat" element={<MessagesLayout/>}/>
             </Routes>
             <Footer/>
         </div>

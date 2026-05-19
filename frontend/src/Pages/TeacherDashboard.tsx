@@ -18,6 +18,7 @@ import MySessions from "./TeacherPages/Sessions/MySessions";
 import SessionView from "./TeacherPages/Sessions/SessionView";
 import SessionRoom from "./SessionRoom";
 import { useLiveSessionStore } from "../store/liveSessionsStore";
+import MessagesLayout from "./MessagesLayout";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -66,6 +67,7 @@ const TeacherDashboard=()=>{
                             <Route path="view/:id" element={<SessionView/>}/>
                             
                         </Route>
+                        <Route path="/chat" element={<MessagesLayout/>}></Route>
                         <Route path="/profile" >
                             <Route index element={<Profile/>}></Route>
                             <Route path="edit" element={<EditProfile/>}></Route>

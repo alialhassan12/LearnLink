@@ -3,13 +3,18 @@
 use App\Http\Controllers\Api\authController;
 use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
+use App\Http\Controllers\Api\conversationsController;
 use App\Http\Controllers\Api\courseEnrollmentController;
 use App\Http\Controllers\Api\coursesController;
 use App\Http\Controllers\Api\liveSessionsController;
+use App\Http\Controllers\Api\messageController;
 use App\Http\Controllers\Api\sessionMaterialsController;
 use App\Http\Controllers\Api\teacherController;
 use App\Models\LiveSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // public routes
 Route::post('/auth/register',[authController::class,'register'])->name('register_new_user');
@@ -22,6 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me',[authController::class,'checkAuth'])->name('check_auth');
     Route::get('/categories',[categoriesController::class,'getCategories'])->name('get_categories');
     Route::post('/livekit/token',[liveSessionsController::class,'getToken'])->name('get_livekit_token');
+    Route::post('/messages/send',[messageController::class,'send'])->name('send-message');
+    Route::get('/messages/conversations',[conversationsController::class,'getConversations'])->name('get-conversations');
+    Route::post('/messages/conversation',[messageController::class,'getMessagesByConversation'])->name('get-messages');
 
     // teacher routes
     Route::middleware(['checkRole:teacher'])->group(function(){

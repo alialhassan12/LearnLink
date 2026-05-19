@@ -32,6 +32,17 @@ class User extends Authenticatable
         return $this->hasOne(Teacher::class);
     }
 
+    public function conversations(){
+        return $this->hasManyThrough(
+            Conversation::class,
+            ConversationParticipant::class,
+            'user_id',
+            'id',
+            'id',
+            'conversation_id'
+        )->with('participants')->with('lastMessage')->orderBy('updated_at','desc');
+    }
+
     // Casts
     protected function casts(): array
     {

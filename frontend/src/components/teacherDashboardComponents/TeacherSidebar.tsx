@@ -78,10 +78,10 @@ const TeacherSidebar = () => {
             onClick:()=>navigate("/dashboard/my-sessions")
         },
         {
-            label:"Messages",
-            path:"/dashboard/messages",
+            label:"Chat",
+            path:"/dashboard/chat",
             icon:MessageCircle,
-            // onClick:()=>navigate("/dashboard/messages")
+            onClick:()=>navigate("/dashboard/chat")
         }
     ];
 

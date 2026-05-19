@@ -66,6 +66,18 @@ class SupabaseStorageService{
         return $this->disk->delete($path);
     }
 
+    public function uploadMessageFile(UploadedFile $file,int $sender_id,int $receiver_id):string{
+        $filename=strtolower(strval($sender_id)) .'-' .strtolower(strval($receiver_id)) . '-' . time();
+
+        $ext=$file->getClientOriginalExtension();
+        $fileName=$filename . '.' . $ext;
+        $path="chats/" . $fileName;
+
+        $this->disk->put($path,file_get_contents($file));
+
+        return $path;
+    }
+
     public function getPublicUrl(string $path):string{
         if (!$path) return "";
         

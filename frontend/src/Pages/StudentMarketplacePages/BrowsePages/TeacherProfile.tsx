@@ -1,8 +1,8 @@
 import useBrowseStore from "../../../store/studentmarketplaceStores/browseStore";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Globe, MapPin, User } from "lucide-react";
+import { Cone, Globe, MapPin, User } from "lucide-react";
 import { Separator } from "../../../components/ui/separator";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
@@ -10,6 +10,9 @@ import { Skeleton } from "../../../components/ui/skeleton";
 import { toast } from "sonner";
 import useBookingStore from "../../../store/bookingStore";
 import { Spinner } from "../../../components/ui/spinner";
+import { useChatStore } from "../../../store/chatStore";
+import useAuthStore from "../../../store/authStore";
+import type { Conversation } from "../../../@types/conversation";
 
 const TeacherProfileSkeleton = () => (
     <div className="flex flex-col gap-10 px-4 py-6 md:px-10 md:py-10 max-w-7xl mx-auto animate-pulse">
@@ -96,8 +99,11 @@ const TeacherProfileSkeleton = () => (
 
 const TeacherProfile = () => {
     const {id}=useParams();
+    const {authUser}=useAuthStore();
     const {teacher,getTeacherById,isGettingTeacherById}=useBrowseStore();
     const {createBooking,isCreatingBooking}=useBookingStore();
+    const {addConversation,setActiveConversation,conversations}=useChatStore();
+    const navigate=useNavigate();
 
     const day_of_week=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     
@@ -145,6 +151,51 @@ const TeacherProfile = () => {
             setDateError(true);
             toast.error("Please select a date and time");
         }
+    }
+
+    const handleMessageTeacher=async()=>{
+        // check if conversation already exists
+        const conversation=conversations.find((c)=>c.participants.some((p)=>p.user_id===teacher.user_id));
+        if(conversation){
+            setActiveConversation(conversation);
+            navigate('/marketplace/chat');
+            return;
+        }
+
+        const newConversationId=conversations.length+1;
+
+        const newConversation:Conversation={
+            id:newConversationId,
+            type:'direct',
+            participants:[
+                {
+                    id:0,
+                    user_id:teacher.user_id,
+                    user:{
+                        id:teacher.user_id,
+                        name:teacher.name,
+                        email:teacher.email,
+                        avatar:teacher.avatar,
+                        role:'teacher'
+                    }
+                },
+                {
+                    id:1,
+                    user_id:authUser!.id,
+                    user:{
+                        id:authUser!.id,
+                        name:authUser!.name,
+                        email:authUser!.email,
+                        avatar:authUser!.avatar,
+                        role:authUser!.role as 'student' | 'teacher'
+                    }
+                }
+            ]
+        };
+
+        addConversation(newConversation);
+        setActiveConversation(newConversation);
+        navigate('/marketplace/chat');
     }
 
     if (isGettingTeacherById) {
@@ -318,7 +369,13 @@ const TeacherProfile = () => {
                                     "Book Session"
                                 )}
                             </Button>
-                            <Button variant="outline" className="w-full h-11 cursor-pointer font-bold rounded-xl hover:bg-muted transition-colors">Message Teacher</Button>
+                            <Button
+                                onClick={handleMessageTeacher}
+                                variant="outline" 
+                                className="w-full h-11 cursor-pointer font-bold rounded-xl hover:bg-muted transition-colors"
+                            >
+                                Message Teacher
+                            </Button>
                         </div>
                     </div>
                 </div>

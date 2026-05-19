@@ -35,8 +35,8 @@ const Header = () => {
             },
             {
                 id:5,
-                title:'Messages',
-                path:'/messages'
+                title:'Chat',
+                path:'/marketplace/chat'
             }
         ]
     };
