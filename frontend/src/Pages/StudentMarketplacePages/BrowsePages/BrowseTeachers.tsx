@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import useBrowseStore from "../../../store/studentmarketplaceStores/browseStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { NativeSelect, NativeSelectOption } from "../../../components/ui/native-select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../../../components/ui/sheet";
@@ -10,11 +10,12 @@ import { Filter } from "lucide-react";
 import TeacherFilterSection from "../../../components/studentMarketplaceComponents/TeacherFilterSection";
 import TeacherCard from "../../../components/studentMarketplaceComponents/TeacherCard";
 import TeacherCardSkeleton from "../../../components/studentMarketplaceComponents/TeacherCardSkeleton";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../../../components/ui/pagination";
 
 
 const BrowseTeachers = () => {
-    const {getSubjects,isGettingFilters,subjects,getLanguages,languages,setIsGettingFilters,teachers,getTeachers,isGettingTeachers}=useBrowseStore();
-    
+    const {getSubjects,isGettingFilters,subjects,getLanguages,languages,setIsGettingFilters,teachers,getTeachers,isGettingTeachers,teacherPaginationData,clearTeacherFilter}=useBrowseStore();
+
     const getFilters=async()=>{
         setIsGettingFilters(true);
         await getSubjects();
@@ -89,7 +90,7 @@ const BrowseTeachers = () => {
 
                 {/* desktop filters */}
                 <aside className="hidden lg:block w-[280px] shrink-0">
-                    <div data-aos="fade-right" className="sticky top-24 flex flex-col gap-6 p-6 bg-bg-1 border border-border rounded-xl shadow-sm">
+                    <div className="sticky top-24 flex flex-col gap-6 p-6 bg-bg-1 border border-border rounded-xl shadow-sm">
                         <TeacherFilterSection 
                             subjects={subjects} 
                             languages={languages} 
@@ -105,7 +106,7 @@ const BrowseTeachers = () => {
                         <div className="text-xl font-bold text-text-strong">
                             {isGettingTeachers ? <Skeleton className="h-6 w-32" /> : `${teachers.length} Teachers Found`}
                         </div>
-                        <div className="flex items-center gap-2">
+                        {/* <div className="flex items-center gap-2">
                             <span className="text-sm text-text-weak hidden sm:inline">Sort by:</span>
                             <NativeSelect className="h-9 w-[140px] text-sm">
                                 <NativeSelectOption value="popular">Most Popular</NativeSelectOption>
@@ -113,7 +114,7 @@ const BrowseTeachers = () => {
                                 <NativeSelectOption value="price-high">Price: High to Low</NativeSelectOption>
                                 <NativeSelectOption value="rating">Highest Rated</NativeSelectOption>
                             </NativeSelect>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* teacher results */}
@@ -130,11 +131,52 @@ const BrowseTeachers = () => {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-20 text-text-weak">
                                     <p className="text-lg">No teachers found matching your criteria.</p>
-                                    <Button variant="link" className="text-primary">Clear all filters</Button>
+                                    <Button 
+                                        onClick={() =>{ 
+                                            clearTeacherFilter()
+                                            getTeachers(1);
+                                        }} 
+                                        variant="link" 
+                                        className="text-primary"
+                                    >
+                                        Clear all filters
+                                    </Button>
                                 </div>
                             )
                         )}
                     </div>
+                    {/* pagination */}
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious 
+                                    size="lg" 
+                                    className={`${teacherPaginationData?.current_page === 1 ? 'pointer-events-none opacity-50' : ''}`}
+                                    onClick={() => getTeachers(teacherPaginationData?.current_page - 1)} 
+                                />
+                            </PaginationItem>
+                            {
+                                Array.from({ length: teacherPaginationData?.total }).map((_, i) => (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink 
+                                            size="lg"
+                                            onClick={() => getTeachers(i + 1)}
+                                            isActive={teacherPaginationData?.current_page === i + 1}
+                                        >
+                                            {i + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))
+                            }
+                            <PaginationItem>
+                                <PaginationNext 
+                                    size="lg" 
+                                    className={`${teacherPaginationData?.current_page === teacherPaginationData?.last_page ? 'pointer-events-none opacity-50' : ''}`}
+                                    onClick={() => getTeachers(teacherPaginationData?.current_page + 1)} 
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </main>
             </div>
 

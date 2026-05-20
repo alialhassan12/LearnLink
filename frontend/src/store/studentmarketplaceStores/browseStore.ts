@@ -3,6 +3,22 @@ import type {Teacher} from '../../@types/teacher';
 import axiosInstance from '../../lib/axios';
 import { toast } from 'sonner';
 
+interface TeacherFilter {
+    subjects?:string[];
+    language?:string;
+    hourlyRate:[min:number,max:number];
+    rating?:number | null;
+}
+
+interface TeacherPaginationData{
+    current_page:number;
+    last_page:number;
+    per_page:number;
+    total:number;
+    from:number;
+    to:number;
+}
+
 interface BrowseStoreState{
     teachers:Teacher[];
     teacher:Teacher | null;
@@ -13,12 +29,19 @@ interface BrowseStoreState{
     isGettingFilters:boolean;
     setIsGettingFilters:(value:boolean)=>void;
     isGettingTeachers:boolean;
-    getTeachers:()=>Promise<void>;
+    teacherPaginationData:TeacherPaginationData | null;
+    getTeachers:(page?:number)=>Promise<void>;
     isGettingTeacherById:boolean;
     getTeacherById:(id:number)=>Promise<void>;
+
+    //teacher filters
+    teacherFilter:TeacherFilter;
+    setTeacherFilter:(filter:TeacherFilter)=>void;
+    clearTeacherFilter:()=>void;
+
 }
 
-const useBrowseStore=create<BrowseStoreState>((set)=>({
+const useBrowseStore=create<BrowseStoreState>((set,get)=>({
     teachers:[],
     subjects:[],
     languages:[],
@@ -44,12 +67,20 @@ const useBrowseStore=create<BrowseStoreState>((set)=>({
     },
 
     isGettingTeachers:false,
-    getTeachers:async()=>{
+    teacherPaginationData:null,
+    getTeachers:async(page:number=1)=>{
         set({isGettingTeachers:true});
+        const currentFilters=get().teacherFilter;
         try {
-            const response = await axiosInstance.get('/teachers');
-            set({teachers:response.data.teachers});
+            if((currentFilters.hourlyRate[0] !== 0 && currentFilters.hourlyRate[1]!==2000) || (currentFilters.subjects?.length !== 0) || (currentFilters.language !== "all") || (currentFilters.rating !== 0)){
+                const response = await axiosInstance.post(`/teachers/filters?page=${page}`,currentFilters);
+                set({teachers:response.data.teachers,teacherPaginationData:response.data.pagination});
+            }else{
+                const response = await axiosInstance.get(`/teachers?page=${page}`);
+                set({teachers:response.data.teachers,teacherPaginationData:response.data.pagination});
+            }
         } catch (error:any) {
+            console.log(error.response?.data?.message);
             toast.error(error.response?.data?.message);
         } finally {
             set({isGettingTeachers:false});
@@ -68,7 +99,22 @@ const useBrowseStore=create<BrowseStoreState>((set)=>({
         } finally {
             set({isGettingTeacherById:false});
         }
-    }
+    },
+
+    // teacher filters
+    teacherFilter:{
+        subjects:[],
+        language:"all",
+        hourlyRate:[0,2000],
+        rating:0
+    },
+    setTeacherFilter:(filter:TeacherFilter)=>set({teacherFilter:filter}),
+    clearTeacherFilter:()=>set({teacherFilter:{
+        subjects:[],
+        language:"all",
+        hourlyRate:[0,2000],
+        rating:0
+    }})
 
 }));
 

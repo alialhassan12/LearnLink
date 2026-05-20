@@ -55,6 +55,7 @@ const MessagesLayout=()=>{
     const [messageInput,setMessageInput]=useState('');
     const [errorInp,setErrorInp]=useState('');
     const [pendingMessageText, setPendingMessageText]=useState('');
+    const [search,setSearch]=useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(()=>{
@@ -63,6 +64,10 @@ const MessagesLayout=()=>{
         }
     },[conversations]);
 
+    const filteredConversation=conversations.filter((conversation)=>{
+        return conversation.participants.some((p)=>p.user.name.toLowerCase().includes(search.toLowerCase()));
+    });
+    
     // Laravel Echo Real-Time Listeners
     useEffect(() => {
         if (!activeConversation) return;
@@ -146,6 +151,8 @@ const MessagesLayout=()=>{
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
                             placeholder="Search conversations..." 
+                            value={search}
+                            onChange={(e)=>setSearch(e.target.value)}
                             className="pl-9 bg-muted/50 border-none rounded-xl"
                         />
                     </div>
@@ -164,7 +171,7 @@ const MessagesLayout=()=>{
                             <p className="text-muted-foreground text-sm mt-1">Start a conversation to see it here.</p>
                         </div>
                     ) : (
-                        conversations.map((conversation)=>{
+                        filteredConversation.map((conversation)=>{
                             const isDirect = conversation.type === 'direct';
                             const otherParticipant = isDirect ? conversation.participants?.find((p)=>p.user_id !== authUser?.id) : null;
                             const isActive = activeConversation?.id === conversation.id;
@@ -196,6 +203,14 @@ const MessagesLayout=()=>{
                                 </div>
                             )
                         })
+                    )}
+                    {filteredConversation.length === 0 && (
+                        <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                                <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-foreground mb-2">No conversations found</h3>
+                        </div>
                     )}
                 </div>
             </div>

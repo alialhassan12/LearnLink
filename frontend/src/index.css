@@ -54,7 +54,7 @@
 
 html.dark {
   --bg-1: #000;
-  --bg-2: #1b1b24;
+  --bg-2: oklch(0.205 0 0);
   --text-strong: #f3effc;
   --text-weak: #a9a7b9;
   --primary: #4f46e5;

@@ -155,8 +155,8 @@ class teacherController extends Controller
         $teachers=Teacher::query()
                 ->with('user')
                 ->orderBy('created_at','desc')
-                ->get()
-                ->map(function($teacher) use ($storage){
+                ->paginate(1)
+                ->through(function($teacher) use ($storage){
                     if($teacher->user->avatar){
                         $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);
                     }
@@ -178,7 +178,15 @@ class teacherController extends Controller
 
         return response()->json([
             'message'=>'Teachers fetched successfully',
-            'teachers'=>$teachers
+            'teachers'=>$teachers->items(),
+            'pagination'=>[
+                'current_page'=>$teachers->currentPage(),
+                'last_page'=>$teachers->lastPage(),
+                'per_page'=>$teachers->perPage(),
+                'total'=>$teachers->total(),
+                'from'=>$teachers->firstItem(),
+                'to'=>$teachers->lastItem(),
+            ],
         ],200);
     }
 
@@ -247,6 +255,73 @@ class teacherController extends Controller
                 'courses_count'=>$teacher->publishedCourses->count(),
                 'courses'=>$teacher->publishedCourses,
                 'availabilities'=>$teacher->availabilities,
+            ],
+        ],200); 
+    }
+
+    public function getTeachersByFilters(Request $request, SupabaseStorageService $storage){
+        $request->validate([
+            'subjects'=>'array|nullable',
+            'language'=>'string|nullable',
+            'hourlyRate'=>'array|nullable|size:2',
+            'rating'=>'numeric|nullable',
+        ]);
+
+        $query=Teacher::query()
+                ->with('user')
+                ->orderBy('created_at','desc');
+        
+        if($request->has('subjects') && count($request->subjects)>0){
+            $query->where(function($q) use ($request){
+                foreach($request->subjects as $subject){
+                    $q->orWhereJsonContains('subjects', $subject);
+                }
+            });
+        }
+
+        if($request->has('language') && $request->language!="all"){
+            $query->whereJsonContains('languages', $request->language);
+        }
+
+        if($request->has('hourlyRate') && count($request->hourlyRate)==2){
+            $query->whereBetween('hourly_rate',$request->hourlyRate);
+        }
+
+        // if($request->has('rating') && $request->rating!=0){
+        //     $query->where('rating','>=',$request->rating);
+        // }
+
+        $teachers=$query->paginate(10)
+                ->through(function($teacher) use ($storage){
+                    if($teacher->user->avatar){
+                        $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);
+                    }
+                    return [
+                        'id'=>$teacher->id,
+                        'name'=>$teacher->user->name,
+                        'email'=>$teacher->user->email,
+                        'avatar'=>$teacher->user->avatar,
+                        'bio'=>$teacher->bio,
+                        'headline'=>$teacher->headline,
+                        'hourly_rate'=>$teacher->hourly_rate,
+                        'subjects'=>$teacher->subjects,
+                        'languages'=>$teacher->languages,
+                        'created_at'=>$teacher->user->created_at,
+                        'updated_at'=>$teacher->user->updated_at,
+                        'courses_count'=>$teacher->courses->count(),
+                    ];
+                });
+
+        return response()->json([
+            'message'=>'Teachers fetched successfully',
+            'teachers'=>$teachers->items(),
+            'pagination'=>[
+                'current_page'=>$teachers->currentPage(),
+                'last_page'=>$teachers->lastPage(),
+                'per_page'=>$teachers->perPage(),
+                'total'=>$teachers->total(),
+                'from'=>$teachers->firstItem(),
+                'to'=>$teachers->lastItem(),
             ],
         ],200); 
     }

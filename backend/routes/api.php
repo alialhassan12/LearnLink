@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // student routes
     Route::middleware(['checkRole:student'])->group(function(){
         Route::get('/teachers',[teacherController::class,'getTeachers'])->name('get_teachers');
+        Route::post('/teachers/filters',[teacherController::class,'getTeachersByFilters'])->name('get_teachers_by_filters');
         Route::get('/teachers/subjects',[teacherController::class,'getSubjects'])->name('get_subjects');
         Route::get('/teachers/languages',[teacherController::class,'getLanguages'])->name('get_languages');
         Route::get('/teacher/{id}',[teacherController::class,'getTeacherById'])->name('get_teacher_by_id');
