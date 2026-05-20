@@ -8,9 +8,19 @@ import { useEffect } from "react";
 import useCategoryStore from "../../../store/categoryStore";
 import CourseCardSkeleton from "../../../components/studentMarketplaceComponents/CourseCardSkeleton";
 import CourseCard from "../../../components/studentMarketplaceComponents/CourseCard";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../../../components/ui/pagination";
 
 const BrowseCourses=()=>{
-    const {courses,getCourses,isGettingCourses}=useCourseStore();
+    const {
+        courses,
+        getCourses,
+        isGettingCourses,
+        coursePaginationData,
+        courseFilters,
+        setCourseFilters,
+        clearCourseFilters,
+    }=useCourseStore();
+    
     const {categories,getCategories,isGettingCategories}=useCategoryStore();
 
     useEffect(()=>{
@@ -18,7 +28,9 @@ const BrowseCourses=()=>{
     },[getCourses]);
 
     useEffect(()=>{
-        getCategories();
+        if(!isGettingCategories){
+            getCategories();
+        }
     },[getCategories]);
 
     return (
@@ -95,13 +107,55 @@ const BrowseCourses=()=>{
                                     <CourseCard key={course.id || i} course={course} />
                                 ))
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-20 text-text-weak">
+                                <div className="col-span-full md:col-span-2 lg:col-span-3 text-center py-20 text-text-weak">
                                     <p className="text-lg">No courses found matching your criteria.</p>
-                                    <Button variant="link" className="text-primary">Clear all filters</Button>
+                                    <Button 
+                                        variant="link" 
+                                        className="text-primary cursor-pointer"
+                                        onClick={()=>{
+                                            clearCourseFilters();
+                                            getCourses(1);
+                                        }}
+                                    >
+                                        Clear all filters
+                                    </Button>
                                 </div>
                             )
                         )}
                     </div>
+
+                    {/* course pagination */}
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious 
+                                    size="lg" 
+                                    className={`${coursePaginationData?.current_page === 1 ? 'pointer-events-none opacity-50' : ''}`}
+                                    onClick={() => getCourses(coursePaginationData?.current_page - 1)} 
+                                />
+                            </PaginationItem>
+                            {
+                                Array.from({ length: coursePaginationData?.last_page }).map((_, i) => (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink 
+                                            size="lg"
+                                            onClick={() => getCourses(i + 1)}
+                                            isActive={coursePaginationData?.current_page === i + 1}
+                                        >
+                                            {i + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))
+                            }
+                            <PaginationItem>
+                                <PaginationNext 
+                                    size="lg" 
+                                    className={`${coursePaginationData?.current_page === coursePaginationData?.last_page ? 'pointer-events-none opacity-50' : ''}`}
+                                    onClick={() => getCourses(coursePaginationData?.current_page + 1)} 
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </main>
             </div>
         </div>

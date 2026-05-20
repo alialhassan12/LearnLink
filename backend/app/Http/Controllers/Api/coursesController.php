@@ -142,27 +142,26 @@ class coursesController extends Controller
                 ->with('teacher.user','category')
                 ->where('status','published')
                 ->orderBy('created_at','desc')
-                ->get();
-        
-        if($courses->isEmpty()){
-            return response()->json([
-                "success"=>false,
-                "message"=>"No courses found"
-            ],404);
-        }
-
-        $courses->each(function($course) use ($storage){
-            if($course->thumbnail){
-                $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
-            }
-            if($course->teacher->user->avatar){
-                $course->teacher->user->avatar=$storage->getPublicUrl($course->teacher->user->avatar);
-            }
-        });
+                ->paginate(1)
+                ->through(function($course) use ($storage){
+                    if($course->thumbnail){
+                        $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+                    }
+                    if($course->teacher->user->avatar){
+                        $course->teacher->user->avatar=$storage->getPublicUrl($course->teacher->user->avatar);
+                    }
+                    return $course;
+                });
 
         return response()->json([
             "message"=>"Courses fetched successfully",
-            "courses"=>$courses
+            "courses"=>$courses->items(),
+            "pagination"=>[
+                "current_page"=>$courses->currentPage(),
+                "per_page"=>$courses->perPage(),
+                "total"=>$courses->total(),
+                "last_page"=>$courses->lastPage(),
+            ]
         ],200);
     }
 
@@ -184,6 +183,48 @@ class coursesController extends Controller
         return response()->json([
             "message"=>"Course fetched successfully",
             "course"=>$course
+        ],200);
+    }
+
+    public function getCoursesByFilters(Request $request,SupabaseStorageService $storage){
+        $request->validate([
+            "category_id"=>"nullable | exists:categories,id",
+            "price_range"=>"array | nullable| size:2",
+        ]);
+
+        $courses=Course::query()
+                    ->with('category','teacher.user')
+                    ->where('status','published')
+                    ->orderBy('created_at','desc');
+
+        if($request->has('category_id')){
+            $courses->where('category_id',$request->category_id);
+        }
+
+        if($request->has('price_range') && count($request->price_range) == 2){
+            $courses->whereBetween('price',$request->price_range);
+        }
+
+        $courses=$courses->paginate(1)
+            ->through(function($course) use ($storage){
+                if($course->thumbnail){
+                    $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+                }
+                if($course->teacher->user->avatar){
+                    $course->teacher->user->avatar=$storage->getPublicUrl($course->teacher->user->avatar);
+                }
+                return $course;
+            });
+
+        return response()->json([
+            "message"=>"Courses fetched successfully",
+            "courses"=>$courses->items(),
+            "pagination"=>[
+                "current_page"=>$courses->currentPage(),
+                "per_page"=>$courses->perPage(),
+                "total"=>$courses->total(),
+                "last_page"=>$courses->lastPage(),
+            ]
         ],200);
     }
 }

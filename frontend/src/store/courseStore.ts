@@ -4,30 +4,50 @@ import axiosInstance from "../lib/axios";
 import { toast } from "sonner";
 import type { Course } from "../@types/course";
 
-interface CourseStore{
-    newCourse:Course | null,
-    setNewCourse:(newCourse:Course)=>void,
-    isPublishing:boolean,
-    setIsPublishing:(isPublishing:boolean)=>void,
-    publishCourse:(data:CoursePublish)=>Promise<boolean>
-    
-    //teacher courses
-    teacherCourses:Course[],
-    getTeacherCourses:()=>Promise<boolean>,
-    isGettingTeacherCourses:boolean,
-
-    //all courses
-    courses:Course[],
-    getCourses:()=>Promise<boolean>,
-    isGettingCourses:boolean,
-
-    // single course
-    course:Course | null,
-    getCourseById:(id:number)=>Promise<boolean>,
-    isGettingCourseById:boolean,
+interface CourseFilter{
+    category_id?:number;
+    price_range:[min:number,max:number];
 }
 
-export const useCourseStore = create<CourseStore>((set) => ({
+interface CoursePaginationData{
+    current_page:number;
+    last_page:number;
+    per_page:number;
+    total:number;
+    from:number;
+    to:number;
+}
+
+interface CourseStore{
+    newCourse:Course | null;
+    setNewCourse:(newCourse:Course)=>void;
+    isPublishing:boolean;
+    setIsPublishing:(isPublishing:boolean)=>void;
+    publishCourse:(data:CoursePublish)=>Promise<boolean>;
+    
+    //teacher courses
+    teacherCourses:Course[];
+    getTeacherCourses:()=>Promise<boolean>;
+    isGettingTeacherCourses:boolean;
+
+    //all courses
+    courses:Course[];
+    coursePaginationData:CoursePaginationData | null;
+    getCourses:(page?:number)=>Promise<boolean>;
+    isGettingCourses:boolean,
+
+    // course filters
+    courseFilters:CourseFilter;
+    setCourseFilters:(courseFilters:CourseFilter)=>void;
+    clearCourseFilters:()=>void;
+
+    // single course
+    course:Course | null;
+    getCourseById:(id:number)=>Promise<boolean>;
+    isGettingCourseById:boolean;
+}
+
+export const useCourseStore = create<CourseStore>((set,get) => ({
     newCourse:null,
     setNewCourse:(newCourse:Course)=>set((state)=>({...state,newCourse})),
     isPublishing:false,
@@ -95,12 +115,32 @@ export const useCourseStore = create<CourseStore>((set) => ({
     },
 
     courses:[],
+    coursePaginationData:null,
+    courseFilters:{
+        category_id: undefined,
+        price_range: [0, 100]
+    },
+    setCourseFilters:(courseFilters:CourseFilter)=>set({courseFilters}),
+    clearCourseFilters:()=>set({courseFilters:{
+        category_id: undefined,
+        price_range: [0, 100]
+    }}),
+    
     isGettingCourses:false,
-    getCourses:async()=>{
+    getCourses:async(page:number=1)=>{
         set({isGettingCourses:true});
+        const filters=get().courseFilters;
         try{
-            const response=await axiosInstance.get('/courses/get-courses');
-            set({courses:response.data.courses});
+            if(filters.category_id || filters.price_range[0] !== 0 || filters.price_range[1] !== 100){
+                const response=await axiosInstance.post(`/courses/get-courses/filtered?page=${page}`,{
+                    category_id:filters.category_id,
+                    price_range:filters.price_range
+                });
+                set({courses:response.data.courses,coursePaginationData:response.data.pagination});
+            }else{
+                const response=await axiosInstance.get(`/courses/get-courses?page=${page}`);
+                set({courses:response.data.courses,coursePaginationData:response.data.pagination});
+            }
             return true;
         }catch(error:any){
             toast.error(error.response?.data?.message || "An error occurred");

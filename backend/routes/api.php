@@ -59,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/live-sessions/student-sessions',[liveSessionsController::class,'getStudentliveSessions'])->name('get-student-live-sessions');
         Route::get('/live-sessions/student-session/{id}',[liveSessionsController::class,'getStudentSessionById'])->name('get-student-session-by-id');
         Route::get('/courses/get-courses',[coursesController::class,'getCourses'])->name('get_courses');
+        Route::post('/courses/get-courses/filtered',[coursesController::class,'getCoursesByFilters'])->name('get_courses_by_filters');
         Route::get('/courses/get-course/{id}',[coursesController::class,'getCourseById'])->name('get-course-by-id');
         Route::post('/courses/enroll',[courseEnrollmentController::class,'createEnrollment'])->name('create-enrollment');
         Route::get('/courses/enrolled-courses-ids',[courseEnrollmentController::class,'getEnrolledCoursesIds'])->name('get-enrolled-courses-ids');

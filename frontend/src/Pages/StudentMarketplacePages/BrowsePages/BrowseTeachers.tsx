@@ -4,7 +4,7 @@ import { Input } from "../../../components/ui/input";
 import useBrowseStore from "../../../store/studentmarketplaceStores/browseStore";
 import { useEffect, useState } from "react";
 import { Skeleton } from "../../../components/ui/skeleton";
-import { NativeSelect, NativeSelectOption } from "../../../components/ui/native-select";
+// import { NativeSelect, NativeSelectOption } from "../../../components/ui/native-select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../../../components/ui/sheet";
 import { Filter } from "lucide-react";
 import TeacherFilterSection from "../../../components/studentMarketplaceComponents/TeacherFilterSection";
@@ -14,7 +14,19 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 
 
 const BrowseTeachers = () => {
-    const {getSubjects,isGettingFilters,subjects,getLanguages,languages,setIsGettingFilters,teachers,getTeachers,isGettingTeachers,teacherPaginationData,clearTeacherFilter}=useBrowseStore();
+    const {
+        getSubjects,
+        isGettingFilters,
+        subjects,
+        getLanguages,
+        languages,
+        setIsGettingFilters,
+        teachers,
+        getTeachers,
+        isGettingTeachers,
+        teacherPaginationData,
+        clearTeacherFilter
+    }=useBrowseStore();
 
     const getFilters=async()=>{
         setIsGettingFilters(true);
@@ -156,7 +168,7 @@ const BrowseTeachers = () => {
                                 />
                             </PaginationItem>
                             {
-                                Array.from({ length: teacherPaginationData?.total }).map((_, i) => (
+                                Array.from({ length: teacherPaginationData?.last_page }).map((_, i) => (
                                     <PaginationItem key={i}>
                                         <PaginationLink 
                                             size="lg"
