@@ -31,6 +31,7 @@ interface CreateCourseStoreState{
     setCourseSections:(courseSections:{title:string,order:number,files:{file:File,title:string,size:number,type:string}[]}[])=>void,
     addCourseSection:(title:string)=>void,
     addFileToSection:(sectionTitle:string,file:File,fileTitle:string,fileSize:number,fileType:string)=>void,
+    removeFileFromSection:(sectionTitle:string,fileTitle:string)=>void,
 
     // clear state
     clearCourseAndSectionData:()=>void,
@@ -81,6 +82,19 @@ const useCreateCourseStore=create<CreateCourseStoreState>((set)=>({
                 ? { ...section, files: [...section.files, {file,title:fileTitle,type:fileType,size:fileSize}]} 
                 : section
         )
+    })),
+
+    removeFileFromSection:(sectionTitle:string,fileTitle:string)=>set((state)=>({
+        ...state,
+        courseSections:state.courseSections.map(section=>{
+            if(section.title===sectionTitle){
+                return {
+                    ...section,
+                    files:section.files.filter(file=>file.title!==fileTitle)
+                };
+            };
+            return section;
+        })
     })),
 
     clearCourseAndSectionData:()=>set((state)=>({...state,courseData:{title:"",teacher_id:0,category_id:0,language:"",description:"",thumbnail:null,price:0}

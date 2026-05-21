@@ -204,7 +204,7 @@ const MessagesLayout=()=>{
                             )
                         })
                     )}
-                    {filteredConversation.length === 0 && (
+                    {filteredConversation.length === 0 && !isGettingConversations && (
                         <div className="flex flex-col items-center justify-center h-full text-center p-6">
                             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                                 <MessageSquare className="h-8 w-8 text-muted-foreground" />

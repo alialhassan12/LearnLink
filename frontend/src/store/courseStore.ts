@@ -24,6 +24,8 @@ interface CourseStore{
     isPublishing:boolean;
     setIsPublishing:(isPublishing:boolean)=>void;
     publishCourse:(data:CoursePublish)=>Promise<boolean>;
+    isSavingDraft:boolean;
+    saveDraftCourse:(data?:CoursePublish)=>Promise<boolean>;
     
     //teacher courses
     teacherCourses:Course[];
@@ -95,6 +97,52 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             return false;
         }finally{
             set({isPublishing:false});
+        }
+    },
+
+    isSavingDraft:false,
+    saveDraftCourse:async(data?:CoursePublish)=>{
+        set({isSavingDraft:true});
+        try{
+            const formData = new FormData();
+            formData.append('category_id', String(data?.category_id));
+            formData.append('title', data?.title);
+            formData.append('description', data?.description);
+            if (data?.thumbnail) {
+                formData.append('thumbnail', data?.thumbnail);
+            }
+            formData.append('language', data?.language);
+            formData.append('price', String(data?.price));
+
+            data?.sections?.forEach((section, index) => {
+                formData.append(`sections[${index}][title]`, section?.title);
+                formData.append(`sections[${index}][order]`, String(section?.order));
+                
+                section?.materials?.forEach((material, mIndex) => {
+                    formData.append(`sections[${index}][materials][${mIndex}][title]`, material?.title);
+                    formData.append(`sections[${index}][materials][${mIndex}][type]`, material?.type);
+                    formData.append(`sections[${index}][materials][${mIndex}][size]`, String(Math.round(material?.size)));
+                    if (material?.file) {
+                        formData.append(`sections[${index}][materials][${mIndex}][file]`, material?.file);
+                    }
+                });
+            });
+
+            const response=await axiosInstance.post('/courses/save-draft', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            set({newCourse:response.data.course});
+            toast.success(response.data.message);
+
+            return true;
+        }catch(error:any){
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        }finally{
+            set({isSavingDraft:false});
         }
     },
 

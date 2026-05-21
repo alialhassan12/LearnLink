@@ -2,12 +2,12 @@ import { useRef, useState } from "react";
 import useCreateCourseStore from "../../../store/createCourseStore";
 import { Card, CardContent, CardHeader } from "../../ui/card";
 import { Button } from "../../ui/button";
-import { ChevronDown, ChevronRight, Folder, Plus, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Folder, Plus, Upload,FolderPlus, Trash } from "lucide-react";
 import { Input } from "../../ui/input";
 import { toast } from "sonner";
 
 const CreateCourseStep2=()=>{
-    const {courseData, courseSections, addCourseSection, addFileToSection}=useCreateCourseStore();
+    const {courseData, courseSections, addCourseSection, addFileToSection,removeFileFromSection}=useCreateCourseStore();
     const [openFolder,setOpenFolder]=useState<boolean>(false);
     const [sectionName,setSectionName]=useState<string>("");
     const [selectedSection,setSelectedSection]=useState<string>("");
@@ -46,6 +46,12 @@ const CreateCourseStep2=()=>{
     const currentSection = courseSections.find(s => s.title === selectedSection);
     const currentFiles = currentSection?.files || [];
 
+    const handleRemoveFile=(fileTitle:string)=>{
+        if(currentSection){
+            removeFileFromSection(selectedSection,fileTitle);
+        }
+    }
+
     return(
         <div className="flex flex-row gap-4 mt-4 mb-4">
             {/* left collapsabile folder creation section */}
@@ -63,7 +69,7 @@ const CreateCourseStep2=()=>{
                         }}
                         className="text-text-weak"
                     >
-                        <Folder/>
+                        <FolderPlus/>
                     </Button>
                 </CardHeader>
                 <CardContent>
@@ -95,6 +101,14 @@ const CreateCourseStep2=()=>{
                                 type="text" 
                                 value={sectionName} 
                                 onChange={(e)=>setSectionName(e.target.value)} 
+                                onKeyDown={(e)=>{
+                                    if(e.key==="Enter"){
+                                        handleAddSection();
+                                    }
+                                    if(e.key==="Escape"){
+                                        setOpenAddSection(false);
+                                    }
+                                }}
                                 placeholder="Section Name"
                                 className="h-8"
                             />
@@ -147,6 +161,16 @@ const CreateCourseStep2=()=>{
                                             <p className="text-text-strong text-sm">{file.title}</p>
                                             <p className="text-text-weak text-sm">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                                             <p className="text-text-weak text-sm">{file.type}</p>
+                                        </div>
+                                        <div>
+                                            <Button 
+                                                variant="ghost" 
+                                                onClick={()=>handleRemoveFile(file.title)}
+                                                size="icon" 
+                                                className="hover:bg-transparent hover:text-destructive cursor-pointer" title="Delete"
+                                            >
+                                                <Trash/>
+                                            </Button>
                                         </div>
                                     </div>
                                 )

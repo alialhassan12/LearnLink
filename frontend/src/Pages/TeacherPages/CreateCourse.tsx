@@ -7,11 +7,16 @@ import useCreateCourseStore from "../../store/createCourseStore";
 import { toast } from "sonner";
 import CreateCourseStep2 from "../../components/teacherDashboardComponents/createCourseSteps/CreateCourseStep2";
 import CreateCourseStep3 from "../../components/teacherDashboardComponents/createCourseSteps/CreateCourseStep3";
+import { useNavigate } from "react-router-dom";
+import { useCourseStore } from "../../store/courseStore";
+import { Spinner } from "../../components/ui/spinner";
 
 
 const CreateCourse=()=>{
     const [stepProgress,setStepProgress]=useState<number>(10);
     const {courseData,courseSections,clearCourseAndSectionData}=useCreateCourseStore();
+    const {isSavingDraft,saveDraftCourse}=useCourseStore();
+    const navigate=useNavigate();
 
     const handleNextStep=()=>{
         if(stepProgress===10){
@@ -37,6 +42,37 @@ const CreateCourse=()=>{
         }
     }
 
+    const handleSaveDraft=async()=>{
+        const data={
+            "category_id":Number(courseData?.category_id || 0),
+            "title":courseData?.title || "untitled-course",
+            "description":courseData?.description || "",
+            "thumbnail":courseData?.thumbnail,
+            "language":courseData?.language || "",
+            "price":Number(courseData?.price || 0),
+            "sections":courseSections?.map(section=>{
+                return({
+                    "title":section?.title,
+                    "order":Number(section?.order),
+                    "materials":section?.files?.map(file=>{
+                        return({
+                            "file":file?.file,
+                            "type":file?.type,
+                            "size":file?.size,
+                            "title":file?.title
+                        });
+                    })
+                });
+            })
+        };
+        const saved=await saveDraftCourse(data);
+        if(saved){
+            clearCourseAndSectionData();
+            navigate("/dashboard/my-courses");
+            toast.success("Course saved successfully");
+        }
+    }
+
     return(
         <div>
             {/* top section */}
@@ -46,8 +82,20 @@ const CreateCourse=()=>{
                     <p className="text-4xl font-bold text-text-strong">Create New Course</p>
                 </div>
                 <div>
-                    <Button variant="outline" className="px-4 h-10 cursor-pointer border-primary">
-                        Save Draft
+                    <Button
+                        disabled={isSavingDraft}
+                        onClick={handleSaveDraft}
+                        variant="outline" 
+                        className="px-4 h-10 cursor-pointer border-primary">
+                        {isSavingDraft 
+                            ?   
+                            <div className="flex items-center gap-2">
+                                <Spinner/>
+                                <p>Saving Draft ...</p>
+                            </div>
+                            :
+                            "Save Draft"
+                        }
                     </Button>
                 </div>
             </div>

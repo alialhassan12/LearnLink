@@ -106,6 +106,100 @@ class coursesController extends Controller
         ],201);
     }
 
+    public function saveDraftCourse(Request $request,SupabaseStorageService $storage){
+        $request->validate([
+            "category_id"=>"nullable|exists:categories,id",
+            "title"=>"nullable|string",
+            "description"=>"nullable|string",
+            "thumbnail"=>"nullable|file|mimes:jpeg,png,jpg,webp|max:5120",
+            "language"=>"nullable|string",
+            "price"=>"nullable|numeric",
+
+            "sections"=>"nullable|array",
+            "sections.*.title"=>"nullable|string",
+            "sections.*.order"=>"nullable|integer",
+
+            "sections.*.materials"=>"nullable|array",
+            "sections.*.materials.*.title"=>"nullable|string",
+            "sections.*.materials.*.type"=>"nullable",
+            "sections.*.materials.*.file"=>"nullable|file",
+            "sections.*.materials.*.size"=>"nullable|integer",
+        ]);
+
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "success"=>false,
+                "message"=>"Unauthenticated",
+            ],401);
+        }
+        $teacher=$user->teacher;
+        if(!$teacher){
+            return response()->json([
+                "success"=>false,
+                "message"=>"You are not authorized to complete this action"
+            ],403);
+        }
+
+        $course=DB::transaction(function () use ($request,$storage,$teacher){
+            $thumbnailPath=null;
+            if($request->hasFile('thumbnail')){
+                $thumbnailPath=$storage->uploadthumbnail(
+                    $request->thumbnail,
+                    $request->title?? "Unknown Title"
+                );
+            }else{
+                $thumbnailPath="/src/assets/default-thumbnail.jfif";
+            }
+
+            $course=Course::create([
+                "teacher_id"=>$teacher->id,
+                "category_id"=>$request->category_id,
+                "title"=>$request->title ?? 'Draft Course',
+                "description"=>$request->description ?? '',
+                "thumbnail"=>$thumbnailPath,
+                "language"=>$request->language ?? 'English',
+                "status"=>"draft",
+                "price"=>$request->price ?? 0,
+            ]);
+
+            if($request->sections){
+                foreach ($request->sections as $sectionData) {
+                    $section=CourseSection::create([
+                        "course_id"=>$course->id,
+                        "title"=>$sectionData['title'],
+                        "order"=>$sectionData['order'],
+                    ]);
+
+                    if($sectionData['materials']){
+                        foreach ($sectionData['materials'] as $materialData) {
+                            $materialPath=$storage->uploadSectionMaterials(
+                                $materialData['file'],
+                                $course->title,
+                                $section->title,
+                                $materialData['title']
+                            );
+
+                            CourseMaterial::create([
+                                "section_id"=>$section->id,
+                                "title"=>$materialData['title'],
+                                "path"=>$materialPath,
+                                "type"=>$materialData['type'],
+                                "size"=>$materialData['size'],
+                            ]);
+                        }
+                    }
+                }
+            }
+            return $course;
+        });
+
+        return response()->json([
+            "message"=>"Course saved as draft successfully",
+            "course"=>$course
+        ],201);
+    }
+
     public function getTeacherCourses(Request $request, SupabaseStorageService $storage){
         $user=$request->user();
         $teacher=$user->teacher;
@@ -142,7 +236,7 @@ class coursesController extends Controller
                 ->with('teacher.user','category')
                 ->where('status','published')
                 ->orderBy('created_at','desc')
-                ->paginate(1)
+                ->paginate(10)
                 ->through(function($course) use ($storage){
                     if($course->thumbnail){
                         $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
@@ -205,7 +299,7 @@ class coursesController extends Controller
             $courses->whereBetween('price',$request->price_range);
         }
 
-        $courses=$courses->paginate(1)
+        $courses=$courses->paginate(10)
             ->through(function($course) use ($storage){
                 if($course->thumbnail){
                     $course->thumbnail=$storage->getPublicUrl($course->thumbnail);

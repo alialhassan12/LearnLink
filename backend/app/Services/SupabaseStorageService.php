@@ -86,6 +86,11 @@ class SupabaseStorageService{
             return $path;
         }
 
+        // If it's a local frontend asset path, return it as is
+        if (str_starts_with($path, '/src')) {
+            return $path;
+        }
+
         $endpoint = config('filesystems.disks.s3.endpoint');
         $bucket = config('filesystems.disks.s3.bucket');
         
@@ -104,6 +109,11 @@ class SupabaseStorageService{
 
         // If it's already a full URL, return it
         if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        // If it's a local frontend asset path, return it as is
+        if (str_starts_with($path, '/src')) {
             return $path;
         }
 
