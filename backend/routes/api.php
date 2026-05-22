@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout',[authController::class,'logout'])->name('logout_user');
     Route::get('/auth/me',[authController::class,'checkAuth'])->name('check_auth');
     Route::get('/categories',[categoriesController::class,'getCategories'])->name('get_categories');
+    Route::get('/courses/course/{id}',[coursesController::class,'getCourseWithMaterialsById'])->name('get-course-with-materials-by-id');
     Route::post('/livekit/token',[liveSessionsController::class,'getToken'])->name('get_livekit_token');
     Route::post('/messages/send',[messageController::class,'send'])->name('send-message');
     Route::get('/messages/conversations',[conversationsController::class,'getConversations'])->name('get-conversations');

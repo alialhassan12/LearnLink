@@ -19,6 +19,7 @@ import SessionView from "./TeacherPages/Sessions/SessionView";
 import SessionRoom from "./SessionRoom";
 import { useLiveSessionStore } from "../store/liveSessionsStore";
 import MessagesLayout from "./MessagesLayout";
+import CourseDetails from "./TeacherPages/CourseDetails";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -61,6 +62,7 @@ const TeacherDashboard=()=>{
                             <Route index element={<MyCourses/>}/>
                             <Route path="create" element={<CreateCourse/>}/>
                             <Route path="published-successful" element={<PublishedSuccessful/>}/>
+                            <Route path="view/:id" element={<CourseDetails/>}></Route>
                         </Route>
                         <Route path="/my-sessions">
                             <Route index element={<MySessions/>}/>

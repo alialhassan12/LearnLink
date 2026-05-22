@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(["student_id","course_id","progress"])]
 class CourseEnrollment extends Model
 {
-    //
-
     //relationship
     public function student(){
         return $this->belongsTo(Student::class);

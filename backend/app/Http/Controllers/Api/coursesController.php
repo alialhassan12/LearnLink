@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\CourseMaterial;
 use App\Models\CourseSection;
 use App\Services\SupabaseStorageService;
+use Illuminate\Contracts\Auth\SupportsBasicAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -259,8 +260,41 @@ class coursesController extends Controller
         ],200);
     }
 
+    public function getCourseWithMaterialsById($id,Request $request,SupabaseStorageService $storage){
+        $course=Course::whereId($id)->with('teacher.user','category','sections.materials','enrollments.student.user')->first();
+        if(!$course){
+            return response()->json([
+                'message'=>'No course found'
+            ],404);
+        }
+
+        if($course->thumbnail){
+            $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+        }
+        if($course->teacher->user->avatar){
+            $course->teacher->user->avatar=$storage->getPublicUrl($course->teacher->user->avatar);
+        }
+
+        if($course->sections){
+            foreach($course->sections as $sectionData){
+                if($sectionData->materials){
+                    foreach($sectionData->materials as $materialData){
+                        if($materialData->path){
+                            $materialData->path=$storage->getTemporaryUrl($materialData->path);
+                        }
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            "message"=>"Course fetched successfully",
+            "course"=>$course
+        ],200);
+    }
+
     public function getCourseById($id,Request $request,SupabaseStorageService $storage){
-        $course=Course::whereId($id)->with('teacher.user','category','sections')->first();
+        $course=Course::whereId($id)->with('teacher.user','category','sections.materials')->first();
         if(!$course){
             return response()->json([
                 'message'=>'No course found'

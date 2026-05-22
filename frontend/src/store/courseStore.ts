@@ -47,6 +47,13 @@ interface CourseStore{
     course:Course | null;
     getCourseById:(id:number)=>Promise<boolean>;
     isGettingCourseById:boolean;
+
+    // course details with its materials
+    // for enrolled students and teachers to view and edit course with its materials
+    courseWithMaterials:Course | null;
+    getCourseWithMaterialsById:(id:number)=>Promise<boolean>;
+    isGettingCourseWithMaterialsById:boolean;
+    
 }
 
 export const useCourseStore = create<CourseStore>((set,get) => ({
@@ -88,7 +95,7 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
                 }
             });
 
-            set({newCourse:response.data.course});
+            set({newCourse:response.data.course,teacherCourses:[...get().teacherCourses,response.data.course]});
             toast.success(response.data.message);
 
             return true;
@@ -134,7 +141,7 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
                 }
             });
 
-            set({newCourse:response.data.course});
+            set({newCourse:response.data.course,teacherCourses:[...get().teacherCourses,response.data.course]});
             toast.success(response.data.message);
 
             return true;
@@ -211,6 +218,23 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             return false;
         }finally{
             set({isGettingCourseById:false});
+        }
+    },
+
+    courseWithMaterials:null,
+    isGettingCourseWithMaterialsById:false,
+    getCourseWithMaterialsById:async(id:number)=>{
+        set({isGettingCourseWithMaterialsById:true});
+        try {
+            const response=await axiosInstance.get(`/courses/course/${id}`);
+            set({courseWithMaterials:response.data.course});
+            console.log(response.data.course);
+            return true;
+        } catch (error:any) {
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        }finally{
+            set({isGettingCourseWithMaterialsById:false});
         }
     }
 }));

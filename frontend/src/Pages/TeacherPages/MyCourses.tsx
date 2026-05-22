@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
@@ -10,6 +10,7 @@ import { Skeleton } from "../../components/ui/skeleton";
 const MyCourses=()=>{
     const {teacherCourses,getTeacherCourses,isGettingTeacherCourses}=useCourseStore();
     const [filterTabs,setFilterTabs]=useState<string>("all");
+    const navigate=useNavigate();
 
     useEffect(()=>{
         if(teacherCourses.length === 0) getTeacherCourses();
@@ -67,7 +68,10 @@ const MyCourses=()=>{
                         ) : (
                             <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
                                 {filteredCourses.map((course)=>(
-                                    <div key={course.id} className="flex flex-col relative rounded-lg overflow-hidden bg-card">
+                                    <div 
+                                        key={course.id} 
+                                        className="flex flex-col relative rounded-lg overflow-hidden bg-card hover:scale-105 hover:border hover:border-primary/50 transition-all duration-300 ease-in-out"
+                                    >
                                         {/* thumbnail section */}
                                         <div className="aspect-video w-full overflow-hidden">
                                             <img src={course.thumbnail} className="w-full h-full object-cover" />
@@ -87,7 +91,13 @@ const MyCourses=()=>{
 
                                             {/* status button and edit course button section */}
                                             <div className="flex flex-row justify-between items-center">
-                                                {course.status==="draft" && (
+                                                <Button  
+                                                    className="h-10 px-4 hover:bg-primary/80 cursor-pointer"
+                                                    onClick={()=>navigate(`/dashboard/my-courses/view/${course.id}`)}
+                                                >
+                                                    View Course
+                                                </Button>
+                                                {/* {course.status==="draft" && (
                                                     <Button className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
                                                         Publish
                                                     </Button>
@@ -96,7 +106,7 @@ const MyCourses=()=>{
                                                     <Button variant="outline" className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
                                                         Unpublish
                                                     </Button>
-                                                )}
+                                                )} */}
                                             </div>
                                         </div>
                                         {/* badge */}

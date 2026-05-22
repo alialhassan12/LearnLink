@@ -155,7 +155,7 @@ class teacherController extends Controller
         $teachers=Teacher::query()
                 ->with('user')
                 ->orderBy('created_at','desc')
-                ->paginate(1)
+                ->paginate(10)
                 ->through(function($teacher) use ($storage){
                     if($teacher->user->avatar){
                         $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);

@@ -1,5 +1,6 @@
 import type { Category } from "./category";
 import type { CourseSection } from "./course_section";
+import type { Enrollment } from "./enrollment";
 import type { Teacher } from "./teacher";
 
 export interface Course{
@@ -19,4 +20,5 @@ export interface Course{
     category?:Category,
     teacher?:Teacher,
     sections?:CourseSection[],
+    enrollments?:Enrollment[],
 }

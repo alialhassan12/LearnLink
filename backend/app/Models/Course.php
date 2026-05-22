@@ -19,6 +19,10 @@ class Course extends Model
     }
 
     public function sections(){
-        return $this->hasMany(CourseSection::class);
+        return $this->hasMany(CourseSection::class)->orderBy('order','asc');
+    }
+
+    public function enrollments(){
+        return $this->hasMany(CourseEnrollment::class);
     }
 }
