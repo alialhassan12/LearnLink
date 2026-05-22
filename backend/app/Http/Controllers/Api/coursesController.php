@@ -201,6 +201,169 @@ class coursesController extends Controller
         ],201);
     }
 
+    public function editCourse(Request $request, SupabaseStorageService $storage)
+    {
+        $request->validate([
+            "course_id" => "required|exists:courses,id",
+            "category_id" => "required|exists:categories,id",
+            "title" => "required|string",
+            "description" => "required|string",
+            "thumbnail" => "nullable|file|mimes:jpeg,png,jpg,webp|max:5120",
+            "language" => "required|string",
+            "price" => "required|numeric",
+
+            "sections" => "nullable|array",
+            "sections.*.id" => "nullable",
+            "sections.*.title" => "required|string",
+            "sections.*.order" => "required|integer",
+
+            "sections.*.materials" => "nullable|array",
+            "sections.*.materials.*.id" => "nullable",
+            "sections.*.materials.*.title" => "required|string",
+            "sections.*.materials.*.type" => "required",
+            "sections.*.materials.*.file" => "nullable|file",
+            "sections.*.materials.*.size" => "nullable|integer",
+        ]);
+
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                "message" => "Unauthenticated"
+            ], 401);
+        }
+
+        $teacher = $user->teacher;
+        if (!$teacher) {
+            return response()->json([
+                "message" => "Unauthorized Access"
+            ], 403);
+        }
+
+        $course = Course::where('id', $request->course_id)
+            ->where('teacher_id', $teacher->id)
+            ->first();
+
+        if (!$course) {
+            return response()->json([
+                "message" => "Course not found or unauthorized to edit"
+            ], 404);
+        }
+
+        $updatedCourse = DB::transaction(function () use ($request, $storage, $course) {
+            if ($request->hasFile('thumbnail')) {
+                $thumbnailPath = $storage->uploadThumbnail(
+                    $request->file('thumbnail'),
+                    $request->title ?? 'Unknown Title'
+                );
+                $course->thumbnail = $thumbnailPath;
+            }
+
+            $course->category_id = $request->category_id;
+            $course->title = $request->title;
+            $course->description = $request->description;
+            $course->language = $request->language;
+            $course->price = $request->price;
+            $course->save();
+
+            $providedSectionIds = [];
+
+            if ($request->sections) {
+                foreach ($request->sections as $sectionData) {
+                    $section = null;
+
+                    if (isset($sectionData['id']) && $sectionData['id']) {
+                        $section = CourseSection::where('id', $sectionData['id'])
+                            ->where('course_id', $course->id)
+                            ->first();
+                    }
+
+                    if ($section) {
+                        $section->update([
+                            'title' => $sectionData['title'],
+                            'order' => $sectionData['order'],
+                        ]);
+                    } else {
+                        $section = CourseSection::create([
+                            'course_id' => $course->id,
+                            'title' => $sectionData['title'],
+                            'order' => $sectionData['order'],
+                        ]);
+                    }
+
+                    $providedSectionIds[] = $section->id;
+                    $providedMaterialIds = [];
+
+                    if (isset($sectionData['materials'])) {
+                        foreach ($sectionData['materials'] as $materialData) {
+                            $material = null;
+
+                            if (isset($materialData['id']) && $materialData['id']) {
+                                $material = CourseMaterial::where('id', $materialData['id'])
+                                    ->where('section_id', $section->id)
+                                    ->first();
+                            }
+
+                            if ($material) {
+                                $material->title = $materialData['title'];
+                                $material->type = $materialData['type'];
+                                if (isset($materialData['size'])) {
+                                    $material->size = $materialData['size'];
+                                }
+
+                                if (isset($materialData['file']) && $materialData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                                    $materialPath = $storage->uploadSectionMaterials(
+                                        $materialData['file'],
+                                        $course->title,
+                                        $section->title,
+                                        $materialData['title']
+                                    );
+                                    $material->path = $materialPath;
+                                }
+                                $material->save();
+                            } else {
+                                $materialPath = null;
+                                if (isset($materialData['file']) && $materialData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                                    $materialPath = $storage->uploadSectionMaterials(
+                                        $materialData['file'],
+                                        $course->title,
+                                        $section->title,
+                                        $materialData['title']
+                                    );
+                                }
+
+                                $material = CourseMaterial::create([
+                                    "section_id" => $section->id,
+                                    "title" => $materialData['title'],
+                                    "type" => $materialData['type'],
+                                    "path" => $materialPath ?? '',
+                                    "size" => $materialData['size'] ?? 0,
+                                ]);
+                            }
+                            $providedMaterialIds[] = $material->id;
+                        }
+                    }
+
+                    // Delete materials not included in the request
+                    CourseMaterial::where('section_id', $section->id)
+                        ->whereNotIn('id', $providedMaterialIds)
+                        ->delete();
+                }
+            }
+
+            // Delete sections not included in the request
+            CourseSection::where('course_id', $course->id)
+                ->whereNotIn('id', $providedSectionIds)
+                ->delete();
+
+            return $course->load('sections.materials');
+        });
+
+        return response()->json([
+            "message" => "Course updated successfully",
+            "course" => $updatedCourse
+        ], 200);
+    }
+
     public function getTeacherCourses(Request $request, SupabaseStorageService $storage){
         $user=$request->user();
         $teacher=$user->teacher;

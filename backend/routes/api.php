@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/teacher/update-profile',[teacherController::class,'teacherUpdate'])->name('teacher_update');
         Route::post('/courses/create-course',[coursesController::class,'createCourse'])->name('create_course');
         Route::post('/courses/save-draft',[coursesController::class,'saveDraftCourse'])->name('save-draft-course');
+        Route::put('/courses/edit-course',[coursesController::class,'editCourse'])->name('edit-course');
         Route::get('/courses/my-courses',[coursesController::class,'getTeacherCourses'])->name('get_teacher_courses');
         Route::get('/bookings/teacher-bookings',[bookingsController::class,'getTeacherBookings'])->name('get-teacher-bookings');
         Route::post('/bookings/reject-booking',[bookingsController::class,'rejectBooking'])->name('reject-booking');

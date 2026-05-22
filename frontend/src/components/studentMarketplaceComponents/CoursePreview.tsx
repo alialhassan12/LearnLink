@@ -1,5 +1,5 @@
 import type { Course } from "../../@types/course";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader } from "../ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
