@@ -28,6 +28,8 @@ interface CourseStore{
     saveDraftCourse:(data?:CoursePublish)=>Promise<boolean>;
     isEditingCourse:boolean;
     editCourse:(course_id:number,data:Course)=>Promise<boolean>;
+    isChangingCourseStatus:boolean;
+    changeCourseStatus:(status:string,course_id:number)=>Promise<boolean>;
     
     //teacher courses
     teacherCourses:Course[];
@@ -287,6 +289,24 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             return false;
         } finally{
             set({isEditingCourse:false});
+        }
+    },
+
+    isChangingCourseStatus:false,
+    changeCourseStatus:async(status:string,course_id:number)=>{
+        set({isChangingCourseStatus:true});
+        try {
+            const response=await axiosInstance.post('/courses/change-course-status',{course_id,status});
+            set({
+                teacherCourses:get().teacherCourses.map((course)=>course.id===course_id?response.data.course:course)
+            });
+            toast.success(response.data.message);
+            return true;
+        } catch (error:any) {
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        }finally{
+            set({isChangingCourseStatus:false});
         }
     }
 }));

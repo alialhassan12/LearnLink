@@ -6,10 +6,18 @@ import { ChevronDown, Eye, Pencil, Shredder, Upload, Users } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../components/ui/collapsible";
 import { Skeleton } from "../../components/ui/skeleton";
 import CoursePreview from "../../components/teacherDashboardComponents/CoursePreview";
+import { Spinner } from "../../components/ui/spinner";
 
 const CourseDetails = () => {
     const {id}=useParams();
-    const {courseWithMaterials,getCourseWithMaterialsById,isGettingCourseWithMaterialsById}=useCourseStore();
+    const {
+        courseWithMaterials,
+        getCourseWithMaterialsById,
+        isGettingCourseWithMaterialsById,
+        changeCourseStatus,
+        isChangingCourseStatus
+    }=useCourseStore();
+
     const [openCoursePreview,setOpenCoursePreview]=useState(false);
     const navigate=useNavigate();
 
@@ -72,16 +80,42 @@ const CourseDetails = () => {
                                 courseWithMaterials?.status==="draft"?(
                                     <Button
                                         variant="outline"
+                                        onClick={async()=>{
+                                            await changeCourseStatus("published",Number(id));
+                                            navigate(-1);
+                                        }}
+                                        disabled={isChangingCourseStatus}
                                         className="h-[48px] md:h-[100px] cursor-pointer flex items-center justify-center bg-card shadow-sm"
                                     >
-                                        <Upload className="w-4 h-4"/> <span className="text-sm font-medium ml-2">Publish Course</span>
+                                        {isChangingCourseStatus?
+                                            <>
+                                                <Spinner/> <span className="text-sm font-medium ml-2">Publishing...</span>
+                                            </>
+                                            :
+                                            <>
+                                                <Upload className="w-4 h-4"/> <span className="text-sm font-medium ml-2">Publish Course</span>
+                                            </>
+                                        }
                                     </Button>
                                 ):(
                                     <Button
                                         variant="outline"
+                                        onClick={async()=>{
+                                            await changeCourseStatus("draft",Number(id));
+                                            navigate(-1);
+                                        }}
+                                        disabled={isChangingCourseStatus}
                                         className="h-[48px] md:h-[100px] cursor-pointer flex items-center justify-center bg-card shadow-sm"
                                     >
-                                        <Shredder className="w-4 h-4"/> <span className="text-sm font-medium ml-2">Unpublish Course</span>
+                                        {isChangingCourseStatus?
+                                            <>
+                                                <Spinner/> <span className="text-sm font-medium ml-2">Unpublishing...</span>
+                                            </>
+                                            :
+                                            <>
+                                                <Shredder className="w-4 h-4"/> <span className="text-sm font-medium ml-2">Unpublish Course</span>
+                                            </>
+                                        }
                                     </Button>
                                 )
                             }

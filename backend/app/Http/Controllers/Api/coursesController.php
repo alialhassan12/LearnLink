@@ -518,4 +518,48 @@ class coursesController extends Controller
             ]
         ],200);
     }
+
+    public function changeCourseStatus(Request $request,SupabaseStorageService $storage){
+        $request->validate([
+            "course_id"=>"required|exists:courses,id",
+            "status"=>"required|in:published,draft"
+        ]);
+
+        $user=$request->user();
+
+        if(!$user || !$user->teacher){
+            return response()->json([
+                "success"=>false,
+                "message"=>"Unauthorized Access"
+            ],403);
+        }
+
+        $course=$user->teacher->courses()->whereId($request->course_id)->first();
+        if(!$course){
+            return response()->json([
+                "success"=>false,
+                "message"=>"No Course Found"
+            ],404);
+        }
+
+        if($course->status==$request->status){
+            return response()->json([
+                "success"=>false,
+                "message"=>"Course is already {$request->status}"
+            ],400);
+        }
+        $course->update([
+            "status"=>$request->status
+        ]);
+
+        if($course->thumbnail){
+            $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+        }
+
+        return response()->json([
+            "success"=>true,
+            "message"=>"Course {$request->status} successfully",
+            "course"=>$course
+        ],200);
+    }
 }

@@ -17,7 +17,13 @@ import { Skeleton } from "../../components/ui/skeleton";
 
 const EditCourse=()=>{
     const {id}=useParams();
-    const {editCourse,isEditingCourse,courseWithMaterials,isGettingCourseWithMaterialsById,getCourseWithMaterialsById}=useCourseStore();
+    const {
+        editCourse,
+        isEditingCourse,
+        courseWithMaterials,
+        isGettingCourseWithMaterialsById,
+        getCourseWithMaterialsById,
+    }=useCourseStore();
     const {categories,getCategories,isGettingCategories}=useCategoryStore();
     const [openAddSection,setOpenAddSection]=useState<boolean>(false);
     const [formData,setFormData]=useState<Course|null>(null);
