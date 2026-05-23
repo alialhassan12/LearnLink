@@ -22,7 +22,7 @@ const CoursePreview = ({course,open,setOpen}:{course:Course,open:boolean,setOpen
                 <div className="flex flex-col rounded-xl overflow-hidden border border-border">
                     {/* course image */}
                     <div className="w-full bg-bg-1 overflow-hidden">
-                        <img src={course?.thumbnail} alt={course?.title} className="object-cover"/>
+                        <img src={course?.thumbnail instanceof File?URL.createObjectURL(course?.thumbnail):course?.thumbnail} alt={course?.title} className="object-cover"/>
                     </div>
                     {/* course info */}
                     <div className="flex flex-col gap-2 p-4">

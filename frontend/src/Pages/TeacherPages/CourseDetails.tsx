@@ -1,16 +1,17 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCourseStore } from "../../store/courseStore";
 import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { ChevronDown, Eye, Pencil, Shredder, Upload, Users } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../components/ui/collapsible";
 import { Skeleton } from "../../components/ui/skeleton";
-import CoursePreview from "../../components/studentMarketplaceComponents/CoursePreview";
+import CoursePreview from "../../components/teacherDashboardComponents/CoursePreview";
 
 const CourseDetails = () => {
     const {id}=useParams();
     const {courseWithMaterials,getCourseWithMaterialsById,isGettingCourseWithMaterialsById}=useCourseStore();
     const [openCoursePreview,setOpenCoursePreview]=useState(false);
+    const navigate=useNavigate();
 
     useEffect(()=>{
         if(id) getCourseWithMaterialsById(Number(id));
@@ -62,6 +63,7 @@ const CourseDetails = () => {
                             </Button>
                             <Button
                                 variant="outline"
+                                onClick={()=>navigate(`/dashboard/my-courses/edit/${id}`)}
                                 className="h-[48px] md:h-[100px] cursor-pointer flex items-center justify-center bg-card shadow-sm"
                             >
                                 <Pencil className="w-4 h-4"/> <span className="text-sm font-medium ml-2">Edit Course</span>

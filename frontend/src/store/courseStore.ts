@@ -26,6 +26,8 @@ interface CourseStore{
     publishCourse:(data:CoursePublish)=>Promise<boolean>;
     isSavingDraft:boolean;
     saveDraftCourse:(data?:CoursePublish)=>Promise<boolean>;
+    isEditingCourse:boolean;
+    editCourse:(course_id:number,data:Course)=>Promise<boolean>;
     
     //teacher courses
     teacherCourses:Course[];
@@ -235,6 +237,56 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             return false;
         }finally{
             set({isGettingCourseWithMaterialsById:false});
+        }
+    },
+
+    isEditingCourse:false,
+    editCourse:async(course_id:number,data:Course)=>{
+        set({isEditingCourse:true});
+        try {
+            const formData =new FormData();
+            formData.append('course_id',String(course_id));
+            formData.append('category_id',String(data.category_id));
+            formData.append('title',data.title);
+            formData.append('description',data.description);
+            
+            if(data.thumbnail){
+                formData.append('thumbnail',data.thumbnail);
+            }
+            formData.append('language',data.language);
+            formData.append('price',String(data.price));
+            data?.sections?.forEach((section, index) => {
+                formData.append(`sections[${index}][title]`, section?.title);
+                formData.append(`sections[${index}][order]`, String(section?.order));
+                
+                section?.materials?.forEach((material, mIndex) => {
+                    formData.append(`sections[${index}][materials][${mIndex}][title]`, material?.title);
+                    formData.append(`sections[${index}][materials][${mIndex}][type]`, material?.type);
+                    formData.append(`sections[${index}][materials][${mIndex}][size]`, String(Math.round(material?.size)));
+                    if (material?.file) {
+                        formData.append(`sections[${index}][materials][${mIndex}][file]`, material?.file);
+                    }
+                });
+            });
+
+            const response=await axiosInstance.put('/courses/edit-course', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            set({
+                newCourse:response.data.course,
+                teacherCourses:get().teacherCourses.map((course)=>course.id===course_id?response.data.course:course)
+            });
+            toast.success(response.data.message);
+
+            return true;
+        } catch (error:any) {
+            toast.error(error.response?.data?.message || "An error occurred");
+            return false;
+        } finally{
+            set({isEditingCourse:false});
         }
     }
 }));
