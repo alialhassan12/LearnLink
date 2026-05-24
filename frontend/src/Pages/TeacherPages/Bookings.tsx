@@ -130,11 +130,11 @@ const Bookings = () => {
                     <TabsTrigger value="rejected">Rejected</TabsTrigger>
                 </TabsList>
                 {/* booking list */}
-                <div className="mt-6 space-y-4">
-                    {filteredBookings.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                    {filteredBookings.length > 0 && (
                         filteredBookings.map((booking) => {
                             return (
-                                <div key={booking.id} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-background border border-border/60 rounded-xl hover:shadow-md transition-all duration-200 gap-4 group">
+                                <div key={booking.id} className=" flex flex-col gap-2  bg-background border border-border/60 rounded-xl hover:shadow-md transition-all duration-200 p-4 group">
                                     <div className="flex items-center gap-4 w-full md:w-auto">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
                                             <AvatarImage src={booking.student.user?.avatar} />
@@ -144,22 +144,11 @@ const Bookings = () => {
                                         </Avatar>
                                         <div className="flex flex-col">
                                             <h2 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{booking.student.user.name}</h2>
-                                            <div className="flex items-center gap-3 mt-1">
-                                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
-                                                    <Calendar className="w-3.5 h-3.5" />
-                                                    <span>{booking.scheduled_day} | {booking.scheduled_date}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
-                                                    <Clock className="w-3.5 h-3.5" />
-                                                    <span>{booking.scheduled_time}</span>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
-
-                                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-2 md:gap-1">
+                                    <div className="flex flex-row md:flex-col justify-between w-full md:w-auto gap-2 md:gap-1">
                                         <div className="text-xl font-bold text-foreground">${booking.price}</div>
-                                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${
+                                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider w-fit ${
                                             booking.status === 'approved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
                                             booking.status === 'rejected' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
                                             'bg-amber-100 text-amber-700 border border-amber-200'
@@ -167,19 +156,42 @@ const Bookings = () => {
                                             {booking.status}
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center gap-2 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-border/40">
+                                    {/* subject */}
+                                    <div className="flex items-center gap-1 w-full md:w-auto">
+                                        <p className="text-muted-foreground">Subject:</p>
+                                        <span className="text-foreground font-semibold">{booking.subject}</span>
+                                    </div>
+                                    {/* date time */}
+                                    <div className="flex flex-col">
+                                        <div className="flex flex-wrap items-center gap-3 mt-1">
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
+                                                <Calendar className="w-3.5 h-3.5" />
+                                                <span>{booking.scheduled_day} | {booking.scheduled_date}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
+                                                <Clock className="w-3.5 h-3.5" />
+                                                <span>{booking.scheduled_time}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* student note */}
+                                    <div className="flex flex-col w-full">
+                                        <p className="text-muted-foreground">Note:</p>
+                                        <span className="text-foreground text-sm line-clamp-2">{booking.student_note || 'No note'}</span>
+                                    </div>
+                                    <Separator/>
+                                    {/* action buttons */}
+                                    <div className="flex flex-col w-full">
                                         {booking.status === 'pending' && (
-                                            <>
-                                                <Button 
-                                                    variant="default" 
-                                                    size="sm" 
-                                                    className="flex-1 md:flex-none bg-primary hover:bg-primary/90 text-white h-9"
-                                                    disabled={isApprovingBooking}
-                                                    onClick={()=>{
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
                                                         setSelectedBooking(booking.id);
-                                                        handleApproveBooking(booking.id);
+                                                        handleApproveBooking(booking.id)
                                                     }}
+                                                    className="flex-1 cursor-pointer"
                                                 >
                                                     {isApprovingBooking && selectedBooking === booking.id ?(  
                                                         <>
@@ -193,15 +205,13 @@ const Bookings = () => {
                                                         </>
                                                     }
                                                 </Button>
-                                                <Button 
-                                                    variant="outline" 
-                                                    size="sm" 
-                                                    className="flex-1 md:flex-none border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-9"
-                                                    disabled={isRejectingBooking}
-                                                    onClick={()=>{
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() => {
                                                         setSelectedBooking(booking.id);
-                                                        handleRejectBooking(booking.id);
-                                                    }}
+                                                        handleRejectBooking(booking.id)}}
+                                                    className="flex-1 cursor-pointer"
                                                 >
                                                     {isRejectingBooking && selectedBooking === booking.id ?(  
                                                         <>
@@ -215,25 +225,31 @@ const Bookings = () => {
                                                         </>
                                                     }
                                                 </Button>
-                                            </>
+                                            </div>
                                         )}
+                                        {/* message btn */}
                                         <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 ml-auto md:ml-0"
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="h-10 w-full mt-2 text-muted-foreground hover:text-primary hover:bg-primary/10 ml-auto md:ml-0 cursor-pointer"
                                             onClick={()=>handleSendMessage(booking.student.user as user)}
                                         >
-                                            <MessageSquare className="w-5 h-5" />
+                                            <div className="flex w-full items-center justify-center gap-2">
+                                                <MessageSquare  /> 
+                                                <p>Message</p>
+                                            </div>
                                         </Button>
                                     </div>
                                 </div>
                             );
                         })
-                    ) : (
-                        <div className="text-center py-12 border border-dashed border-border rounded-xl">
+                    )}
+                    {
+                        filteredBookings.length===0 &&
+                        <div className=" text-center py-12 border border-dashed border-border rounded-xl col-span-full">
                             <p className="text-muted-foreground font-medium">No bookings found for this filter.</p>
                         </div>
-                    )}
+                    }
                 </div>
             </Tabs>
         </div>
@@ -290,31 +306,58 @@ const SkeletonBookingState = () => {
             
             <div className="h-10 w-64 bg-secondary rounded-md"></div>
 
-            <div className="space-y-4">
-                {/* Skeleton for each booking card */}
-                {[...Array(4)].map((_, index) => (
+            {/* Skeleton for bookings grid */}
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, index) => (
                     <div
                         key={index}
-                        className="bg-background rounded-xl border border-border/60 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                        className="flex flex-col gap-2 bg-background border border-border/60 rounded-xl p-4"
                     >
+                        {/* Student Avatar & Name */}
                         <div className="flex items-center gap-4 w-full md:w-auto">
-                            <div className="w-12 h-12 rounded-full bg-secondary"></div>
-                            <div className="space-y-2">
+                            <div className="h-12 w-12 rounded-full bg-secondary"></div>
+                            <div className="flex flex-col gap-1">
                                 <div className="h-5 bg-secondary rounded w-32"></div>
-                                <div className="flex gap-2">
-                                    <div className="h-4 bg-secondary rounded w-20"></div>
-                                    <div className="h-4 bg-secondary rounded w-20"></div>
-                                </div>
                             </div>
                         </div>
-                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-2">
+                        {/* Price and Status Badge */}
+                        <div className="flex flex-row md:flex-col justify-between w-full md:w-auto gap-2 md:gap-1">
                             <div className="h-6 bg-secondary rounded w-16"></div>
-                            <div className="h-4 bg-secondary rounded w-20"></div>
+                            <div className="h-5 bg-secondary rounded w-20"></div>
                         </div>
-                        <div className="flex items-center gap-2 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-border/40">
-                            <div className="h-9 bg-secondary rounded w-24"></div>
-                            <div className="h-9 bg-secondary rounded w-24"></div>
-                            <div className="h-9 w-9 bg-secondary rounded-md ml-auto md:ml-0"></div>
+                        {/* Subject */}
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                            <div className="h-4 bg-secondary rounded w-14"></div>
+                            <div className="h-4 bg-secondary rounded w-24"></div>
+                        </div>
+                        {/* Date and Time slots */}
+                        <div className="flex flex-col">
+                            <div className="flex flex-wrap items-center gap-3 mt-1">
+                                <div className="h-6 bg-secondary rounded-md w-28"></div>
+                                <div className="h-6 bg-secondary rounded-md w-20"></div>
+                            </div>
+                        </div>
+                        {/* Note */}
+                        <div className="flex flex-col w-full gap-1">
+                            <div className="h-4 bg-secondary rounded w-10"></div>
+                            <div className="h-4 bg-secondary rounded w-full"></div>
+                        </div>
+                        <Separator />
+                        {/* Action buttons (simulating Approve/Reject and Message buttons) */}
+                        <div className="flex flex-col w-full gap-2">
+                            {index % 2 === 0 ? (
+                                // Simulate a pending booking (with action buttons + message button)
+                                <>
+                                    <div className="flex gap-2">
+                                        <div className="h-9 bg-secondary rounded flex-1"></div>
+                                        <div className="h-9 bg-secondary rounded flex-1"></div>
+                                    </div>
+                                    <div className="h-10 bg-secondary rounded w-full"></div>
+                                </>
+                            ) : (
+                                // Simulate approved/rejected booking (only message button)
+                                <div className="h-10 bg-secondary rounded w-full"></div>
+                            )}
                         </div>
                     </div>
                 ))}

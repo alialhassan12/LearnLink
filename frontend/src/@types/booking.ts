@@ -8,6 +8,8 @@ export interface Booking{
     scheduled_day:string;
     scheduled_date:string;
     scheduled_time:string;
+    subject:string;
+    student_note?:string;
     price:number;
     status?:string;
     created_at?:string;

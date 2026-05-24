@@ -173,7 +173,10 @@ const MyBookings = () => {
                                         </div>
                                         <div className="space-y-1">
                                             <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                                                {booking.teacher?.name}
+                                                {booking.teacher?.user.name}
+                                            </h3>
+                                            <h3 className="text-lg">
+                                                Subject: <span className="text-primary font-semibold">{booking.subject}</span>
                                             </h3>
                                             <div className="flex flex-wrap items-center gap-3">
                                                 <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground bg-secondary/40 px-2.5 py-1 rounded-lg">

@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
 import { useLiveSessionStore } from "../../../store/liveSessionsStore";
-import { Calendar, Clock, ClockCheck, Video } from "lucide-react";
+import { Calendar, Clock, ClockCheck, Video, MessageSquare } from "lucide-react";
 import { Separator } from "../../../components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { Button } from "../../../components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useChatStore } from "../../../store/chatStore";
+import useAuthStore from "../../../store/authStore";
+import type { Conversation } from "../../../@types/conversation";
+import type { user } from "../../../@types/user";
 
 const MySessions = () => {
+    const { authUser } = useAuthStore();
+    const { conversations, setActiveConversation, addConversation, getMessages } = useChatStore();
     const { getTeacherLiveSessions, teacherLiveSessions, isGettingTeacherLiveSessions } = useLiveSessionStore();
     const [filterTabs, setFilterTabs] = useState<string>("all");
     const filteredSessions = teacherLiveSessions.filter((session) => filterTabs === "all" || filterTabs === session.status);
-    const navigate=useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         getTeacherLiveSessions();
@@ -38,6 +44,50 @@ const MySessions = () => {
             icon: Calendar
         }
     ];
+
+    const handleSendMessage = async (user: user) => {
+        // check if conversation exist
+        const conversation = conversations.find((c) => c.participants?.some((p) => p.user_id === user.id));
+        if (conversation) {
+            setActiveConversation(conversation);
+            getMessages(conversation.id);
+            navigate('/dashboard/chat');
+            return;
+        }
+        const newConversationId = conversations.length + 1;
+
+        const newConversation: Conversation = {
+            id: newConversationId,
+            type: 'direct',
+            participants: [
+                {
+                    id: 0,
+                    user_id: user.id,
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        avatar: user.avatar,
+                        role: 'student'
+                    }
+                },
+                {
+                    id: 1,
+                    user_id: authUser!.id,
+                    user: {
+                        id: authUser!.id,
+                        name: authUser!.name,
+                        email: authUser!.email,
+                        avatar: authUser!.avatar,
+                        role: authUser!.role as 'student' | 'teacher'
+                    }
+                }
+            ]
+        }
+        setActiveConversation(newConversation);
+        addConversation(newConversation);
+        navigate('/dashboard/chat');
+    };
 
     if (isGettingTeacherLiveSessions) {
         return <MySessionsSkeleton />;
@@ -66,66 +116,97 @@ const MySessions = () => {
 
             {/* live sessions list */}
             <Tabs defaultValue={filterTabs} onValueChange={(value) => setFilterTabs(value)}>
-                <TabsList className="w-full sm:w-auto flex flex-wrap h-auto justify-start bg-transparent p-0 gap-2 mb-6">
-                    <TabsTrigger value="all" className="px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border rounded-lg transition-all">All Sessions</TabsTrigger>
-                    <TabsTrigger value="booked" className="px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border rounded-lg transition-all">Upcoming</TabsTrigger>
-                    <TabsTrigger value="completed" className="px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border rounded-lg transition-all">Completed</TabsTrigger>
-                    <TabsTrigger value="cancelled" className="px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border rounded-lg transition-all">Cancelled</TabsTrigger>
+                <TabsList>
+                    <TabsTrigger value="all">All Sessions</TabsTrigger>
+                    <TabsTrigger value="booked">Upcoming</TabsTrigger>
+                    <TabsTrigger value="completed">Completed</TabsTrigger>
+                    <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                 </TabsList>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
                     {filteredSessions.length > 0 ? (
                         filteredSessions.map((session) => {
                             return (
-                                <div key={session.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card rounded-xl p-5 border border-border/60 hover:border-primary hover:shadow-md transition-all duration-300">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="w-12 h-12 border-2 border-primary/10">
-                                                <AvatarImage src={session.student?.user?.avatar} />
-                                                <AvatarFallback className="bg-primary/5 text-primary font-semibold text-lg">{session.student?.user?.name ? session.student.user.name[0] : 'S'}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="text-foreground font-semibold text-lg">{session.student?.user?.name}</p>
-                                                <div className="flex items-center gap-2 mt-0.5">
-                                                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-                                                        session.status === 'booked' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                                                        session.status === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                                        'bg-rose-100 text-rose-700 border border-rose-200'
-                                                    }`}>
-                                                        {session.status}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                <div key={session.id} className="flex flex-col gap-2 bg-background border border-border/60 rounded-xl hover:shadow-md transition-all duration-200 p-4 group">
+                                    {/* Student Avatar & Name */}
+                                    <div className="flex items-center gap-4 w-full md:w-auto">
+                                        <Avatar className="h-12 w-12 border-2 border-primary/10">
+                                            <AvatarImage src={session.student?.user?.avatar} />
+                                            <AvatarFallback className="bg-primary/5 text-primary font-semibold">
+                                                {session.student?.user?.name ? session.student.user.name[0].toUpperCase() : 'S'}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col">
+                                            <h2 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{session.student?.user?.name}</h2>
                                         </div>
-                                        
-                                        <Separator orientation="vertical" className="hidden sm:block h-10 mx-2" />
-                                        
-                                        <div className="flex flex-col gap-1.5">
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Calendar className="w-4 h-4 text-primary/70" />
-                                                <span>{new Date(session.scheduled_date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                    </div>
+
+                                    {/* Status Badge */}
+                                    <div className="flex flex-row md:flex-col justify-between w-full md:w-auto gap-2 md:gap-1">
+                                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider w-fit ${
+                                            session.status === 'booked' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                            session.status === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                            'bg-rose-100 text-rose-700 border border-rose-200'
+                                        }`}>
+                                            {session.status}
+                                        </div>
+                                    </div>
+
+                                    {/* Subject */}
+                                    <div className="flex items-center gap-1 w-full md:w-auto">
+                                        <p className="text-muted-foreground">Subject:</p>
+                                        <span className="text-foreground font-semibold">{session.subject || 'N/A'}</span>
+                                    </div>
+
+                                    {/* Date & Time */}
+                                    <div className="flex flex-col">
+                                        <div className="flex flex-wrap items-center gap-3 mt-1">
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
+                                                <Calendar className="w-3.5 h-3.5" />
+                                                <span>{session.scheduled_day} | {session.scheduled_date}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Clock className="w-4 h-4 text-primary/70" />
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded-md">
+                                                <Clock className="w-3.5 h-3.5" />
                                                 <span>{session.scheduled_time}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
+                                    {/* Student Note */}
+                                    <div className="flex flex-col w-full">
+                                        <p className="text-muted-foreground">Note:</p>
+                                        <span className="text-foreground text-sm line-clamp-2">{session.student_note || 'No note'}</span>
+                                    </div>
+
+                                    <Separator />
+
+                                    {/* Action Buttons */}
+                                    <div className="flex flex-col w-full gap-2">
                                         <Button
-                                            onClick={()=>navigate(`/dashboard/my-sessions/view/${session?.id}`)}
-                                            className="flex-1 md:flex-none bg-primary hover:bg-primary/90 text-white shadow-sm transition-all hover:scale-[1.02]">
+                                            onClick={() => navigate(`/dashboard/my-sessions/view/${session?.id}`)}
+                                            className="w-full bg-primary hover:bg-primary/90 text-white shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
+                                        >
                                             <Video className="w-4 h-4 mr-2" />
-                                            {session.status=="booked"? "Start Session": "View Session"}
+                                            {session.status == "booked" ? "Start Session" : "View Session"}
+                                        </Button>
+
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="h-10 w-full text-muted-foreground hover:text-primary hover:bg-primary/10 cursor-pointer"
+                                            onClick={() => handleSendMessage(session.student?.user as user)}
+                                        >
+                                            <div className="flex w-full items-center justify-center gap-2">
+                                                <MessageSquare className="w-4 h-4" /> 
+                                                <p>Message</p>
+                                            </div>
                                         </Button>
                                     </div>
                                 </div>
                             );
                         })
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-20 bg-muted/5 rounded-xl border border-dashed border-border">
-                            <Calendar className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                        <div className="text-center py-12 border border-dashed border-border rounded-xl col-span-full">
                             <p className="text-muted-foreground font-medium">No sessions found for this category</p>
                         </div>
                     )}
@@ -158,23 +239,46 @@ const MySessionsSkeleton = () => {
                 ))}
             </div>
             
-            <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card rounded-xl p-5 border border-border/60">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="flex items-center gap-3">
-                                <Skeleton className="w-12 h-12 rounded-full" />
-                                <div className="space-y-2">
-                                    <Skeleton className="w-32 h-5" />
-                                    <Skeleton className="w-20 h-4 rounded-full" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Skeleton className="w-48 h-4" />
-                                <Skeleton className="w-32 h-4" />
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, index) => (
+                    <div
+                        key={index}
+                        className="flex flex-col gap-2 bg-background border border-border/60 rounded-xl p-4"
+                    >
+                        {/* Student Avatar & Name */}
+                        <div className="flex items-center gap-4 w-full md:w-auto">
+                            <Skeleton className="h-12 w-12 rounded-full" />
+                            <div className="flex flex-col gap-1">
+                                <Skeleton className="h-5 rounded w-32" />
                             </div>
                         </div>
-                        <Skeleton className="w-full md:w-32 h-10 rounded-md" />
+                        {/* Status Badge */}
+                        <div className="flex flex-row md:flex-col justify-between w-full md:w-auto gap-2 md:gap-1">
+                            <Skeleton className="h-5 rounded w-20" />
+                        </div>
+                        {/* Subject */}
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                            <Skeleton className="h-4 rounded w-14" />
+                            <Skeleton className="h-4 rounded w-24" />
+                        </div>
+                        {/* Date and Time slots */}
+                        <div className="flex flex-col">
+                            <div className="flex flex-wrap items-center gap-3 mt-1">
+                                <Skeleton className="h-6 rounded-md w-28" />
+                                <Skeleton className="h-6 rounded-md w-20" />
+                            </div>
+                        </div>
+                        {/* Note */}
+                        <div className="flex flex-col w-full gap-1">
+                            <Skeleton className="h-4 rounded w-10" />
+                            <Skeleton className="h-4 rounded w-full" />
+                        </div>
+                        <Separator />
+                        {/* Action buttons */}
+                        <div className="flex flex-col w-full gap-2">
+                            <Skeleton className="h-10 rounded w-full" />
+                            <Skeleton className="h-10 rounded w-full" />
+                        </div>
                     </div>
                 ))}
             </div>

@@ -19,6 +19,8 @@ class bookingsController extends Controller
             'scheduled_date'=>'required|date',
             'scheduled_day'=>'required|string',
             'scheduled_time'=>'required|date_format:H:i',
+            'subject'=>'required|string',
+            'student_note'=>'nullable|string',
             'price'=>'required|decimal:2|min:0'
         ]);
 
@@ -42,6 +44,8 @@ class bookingsController extends Controller
             'scheduled_day'=>$request->scheduled_day,
             'scheduled_date'=>$request->scheduled_date,
             'scheduled_time'=>$request->scheduled_time,
+            'subject'=>$request->subject,
+            'student_note'=>$request->student_note,
             'price'=>$request->price,
         ]);
 
@@ -187,6 +191,8 @@ class bookingsController extends Controller
                 'scheduled_date'=>$booking->scheduled_date,
                 'scheduled_day'=>$booking->scheduled_day,
                 'scheduled_time'=>$booking->scheduled_time,
+                'subject'=>$booking->subject,
+                'student_note'=>$booking->student_note,
             ]);
 
             $booking->status='approved';

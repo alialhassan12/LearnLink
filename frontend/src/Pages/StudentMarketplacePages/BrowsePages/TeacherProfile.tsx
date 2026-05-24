@@ -13,6 +13,8 @@ import { Spinner } from "../../../components/ui/spinner";
 import { useChatStore } from "../../../store/chatStore";
 import useAuthStore from "../../../store/authStore";
 import type { Conversation } from "../../../@types/conversation";
+import { NativeSelect, NativeSelectOption } from "../../../components/ui/native-select";
+import { Textarea } from "../../../components/ui/textarea";
 
 const TeacherProfileSkeleton = () => (
     <div className="flex flex-col gap-10 px-4 py-6 md:px-10 md:py-10 max-w-7xl mx-auto animate-pulse">
@@ -109,6 +111,8 @@ const TeacherProfile = () => {
     
     const [selectedDate,setSelectedDate]=useState("");
     const [dateError,setDateError]=useState(false);
+    const [selectedSubject,setSelectedSubject]=useState<string>("");
+    const [student_note,setStudentNote]=useState<string>("");
 
     useEffect(()=>{
         getTeacherById(Number(id));
@@ -139,10 +143,14 @@ const TeacherProfile = () => {
                     scheduled_day:day_of_week[day],
                     scheduled_time:time,
                     scheduled_date:scheduled_date,
+                    subject:selectedSubject,
+                    student_note:student_note,
                     price:teacher.hourly_rate
                 });
                 setDateError(false);
                 setSelectedDate("");
+                setStudentNote("");
+                setSelectedSubject("");
             }else{
                 setDateError(true);
                 toast.error("Not available on this day or at this time. Please check teacher's availability.");
@@ -307,7 +315,10 @@ const TeacherProfile = () => {
                                     return (
                                     <div key={index} className="group flex flex-col bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 ease-in-out cursor-pointer">
                                         <div className="relative h-48 overflow-hidden">
-                                            <img src={course.thumbnail} alt="course image" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                            <img src={course.thumbnail instanceof File ? URL.createObjectURL(course.thumbnail) : course.thumbnail || ""} 
+                                                alt="course image" 
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
                                             <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">
                                                 Course
                                             </div>
@@ -325,7 +336,7 @@ const TeacherProfile = () => {
 
                 {/* right side booking */}
                 <div className="w-full lg:w-80 xl:w-96">
-                    <div className="flex flex-col h-fit gap-6 bg-card border border-border rounded-2xl p-6 sticky top-24 shadow-sm">
+                    <div className="flex flex-col h-fit gap-6 bg-card border border-border rounded-2xl p-6 sticky top-20 shadow-sm">
                         {/* price */}
                         <div className="flex flex-row justify-start items-baseline gap-1">
                             <span className="text-3xl font-bold text-text-strong">${teacher?.hourly_rate}</span>
@@ -340,7 +351,7 @@ const TeacherProfile = () => {
                                 <p className="font-bold">1-on-1 Session</p>
                             </div>
                         </div>
-
+                        {/* date input */}
                         <div className="flex flex-col gap-2">
                             <p className="text-sm text-text-weak font-bold uppercase tracking-wider text-[10px]">Select Date & Time</p>
                             <Input 
@@ -350,6 +361,36 @@ const TeacherProfile = () => {
                                 onChange={(e)=>setSelectedDate(e.target.value)}
                                 aria-invalid={dateError}
                                 className="w-full h-11 rounded-xl border-border focus:border-primary transition-colors"
+                            />
+                        </div>
+                        {/* subject select */}
+                        <div className="flex flex-col gap-2">
+                            <p className="text-sm text-text-weak font-bold uppercase tracking-wider text-[10px]">Select Subject</p>
+                            <NativeSelect
+                                className="w-full"
+                                value={selectedSubject}
+                                onChange={(e)=>setSelectedSubject(e.target.value)}
+                            >
+                                <NativeSelectOption value="" disabled>Select a Subject</NativeSelectOption>
+                                {
+                                    teacher?.subjects.map((subject)=>{
+                                        return(
+                                            <NativeSelectOption key={subject} value={subject}>
+                                                {subject}
+                                            </NativeSelectOption>
+                                        );
+                                    })
+                                }
+                            </NativeSelect>
+                        </div>
+                        {/* student note (optional) */}
+                        <div className="flex flex-col gap-2">
+                            <p className="text-sm text-text-weak font-bold uppercase tracking-wider text-[10px]">Student Note (optional)</p>
+                            <Textarea
+                                placeholder="Enter your note"
+                                value={student_note}
+                                onChange={(e)=>setStudentNote(e.target.value)}
+                                className="w-full h-20 rounded-xl border-border focus:border-primary transition-colors resize-none"
                             />
                         </div>
 

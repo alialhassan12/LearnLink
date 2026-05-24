@@ -14,6 +14,8 @@ export interface LiveSession{
     recording_url:string;
     created_at:string;
     updated_at:string;
+    subject?:string;
+    student_note?:string;
     session_materials?:SessionMaterial[];
 
     booking?:Booking;

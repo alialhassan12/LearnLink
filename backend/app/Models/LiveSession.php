@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['booking_id','scheduled_date','scheduled_day','scheduled_time','duration','status','recording_url'])]
+#[Fillable(['booking_id','scheduled_date','scheduled_day','scheduled_time', 'subject', 'student_note','duration','status','recording_url'])]
 
 class LiveSession extends Model
 {
