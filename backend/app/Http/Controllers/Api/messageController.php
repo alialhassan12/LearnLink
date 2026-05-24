@@ -8,6 +8,7 @@ use App\Models\Message;
 use App\Services\SupabaseStorageService;
 use App\Services\ConversationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class messageController extends Controller
 {
@@ -16,7 +17,8 @@ class messageController extends Controller
             'receiver_id'=>'required|exists:users,id',
             'content'=>'nullable|string',
             'type'=>'in:text,file,image',
-            'file'=>'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png,gif'
+            'file'=>'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png,gif,mp4,mov',
+            'file_name'=>'nullable|string'
         ]);
         
         if(empty($request->content) && empty($request->file)){
@@ -36,24 +38,34 @@ class messageController extends Controller
         
         $conversation=ConversationService::findOrCreateDirectConversation($sender_id,$receiver_id);
         
-        $file_url=null;
-        if($request->hasFile('file')){
-            $file=$request->file('file');
-            $file_url=$storage->uploadMessageFile($file,$sender_id,$receiver_id);
-        }
+        $message=DB::transaction(function() use ($sender_id,$receiver_id,$storage,$request,$conversation){
+            $file_url=null;
+            if($request->hasFile('file')){
+                $file=$request->file('file');
+                $file_url=$storage->uploadMessageFile($file,$sender_id,$receiver_id);
+            }
 
-        $message=Message::create([
-            "sender_id"=>$sender_id,
-            "conversation_id"=>$conversation->id,
-            "content"=>$request->content??null,
-            "type"=>$request->type??'text',
-            "file_url"=>$file_url,
-        ]);
+            $message=Message::create([
+                "sender_id"=>$sender_id,
+                "conversation_id"=>$conversation->id,
+                "content"=>$request->content??null,
+                "type"=>$request->type??'text',
+                "file_name"=>$request->file_name??null,
+                "file_url"=>$file_url,
+            ]);
+            
+            $conversation->update([
+                'last_message_id'=>$message->id,
+                'updated_at'=>now(),
+            ]);
+
+            if($message->type=="image" || $message->type=="file"){
+                $message->file_url=$storage->getPublicUrl($message->file_url);
+            }
+
+            return $message;
+        });
         
-        $conversation->update([
-            'last_message_id'=>$message->id,
-            'updated_at'=>now(),
-        ]);
 
         broadcast(new MessageSent($message->load('sender')));
 

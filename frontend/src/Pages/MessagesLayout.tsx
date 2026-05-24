@@ -4,7 +4,7 @@ import  useAuthStore  from "../store/authStore";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { ArrowLeft, Send, Search, MessageSquare, Hand, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Search, MessageSquare, Hand, Loader2, FileText, Upload, X, Image } from "lucide-react";
 import type { Conversation } from "../@types/conversation";
 import echo from "../lib/echo";
 
@@ -53,10 +53,14 @@ const MessagesLayout=()=>{
     }=useChatStore();
     const {authUser}=useAuthStore();
     const [messageInput,setMessageInput]=useState('');
+    const [file,setFile]=useState<File|null>(null);
     const [errorInp,setErrorInp]=useState('');
     const [pendingMessageText, setPendingMessageText]=useState('');
+    const [pendingImage,setPendingImage]=useState<boolean>(false);
+    const [pendingFile,setPendingFile]=useState<boolean>(false);
     const [search,setSearch]=useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const uploadRef=useRef<HTMLInputElement>(null);
 
     useEffect(()=>{
         if(conversations?.length === 0){
@@ -113,7 +117,7 @@ const MessagesLayout=()=>{
     }, [messages, isSendingMessage]);
 
     const handleSendMessage=async()=>{
-        if(!messageInput.trim()){
+        if(!messageInput.trim() && !file){
             setErrorInp('Message is required');
             return;
         }
@@ -121,20 +125,42 @@ const MessagesLayout=()=>{
         const contentToSend = messageInput;
         setPendingMessageText(contentToSend);
         setMessageInput('');
+        let type="text";
+        if(file){
+            type = file.type.startsWith("image/") ? "image" : "file";
+        }
+
+        if(type=="image"){
+            setPendingImage(true);
+        }
+        else if(type=="file"){
+            setPendingFile(true);
+        }
         
         const receiverId = activeConversation?.participants?.find((p)=>p.user_id !== authUser?.id)?.user_id;
+        
+        setFile(null);
         
         if (receiverId) {
             await sendMessage(
                 receiverId,
-                "text",
-                contentToSend
+                type,
+                contentToSend,
+                file,
+                file?.name
             );
         }
-        
+
         setPendingMessageText('');
+        setPendingImage(false);
+        setPendingFile(false);
     }
-    
+    const handleFileChange=(event:React.ChangeEvent<HTMLInputElement>)=>{
+        const file=event.target.files?.[0];
+        if(file){
+            setFile(file);
+        }
+    }
     const handleSelectConversation=(conversation:Conversation)=>{
         setActiveConversation(conversation);
         getMessages(conversation.id);
@@ -293,14 +319,50 @@ const MessagesLayout=()=>{
                                                             <AvatarImage src={message.sender?.avatar}/>
                                                         </Avatar>
                                                         <div className={`flex flex-col gap-1 ${isMyMessage ? 'items-end' : 'items-start'}`}>
-                                                            <div className={`px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed 
-                                                                                ${isMyMessage 
-                                                                                    ? 'bg-primary text-primary-foreground rounded-br-sm' 
-                                                                                    : 'bg-card text-card-foreground border border-border/50 rounded-bl-sm'}`
-                                                                }
-                                                            >
-                                                                {message.content}
+                                                            <div className={`${message.file_url?'flex':'hidden'}`}>
+                                                                {/* image */}
+                                                                {message.type==='image' && (
+                                                                    <a
+                                                                        href={message.file_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="block w-40 h-40 rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
+                                                                    >
+                                                                        <img
+                                                                            src={message.file_url}
+                                                                            alt="sent image"
+                                                                            className="w-full h-full object-cover"
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLImageElement).src = '/fallback-image.png';
+                                                                            }}
+                                                                        />
+                                                                    </a>
+                                                                )}
+                                                                {/* pdf doc */}
+                                                                {message.type==='file' && (
+                                                                    <a
+                                                                        href={message.file_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                                                                    >
+                                                                        <FileText className="h-5 w-5" />
+                                                                        <span className="text-sm font-medium truncate max-w-32">
+                                                                            {'Document'}
+                                                                        </span>
+                                                                    </a>
+                                                                )}
                                                             </div>
+                                                            {message.content &&(
+                                                                <div className={`px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed 
+                                                                                    ${isMyMessage 
+                                                                                        ? 'bg-primary text-primary-foreground rounded-br-sm' 
+                                                                                        : 'bg-card text-card-foreground border border-border/50 rounded-bl-sm'}
+                                                                                `}
+                                                                >
+                                                                    {message.content}
+                                                                </div>
+                                                            )}
                                                             <span className={`text-[10px] font-medium text-muted-foreground/80 ${isMyMessage ? 'mr-1' : 'ml-1'}`}>
                                                                 {new Date(message.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
                                                             </span>
@@ -310,7 +372,7 @@ const MessagesLayout=()=>{
                                             })}
 
                                             {/* Optimistic "Sending..." Message Bubble */}
-                                            {isSendingMessage && pendingMessageText && (
+                                            {isSendingMessage && pendingMessageText && !pendingImage && !pendingFile && (
                                                 <div className="flex gap-3 max-w-[85%] md:max-w-[70%] self-end flex-row-reverse animate-in fade-in duration-300 opacity-60">
                                                     <Avatar className="h-8 w-8 mt-auto shrink-0 shadow-sm border border-background">
                                                         <AvatarFallback className="bg-primary/20 text-primary text-xs">
@@ -319,6 +381,99 @@ const MessagesLayout=()=>{
                                                         <AvatarImage src={authUser?.avatar}/>
                                                     </Avatar>
                                                     <div className="flex flex-col gap-1 items-end">
+                                                        <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm">
+                                                            {pendingMessageText}
+                                                        </div>
+                                                        <span className="text-[10px] font-medium text-muted-foreground/80 mr-1 flex items-center gap-1">
+                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                            Sending...
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* Show pending image message if uploading */}
+                                            {pendingImage && !pendingMessageText && !pendingFile && isSendingMessage && (
+                                                <div className="flex gap-3 max-w-[85%] md:max-w-[70%] self-end flex-row-reverse animate-in fade-in duration-300 opacity-60">
+                                                    <Avatar className="h-8 w-8 mt-auto shrink-0 shadow-sm border border-background">
+                                                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                                            You
+                                                        </AvatarFallback>
+                                                        <AvatarImage src={authUser?.avatar}/>
+                                                    </Avatar>
+                                                    <div className="flex flex-col gap-1 items-end">
+                                                        <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm">
+                                                            <div className="flex items-center gap-2">
+                                                                <Image size={16} />
+                                                                {file?.name || "Uploading image..."}
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-[10px] font-medium text-muted-foreground/80 mr-1 flex items-center gap-1">
+                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                            Uploading...
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* show pending message if text and image */}
+                                            {pendingMessageText && isSendingMessage && pendingImage && !pendingFile && (
+                                                <div className="flex gap-3 max-w-[85%] md:max-w-[70%] self-end flex-row-reverse animate-in fade-in duration-300 opacity-60">
+                                                    <Avatar className="h-8 w-8 mt-auto shrink-0 shadow-sm border border-background">
+                                                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                                            You
+                                                        </AvatarFallback>
+                                                        <AvatarImage src={authUser?.avatar}/>
+                                                    </Avatar>
+                                                    <div className="flex flex-col gap-1 items-end">
+                                                        <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm flex items-center gap-2">
+                                                            <Image size={16} />
+                                                            {file?.name || "Uploading image..."}
+                                                        </div>
+                                                        <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm">
+                                                            {pendingMessageText}
+                                                        </div>
+                                                        <span className="text-[10px] font-medium text-muted-foreground/80 mr-1 flex items-center gap-1">
+                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                            Sending...
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Show pending file message if uploading */}
+                                            {pendingFile && !pendingMessageText && !pendingImage && isSendingMessage && (
+                                                <div className="flex gap-3 max-w-[85%] md:max-w-[70%] self-end flex-row-reverse animate-in fade-in duration-300 opacity-60">
+                                                    <Avatar className="h-8 w-8 mt-auto shrink-0 shadow-sm border border-background">
+                                                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                                            You
+                                                        </AvatarFallback>
+                                                        <AvatarImage src={authUser?.avatar}/>
+                                                    </Avatar>
+                                                    <div className="flex flex-col gap-1 items-end">
+                                                        <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm flex items-center gap-2">
+                                                            <FileText size={16} />
+                                                            {file?.name || "Uploading file..."}
+                                                        </div>
+                                                        <span className="text-[10px] font-medium text-muted-foreground/80 mr-1 flex items-center gap-1">
+                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                            Uploading...
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* show pending message if text and file */}
+                                            {pendingMessageText && !pendingImage && pendingFile && isSendingMessage && (
+                                                <div className="flex gap-3 max-w-[85%] md:max-w-[70%] self-end flex-row-reverse animate-in fade-in duration-300 opacity-60">
+                                                    <Avatar className="h-8 w-8 mt-auto shrink-0 shadow-sm border border-background">
+                                                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                                            You
+                                                        </AvatarFallback>
+                                                        <AvatarImage src={authUser?.avatar}/>
+                                                    </Avatar>
+                                                    <div className="flex flex-col gap-1 items-end">
+                                                        <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm flex items-center gap-2">
+                                                            <FileText size={16} />
+                                                            {file?.name || "Uploading file..."}
+                                                        </div>
                                                         <div className="px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-sm">
                                                             {pendingMessageText}
                                                         </div>
@@ -339,6 +494,31 @@ const MessagesLayout=()=>{
                             
                             {/* message input area */}
                             <div className="p-4 bg-card border-t border-border mt-auto">
+                                {/* show selected file */}
+                                {file && (
+                                    <div className="flex items-center justify-between p-2 bg-muted/50 rounded-2xl mb-2">
+                                        <div className="flex flex-col gap-1">
+                                            {file.type.startsWith('image/') ? (
+                                                <img 
+                                                    src={URL.createObjectURL(file)} 
+                                                    className="w-40 h-40 object-cover rounded" 
+                                                />
+                                            ) : (
+                                                <div className="w-fit h-10 p-2 object-cover rounded flex items-center justify-center border border-border">
+                                                    <span className="text-sm text-muted-foreground">{file?.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <Button 
+                                            onClick={()=>{setFile(null);}}
+                                            disabled={isSendingMessage}
+                                            size="icon" 
+                                            className="h-8 w-8 rounded-full shrink-0"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                )}
                                 <div className="flex items-end gap-2 bg-muted/50 p-2 rounded-3xl border border-transparent focus-within:border-primary/30 focus-within:bg-card transition-all shadow-inner">
                                     <Input
                                         placeholder="Type your message..."
@@ -353,14 +533,28 @@ const MessagesLayout=()=>{
                                         onChange={(e)=>setMessageInput(e.target.value)}
                                         className="flex-1 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 shadow-none disabled:opacity-50"
                                     />
+
+                                    {/* upload btn */}
+                                    <Button 
+                                        onClick={()=>{uploadRef.current?.click();}}
+                                        disabled={isSendingMessage}
+                                        size="icon" 
+                                        className="h-10 w-10 rounded-full shrink-0 shadow-md transition-transform hover:scale-105"
+                                    >
+                                        <Upload className="h-4 w-4" />
+                                    </Button>
+                                    <input type="file" ref={uploadRef} className="hidden" onChange={(e)=>handleFileChange(e)} />
+                                    
+                                    {/* send btn */}
                                     <Button 
                                         onClick={handleSendMessage}
-                                        disabled={!messageInput.trim() || isSendingMessage}
+                                        disabled={!messageInput.trim() && !file || isSendingMessage}
                                         size="icon" 
                                         className="h-10 w-10 rounded-full shrink-0 shadow-md transition-transform hover:scale-105"
                                     >
                                         <Send className="h-4 w-4 ml-1" />
                                     </Button>
+
                                 </div>
                             </div>
                         </div>

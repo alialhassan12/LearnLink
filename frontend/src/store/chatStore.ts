@@ -17,7 +17,7 @@ interface ChatState{
     getMessages:(conversation_id:number)=>Promise<void>;
 
     isSendingMessage:boolean;
-    sendMessage:(receiver_id:number,type:string,content?:string,file?:File)=>Promise<void>;
+    sendMessage:(receiver_id:number,type:string,content?:string,file?:File,file_name?:string)=>Promise<void>;
 }
 
 export const useChatStore=create<ChatState>((set)=>({
@@ -57,14 +57,25 @@ export const useChatStore=create<ChatState>((set)=>({
     },
 
     isSendingMessage:false,
-    sendMessage:async(receiver_id:number,type:string,content?:string,file?:File)=>{
+    sendMessage:async(receiver_id:number,type:string,content?:string,file?:File,file_name?:string)=>{
         set({isSendingMessage:true});
         try {
-            const response=await axiosInstance.post('/messages/send',{
-                'receiver_id':receiver_id,
-                'type':type,
-                'content':content,
-                'file':file,
+            const formData=new FormData();
+            formData.append('receiver_id',receiver_id.toString());
+            formData.append('type',type);
+            if(content){
+                formData.append('content',content);
+            }
+            if(file){
+                formData.append('file',file);
+            }
+            if(file_name){
+                formData.append('file_name',file_name);
+            }
+            const response=await axiosInstance.post('/messages/send',formData,{
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
             // set((state)=>({messages:[...state.messages,response.data.message]}));
             // console.log('message sent:',response.data.message);

@@ -35,7 +35,7 @@ const MyCourses=()=>{
             {/* filter section */}
             <div className="py-1">
                 <Tabs defaultValue={filterTabs} onValueChange={(value)=>setFilterTabs(value)} className="flex flex-col gap-3">
-                    <TabsList className="w-[20%]">
+                    <TabsList className="w-full md:w-[50%] lg:w-[30%]">
                         <TabsTrigger value="all">All</TabsTrigger>
                         <TabsTrigger value="published">Published</TabsTrigger>
                         <TabsTrigger value="draft">Draft</TabsTrigger>

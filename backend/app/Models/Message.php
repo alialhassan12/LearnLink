@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable('sender_id','conversation_id','content','file_url','type')]
+#[Fillable('sender_id','conversation_id','content','file_name','file_url','type')]
 class Message extends Model
 {
     //relationships
