@@ -12,10 +12,9 @@ import { toast } from "sonner";
 const CourseLearning = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { courseWithMaterials, isGettingCourseWithMaterialsById, getCourseWithMaterialsById } = useCourseStore();
+    const { courseWithMaterials, isGettingCourseWithMaterialsById, getCourseWithMaterialsById,isDownloadingCourseMaterial,downoladCourseMaterial } = useCourseStore();
     const [selectedMaterial, setSelectedMaterial] = useState<CourseMaterial | null>(null);
     const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
-    const [isDownloadingMaterial, setIsDownloadingMaterial] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -80,22 +79,26 @@ const CourseLearning = () => {
         return <FileDown className="text-purple-500" size={18} />;
     };
 
-    const handleDownloadMaterial=(url:string,fileTitle:string)=>{
-        setIsDownloadingMaterial(true);
-        try {
-            const link=document.createElement("a");
-            link.href=url;
-            link.download=fileTitle;
+    const handleDownloadMaterial=async(materialId:number,fileTitle:string)=>{
+        try{
+            const blob = await downoladCourseMaterial(materialId);
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = fileTitle;
+
             document.body.appendChild(link);
             link.click();
+
             document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+
+            window.URL.revokeObjectURL(blobUrl);
+
             toast.success("Downloading...");
-        } catch (error) {
+
+        }catch(error){
             console.log(error);
             toast.error("Failed to download file");
-        } finally {
-            setIsDownloadingMaterial(false);
         }
     }
 
@@ -135,8 +138,8 @@ const CourseLearning = () => {
                             {material.title}
                         </span>
                         <Button
-                            onClick={() => handleDownloadMaterial(path, material.title)}
-                            disabled={isDownloadingMaterial}
+                            onClick={() => handleDownloadMaterial(material.id, material.title)}
+                            disabled={isDownloadingCourseMaterial}
                             className="inline-flex items-center text-xs text-primary hover:text-primary/80 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded transition"
                         >
                             <FileDown size={14} className="mr-1.5" /> Full Screen / Download
@@ -161,8 +164,8 @@ const CourseLearning = () => {
                     This file format ({material.type.toUpperCase()}) cannot be previewed directly in the browser. You can download it to view locally.
                 </p>
                 <Button
-                    onClick={() => handleDownloadMaterial(path, material.title)}
-                    disabled={isDownloadingMaterial}
+                    onClick={() => handleDownloadMaterial(material.id, material.title)}
+                    disabled={isDownloadingCourseMaterial}
                     className="inline-flex items-center justify-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-all font-medium shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5"
                 >
                     <FileDown size={18} className="mr-2" /> Download File ({(material.size ? (material.size / 1024 / 1024).toFixed(2) : "0")} MB)

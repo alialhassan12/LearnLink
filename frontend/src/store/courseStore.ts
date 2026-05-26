@@ -3,6 +3,7 @@ import type { CoursePublish } from "../@types/coursePublish";
 import axiosInstance from "../lib/axios";
 import { toast } from "sonner";
 import type { Course } from "../@types/course";
+import type { responseEncoding } from "axios";
 
 interface CourseFilter{
     category_id?:number;
@@ -58,6 +59,9 @@ interface CourseStore{
     getCourseWithMaterialsById:(id:number)=>Promise<boolean>;
     isGettingCourseWithMaterialsById:boolean;
     
+    //download course material
+    downoladCourseMaterial:(materialId:number)=>Promise<any>;
+    isDownloadingCourseMaterial:boolean;
 }
 
 export const useCourseStore = create<CourseStore>((set,get) => ({
@@ -276,9 +280,7 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
                     }
                 });
             });
-            // formData.forEach((value, key) => {
-            //     console.log(`${key}:`, value);
-            // });
+
             const response=await axiosInstance.put('/courses/edit-course', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -316,6 +318,22 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             return false;
         }finally{
             set({isChangingCourseStatus:false});
+        }
+    },
+    
+    isDownloadingCourseMaterial:false,
+    downoladCourseMaterial:async(materialId:number)=>{
+        set({isDownloadingCourseMaterial:true});
+        try{
+            const response=await axiosInstance.get(`/courses/download-material/${materialId}`,{
+                responseType:"blob"
+            });
+            return response.data;
+        }catch(error:any){
+            toast.error(error.response?.data?.message || "An error occurred");
+            return error;
+        }finally{
+            set({isDownloadingCourseMaterial:false});
         }
     }
 }));

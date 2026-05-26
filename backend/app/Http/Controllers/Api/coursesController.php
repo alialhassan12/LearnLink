@@ -581,10 +581,38 @@ class coursesController extends Controller
         ],200);
     }
 
-    public function downloadMaterial($id) {
-        $material = CourseMaterial::find($id);
+    public function downloadCourseMaterial($id) {
+        $user=auth('sanctum')->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"Unauthenticated"
+            ],401);
+        }
+        $student=$user->student;
+        if(!$student){
+            return response()->json([
+                "message"=>"Unauthorized Access"
+            ],403);
+        }
+
+        $material = CourseMaterial::with('section.course')->find($id);
         if (!$material || !$material->path) {
             abort(404, 'Material not found');
+        }
+        $course=$material->section->course;
+        if(!$course){
+            return response()->json([
+                "message"=>"Course not found"
+            ],404);
+        }
+
+        $isEnrolled=$student->enrollments()
+            ->where('course_id',$course->id)
+            ->exists();
+        if(!$isEnrolled){
+            return response()->json([
+                "message"=>"You are not enrolled in this course"
+            ],403);
         }
 
         $disk = \Illuminate\Support\Facades\Storage::disk('s3');

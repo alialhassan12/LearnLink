@@ -21,4 +21,8 @@ class Student extends Model
     public function approvedBookings(){
         return $this->hasMany(Booking::class)->where('status','approved');
     }
+
+    public function enrollments(){
+        return $this->hasMany(CourseEnrollment::class);
+    }
 }
