@@ -15,7 +15,7 @@ const CourseCard=({course}:{course:Course})=>{
         <div className="flex flex-col rounded-xl overflow-hidden border border-border hover:shadow-lg hover:-translate-y-[4px] hover:shadow-primary/10 hover:border-primary/30 hover:duration-300 transition-all">
             {/* course image */}
             <div className="w-full bg-bg-1 overflow-hidden">
-                <img src={course.thumbnail} alt={course.title} className="object-cover"/>
+                <img src={course.thumbnail instanceof File? URL.createObjectURL(course.thumbnail):course.thumbnail} alt={course.title} className="object-cover"/>
             </div>
             {/* course info */}
             <div className="flex flex-col gap-2 p-4">
@@ -36,6 +36,7 @@ const CourseCard=({course}:{course:Course})=>{
                         <Button
                             size="sm"
                             className="rounded-full bg-primary hover:bg-primary/80 text-white font-medium cursor-pointer"
+                            onClick={()=>navigate(`/marketplace/learnings/course/${course.id}`)}
                         >
                             Go to Course
                         </Button>

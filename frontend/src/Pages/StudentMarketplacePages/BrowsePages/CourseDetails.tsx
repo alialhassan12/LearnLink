@@ -119,7 +119,7 @@ const CourseDetails=()=>{
                 <div className="w-full lg:w-[30%] lg:sticky lg:top-24 mt-8 lg:mt-0">
                     <div className="flex flex-col gap-5 bg-card p-5 border border-border rounded-xl shadow-lg">
                         <div className="w-full rounded-xl overflow-hidden bg-bg-1 aspect-video">
-                            <img src={course?.thumbnail} className="w-full h-full object-cover" alt="Course Thumbnail" />
+                            <img src={course?.thumbnail instanceof File?URL.createObjectURL(course?.thumbnail):course?.thumbnail} className="w-full h-full object-cover" alt="Course Thumbnail" />
                         </div>
                         {/* price */}
                         <div>

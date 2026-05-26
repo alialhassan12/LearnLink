@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CourseEnrollment;
+use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -71,6 +72,38 @@ class courseEnrollmentController extends Controller
 
         return response()->json([
             "enrolled_courses_ids"=>$enrolledCourses
+        ],200);
+    }
+
+    public function getEnrolledCourses(Request $request,SupabaseStorageService $storage){
+        $user=$request->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"Unauthenticated",
+                
+            ],401);
+        }
+        $student=$user->student;
+        if(!$student){
+            return response()->json([
+                "message"=>"Unautharized Access"
+            ],403);
+        }
+
+        $enrollments=CourseEnrollment::where('student_id',$student->id)->with('course.teacher.user')->get();
+        
+        foreach($enrollments as $enrollment){
+            if($enrollment->course->thumbnail){
+                $enrollment->course->thumbnail=$storage->getPublicUrl($enrollment->course->thumbnail);
+            }
+            if($enrollment->course->teacher->user->avatar){
+                $enrollment->course->teacher->user->avatar=$storage->getPublicUrl($enrollment->course->teacher->user->avatar);
+            }
+        }
+
+        return response()->json([
+            "message"=>"Enrolled courses retrieved successfully",
+            "enrollments"=>$enrollments
         ],200);
     }
 }

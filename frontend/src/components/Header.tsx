@@ -21,7 +21,7 @@ const Header = () => {
             {
                 id:2,
                 title:'My Learning',
-                path:'/learning'
+                path:'/marketplace/learnings'
             },
             {
                 id:3,

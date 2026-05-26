@@ -67,5 +67,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/courses/get-course/{id}',[coursesController::class,'getCourseById'])->name('get-course-by-id');
         Route::post('/courses/enroll',[courseEnrollmentController::class,'createEnrollment'])->name('create-enrollment');
         Route::get('/courses/enrolled-courses-ids',[courseEnrollmentController::class,'getEnrolledCoursesIds'])->name('get-enrolled-courses-ids');
+        Route::get('/courses/enrolled-courses',[courseEnrollmentController::class,'getEnrolledCourses'])->name('get-enrolled-courses');
     });
 });

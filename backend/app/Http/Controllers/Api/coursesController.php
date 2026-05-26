@@ -8,8 +8,10 @@ use App\Models\Course;
 use App\Models\CourseMaterial;
 use App\Models\CourseSection;
 use App\Services\SupabaseStorageService;
+use Exception;
 use Illuminate\Contracts\Auth\SupportsBasicAuth;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class coursesController extends Controller
@@ -295,58 +297,69 @@ class coursesController extends Controller
 
                     if (isset($sectionData['materials'])) {
                         foreach ($sectionData['materials'] as $materialData) {
+                            // Initialize material handling
                             $material = null;
+                            $materialPath = null;
 
+                            // Attempt to fetch existing material if ID provided
                             if (isset($materialData['id']) && $materialData['id']) {
                                 $material = CourseMaterial::where('id', $materialData['id'])
                                     ->where('section_id', $section->id)
                                     ->first();
                             }
 
-                            if ($material) {
+                            // Preserve existing path if material exists
+                            if ($material != null && $materialPath == null) {
+                                $materialPath = $material->path;
+                            }
+
+                            if (isset($materialData['file']) && $materialData['file'] instanceof UploadedFile) {
+                                $materialPath = $storage->uploadSectionMaterials(
+                                    $materialData['file'],
+                                    $course->title,
+                                    $section->title,
+                                    $materialData['title']
+                                );
+                            }
+
+                            if ($material !== null) {
+                                // Update existing material
                                 $material->title = $materialData['title'];
                                 $material->type = $materialData['type'];
                                 if (isset($materialData['size'])) {
                                     $material->size = $materialData['size'];
                                 }
-
-                                if (isset($materialData['file']) && $materialData['file'] instanceof \Illuminate\Http\UploadedFile) {
-                                    $materialPath = $storage->uploadSectionMaterials(
-                                        $materialData['file'],
-                                        $course->title,
-                                        $section->title,
-                                        $materialData['title']
-                                    );
+                                // Only overwrite path if a new file was uploaded
+                                if ($materialPath !== null && $materialPath !== $material->path) {
                                     $material->path = $materialPath;
                                 }
                                 $material->save();
+                                $providedMaterialIds[] = $material->id;
                             } else {
-                                $materialPath = null;
-                                if (isset($materialData['file']) && $materialData['file'] instanceof \Illuminate\Http\UploadedFile) {
-                                    $materialPath = $storage->uploadSectionMaterials(
-                                        $materialData['file'],
-                                        $course->title,
-                                        $section->title,
-                                        $materialData['title']
-                                    );
+                                // Create new material record
+                                // Ensure path is not null to satisfy DB constraint
+                                if(!$materialPath){
+                                    throw new Exception("Material path is required for material ". $materialData['title']);
                                 }
-
-                                $material = CourseMaterial::create([
+                                $newMaterial = CourseMaterial::create([
                                     "section_id" => $section->id,
                                     "title" => $materialData['title'],
                                     "type" => $materialData['type'],
-                                    "path" => $materialPath ?? '',
+                                    "path" => $materialPath,
                                     "size" => $materialData['size'] ?? 0,
                                 ]);
+                                $providedMaterialIds[] = $newMaterial->id;
                             }
-                            $providedMaterialIds[] = $material->id;
                         }
                     }
 
                     // Delete materials not included in the request
-                    CourseMaterial::where('section_id', $section->id)
-                        ->whereNotIn('id', $providedMaterialIds)
-                        ->delete();
+                    // Only delete if the materials key was explicitly sent in the request
+                    if (isset($sectionData['materials'])) {
+                        CourseMaterial::where('section_id', $section->id)
+                            ->whereNotIn('id', $providedMaterialIds)
+                            ->delete();
+                    }
                 }
             }
 
@@ -357,6 +370,11 @@ class coursesController extends Controller
 
             return $course->load('sections.materials');
         });
+
+        // load course thumbnail
+        if($updatedCourse->thumbnail){
+            $updatedCourse->thumbnail=$storage->getPublicUrl($updatedCourse->thumbnail);
+        }
 
         return response()->json([
             "message" => "Course updated successfully",
@@ -561,5 +579,33 @@ class coursesController extends Controller
             "message"=>"Course {$request->status} successfully",
             "course"=>$course
         ],200);
+    }
+
+    public function downloadMaterial($id) {
+        $material = CourseMaterial::find($id);
+        if (!$material || !$material->path) {
+            abort(404, 'Material not found');
+        }
+
+        $disk = \Illuminate\Support\Facades\Storage::disk('s3');
+        if (!$disk->exists($material->path)) {
+            abort(404, 'File not found in storage');
+        }
+
+        $fileContent = $disk->get($material->path);
+        
+        // Get original extension
+        $ext = pathinfo($material->path, PATHINFO_EXTENSION);
+        $fileName = $material->title;
+        if (!str_ends_with(strtolower($fileName), '.' . strtolower($ext))) {
+            $fileName .= '.' . $ext;
+        }
+
+        $mimeType = $disk->mimeType($material->path) ?: 'application/octet-stream';
+
+        return response($fileContent, 200, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
+        ]);
     }
 }

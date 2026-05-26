@@ -252,16 +252,22 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             formData.append('title',data.title);
             formData.append('description',data.description);
             
-            if(data.thumbnail){
+            if(data.thumbnail instanceof File){
                 formData.append('thumbnail',data.thumbnail);
             }
             formData.append('language',data.language);
             formData.append('price',String(data.price));
             data?.sections?.forEach((section, index) => {
+                if (section?.id) {
+                    formData.append(`sections[${index}][id]`, String(section.id));
+                }
                 formData.append(`sections[${index}][title]`, section?.title);
                 formData.append(`sections[${index}][order]`, String(section?.order));
                 
                 section?.materials?.forEach((material, mIndex) => {
+                    if (material?.id) {
+                        formData.append(`sections[${index}][materials][${mIndex}][id]`, String(material.id));
+                    }
                     formData.append(`sections[${index}][materials][${mIndex}][title]`, material?.title);
                     formData.append(`sections[${index}][materials][${mIndex}][type]`, material?.type);
                     formData.append(`sections[${index}][materials][${mIndex}][size]`, String(Math.round(material?.size)));
@@ -270,7 +276,9 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
                     }
                 });
             });
-
+            // formData.forEach((value, key) => {
+            //     console.log(`${key}:`, value);
+            // });
             const response=await axiosInstance.put('/courses/edit-course', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -281,6 +289,7 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
                 newCourse:response.data.course,
                 teacherCourses:get().teacherCourses.map((course)=>course.id===course_id?response.data.course:course)
             });
+            console.log(response.data);
             toast.success(response.data.message);
 
             return true;

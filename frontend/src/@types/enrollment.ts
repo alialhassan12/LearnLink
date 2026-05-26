@@ -1,3 +1,4 @@
+import type { Course } from "./course";
 import type { Student } from "./student";
 
 export interface Enrollment{
@@ -6,6 +7,7 @@ export interface Enrollment{
     student_id:number;
     progress:number;
     student?:Student;
+    course?:Course;
     created_at:string;
     updated_at:string;
 }
