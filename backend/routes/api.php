@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\coursesController;
 use App\Http\Controllers\Api\liveSessionsController;
 use App\Http\Controllers\Api\messageController;
 use App\Http\Controllers\Api\sessionMaterialsController;
+use App\Http\Controllers\Api\studentController;
 use App\Http\Controllers\Api\teacherController;
 use App\Models\LiveSession;
 use Illuminate\Support\Facades\Route;
@@ -69,5 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/courses/enrolled-courses-ids',[courseEnrollmentController::class,'getEnrolledCoursesIds'])->name('get-enrolled-courses-ids');
         Route::get('/courses/enrolled-courses',[courseEnrollmentController::class,'getEnrolledCourses'])->name('get-enrolled-courses');
         Route::get('/courses/download-material/{id}',[coursesController::class,'downloadCourseMaterial'])->name('download-course-material');
+        Route::get('/student/profile',[studentController::class,'getStudent'])->name('get-student-profile');
     });
 });

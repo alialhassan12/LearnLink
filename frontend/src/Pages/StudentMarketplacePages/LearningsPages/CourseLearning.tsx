@@ -81,6 +81,7 @@ const CourseLearning = () => {
 
     const handleDownloadMaterial=async(materialId:number,fileTitle:string)=>{
         try{
+            toast.info("start Downloading...");
             const blob = await downoladCourseMaterial(materialId);
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -94,8 +95,7 @@ const CourseLearning = () => {
 
             window.URL.revokeObjectURL(blobUrl);
 
-            toast.success("Downloading...");
-
+            toast.success("downloaded successfuly");
         }catch(error){
             console.log(error);
             toast.error("Failed to download file");
@@ -104,6 +104,7 @@ const CourseLearning = () => {
 
     const renderMaterialContent = (material: CourseMaterial) => {
         const lowerType = material.type.toLowerCase();
+        console.log(lowerType);
         const path = material.path || "";
 
         if (lowerType.includes("video") || lowerType === "mp4" || lowerType === "mov") {
@@ -120,7 +121,7 @@ const CourseLearning = () => {
 
         if (lowerType.includes("image") || lowerType === "png" || lowerType === "jpg" || lowerType === "jpeg" || lowerType === "webp") {
             return (
-                <div className="flex items-center justify-center w-full h-full bg-slate-950 p-4 rounded-xl">
+                <div className="flex items-center justify-center w-full h-full bg-card p-4 rounded-xl">
                     <img
                         src={path}
                         alt={material.title}
@@ -132,7 +133,7 @@ const CourseLearning = () => {
 
         if (lowerType.includes("pdf") || lowerType === "pdf") {
             return (
-                <div className="flex flex-col w-full h-full bg-slate-900 rounded-xl overflow-hidden">
+                <div className="flex flex-col w-full h-full bg-card rounded-xl overflow-hidden">
                     <div className="flex items-center justify-between bg-slate-800 px-4 py-2 border-b border-slate-700">
                         <span className="text-sm font-medium text-slate-200 truncate max-w-[70%]">
                             {material.title}
@@ -155,7 +156,7 @@ const CourseLearning = () => {
         }
 
         return (
-            <div className="flex flex-col gap-2 items-center justify-center w-full h-full bg-slate-50 dark:bg-slate-900 border border-dashed border-border rounded-xl p-8 text-center">
+            <div className="flex flex-col gap-2 items-center justify-center w-full h-full bg-card border-dashed border-border rounded-xl p-8 text-center">
                 <div className="p-4 bg-primary/10 rounded-full text-primary mb-4 animate-bounce">
                     <FileDown size={48} />
                 </div>
@@ -168,7 +169,8 @@ const CourseLearning = () => {
                     disabled={isDownloadingCourseMaterial}
                     className="inline-flex items-center justify-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-all font-medium shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5"
                 >
-                    <FileDown size={18} className="mr-2" /> Download File ({(material.size ? (material.size / 1024 / 1024).toFixed(2) : "0")} MB)
+                    <FileDown size={18} className="mr-2" />
+                    Download File ({(material.size ? (material.size / 1024 / 1024).toFixed(2) : "0")} MB)
                 </Button>
             </div>
         );

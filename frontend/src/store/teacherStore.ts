@@ -2,7 +2,6 @@ import {create} from 'zustand';
 import type {Teacher} from '../@types/teacher';
 import axiosInstance from '../lib/axios';
 import { toast } from 'sonner';
-import useAuthStore from './authStore';
 
 interface TeacherStoreState{
     teacher:Teacher|null;

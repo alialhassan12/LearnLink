@@ -81,7 +81,7 @@ const Header = () => {
                     <Bell className="cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary text-text-strong" />
                     <div className="flex items-center gap-2">
                         <Separator orientation="vertical" />
-                        <Avatar className="cursor-pointer" onClick={()=>navigate("/marketplace")}>
+                        <Avatar className="cursor-pointer" onClick={()=>navigate("/marketplace/profile")}>
                             <AvatarImage src={authUser?.avatar} />
                             <AvatarFallback>{authUser?.name?.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>

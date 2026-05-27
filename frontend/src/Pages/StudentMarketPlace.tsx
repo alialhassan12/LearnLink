@@ -12,7 +12,8 @@ import SessionView from "./StudentMarketplacePages/Sessions/SessionView";
 import CourseDetails from "./StudentMarketplacePages/BrowsePages/CourseDetails";
 import MessagesLayout from "./MessagesLayout";
 import MyLearnings from "./StudentMarketplacePages/MyLearnings";
-import CourseLearning from "./StudentMarketplacePages/LearningsPages/courseLearning";
+import CourseLearning from "./StudentMarketplacePages/LearningsPages/CourseLearning";
+import Profile from "./StudentMarketplacePages/Profile";
 
 const StudentMarketPlace=()=>{
     const authUser=useAuthStore((state)=>state.authUser);
@@ -34,8 +35,9 @@ const StudentMarketPlace=()=>{
                 <Route path="/chat" element={<MessagesLayout/>}/>
                 <Route path="/learnings">
                     <Route index element={<MyLearnings/>}/>
-                    <Route path="course/:id" element={<CourseLearning/>}></Route>
+                    <Route path="course/:id" element={<CourseLearning/>}/>
                 </Route>
+                <Route path="/profile" element={<Profile/>}/>
             </Routes>
             <Footer/>
         </div>

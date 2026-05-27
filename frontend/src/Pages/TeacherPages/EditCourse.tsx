@@ -90,7 +90,7 @@ const EditCourse=()=>{
                             materials:[...s.materials,{
                                 file:file,
                                 title:file.name,
-                                type:file.type.startsWith("video/")?"video":"document",
+                                type:file.type.startsWith("video/")?"video":file.type.startsWith("image/")?"image":"document",
                                 size:file.size,
                             }]
                         }
