@@ -66,6 +66,7 @@ const LandingPage = () => {
 
     const handleGetStarted=async()=>{
         if(!authUser) navigate('/auth/login');
+        else if(authUser?.role==='admin') navigate("/admin/dashboard");
         else if(authUser?.role==='teacher') navigate('/dashboard');
         else if(authUser?.role==='student') navigate('/marketplace');
     }

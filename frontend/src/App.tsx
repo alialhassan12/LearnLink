@@ -12,6 +12,7 @@ import { Toaster } from "./components/ui/sonner";
 import { useLiveSessionStore } from './store/liveSessionsStore';
 import SessionRoom from './Pages/SessionRoom';
 import { useCourseEnrollmentStore } from './store/studentmarketplaceStores/courseEnrollmentStore';
+import AdminDashboard from './Pages/AdminDashboard';
 
 // Wrapper for routes that require the user to be logged in
 const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:string[] }) => {
@@ -45,6 +46,7 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   if (authUser) {
+    if(authUser.role==='admin') return <Navigate to="/admin/dashboard"/>;
     if(authUser.role==='teacher') return <Navigate to="/dashboard"/>;
     if(authUser.role==='student') return <Navigate to="/marketplace"/>;
   }
@@ -92,6 +94,12 @@ function App() {
         }></Route>
 
         {/* Protected Route - Requires login */}
+        <Route path='/admin/dashboard/*' element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboard/>
+          </ProtectedRoute>
+        }></Route>
+
         <Route path='/dashboard/*' element={
           <ProtectedRoute allowedRoles={['teacher']}>
             <TeacherDashboard/>

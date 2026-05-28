@@ -64,6 +64,7 @@ const Login = () => {
         // send request to backend
         const success = await login(formData);
         if(success){
+            if(authUser?.role==='admin') navigate("/admin/dashboard");
             if(authUser?.role==='teacher') navigate('/dashboard');
             if(authUser?.role==='student'){ 
                 // fetch enrolled courses ids before navigating

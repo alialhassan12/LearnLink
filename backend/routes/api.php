@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\courseEnrollmentController;
 use App\Http\Controllers\Api\coursesController;
 use App\Http\Controllers\Api\liveSessionsController;
 use App\Http\Controllers\Api\messageController;
+use App\Http\Controllers\Api\plansController;
 use App\Http\Controllers\Api\sessionMaterialsController;
 use App\Http\Controllers\Api\studentController;
 use App\Http\Controllers\Api\teacherController;
@@ -32,6 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages/send',[messageController::class,'send'])->name('send-message');
     Route::get('/messages/conversations',[conversationsController::class,'getConversations'])->name('get-conversations');
     Route::post('/messages/conversation',[messageController::class,'getMessagesByConversation'])->name('get-messages');
+
+    // admin routes
+    Route::middleware(['checkRole:admin'])->group(function(){
+        Route::post('/plans/create-plan',[plansController::class,'createPlan'])->name('create-new-plan');
+    });
 
     // teacher routes
     Route::middleware(['checkRole:teacher'])->group(function(){
