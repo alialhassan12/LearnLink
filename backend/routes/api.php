@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // admin routes
     Route::middleware(['checkRole:admin'])->group(function(){
+        Route::get('/plans',[plansController::class,'getAllPlans'])->name('get-all-plans');
         Route::post('/plans/create-plan',[plansController::class,'createPlan'])->name('create-new-plan');
     });
 

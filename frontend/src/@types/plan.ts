@@ -7,7 +7,7 @@ interface PlanFeatures{
 }
 
 export interface Plan{
-    id:number;
+    id?:number;
     title:string;
     description:string;
     type:string;
@@ -15,6 +15,6 @@ export interface Plan{
     duration_days:number;
     price:number;
     status:string;
-    created_at:string;
-    updated_at:string;
+    created_at?:string;
+    updated_at?:string;
 }

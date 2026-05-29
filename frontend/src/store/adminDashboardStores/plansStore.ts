@@ -4,23 +4,41 @@ import axiosInstance from "../../lib/axios";
 import { toast } from "sonner";
 
 interface PlansStore{
-    plans:Plan[];
+    allPlans:Plan[];
     newPlan:Plan | null;
     
-    isCreatingPLan:boolean;
+    isGettingAllPlans:boolean;
+    getAllPlans:()=>Promise<void>;
+
+    isCreatingPlan:boolean;
     createPlan:(plan:Plan)=>Promise<boolean>;
 }
 
 export const usePlanStore=create<PlansStore>((set)=>({
-    plans:[],
+    allPlans:[],
     newPlan:null,
 
-    isCreatingPLan:false,
+    isGettingAllPlans:false,
+    getAllPlans:async()=>{
+        set({isGettingAllPlans:true});
+        try{
+            const response=await axiosInstance.get('/plans');
+            set({allPlans:response.data.plans});
+            console.log(response.data.plans);
+        }catch(error:any){
+            console.log(error?.response?.data?.message);
+            toast.error(error?.response?.data?.message);
+        }finally{
+            set({isGettingAllPlans:false});
+        }
+    },
+
+    isCreatingPlan:false,
     createPlan:async(plan:Plan)=>{
-        set({isCreatingPLan:true});
+        set({isCreatingPlan:true});
         try {
             const response= await axiosInstance.post('/plans/create-plan',plan);
-            set((state)=>({plans:[...state.plans,response.data.plan]}));
+            set((state)=>({allPlans:[...state.allPlans,response.data.plan]}));
             console.log(response.data.plan);
             toast.success(response.data.message || 'Plan created successfully');
             return true;
@@ -29,7 +47,7 @@ export const usePlanStore=create<PlansStore>((set)=>({
             toast.error(error?.response?.data?.message);
             return false;
         }finally{
-            set({isCreatingPLan:false});
+            set({isCreatingPlan:false});
         }
     }
 }));

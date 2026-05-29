@@ -21,7 +21,8 @@ class plansController extends Controller
             "features.search_priority"=>"required|boolean",
 
             'duration_days'=>'required|integer|min:-1',
-            'price'=>'required|numeric|min:0'
+            'price'=>'required|numeric|min:0',
+            'status'=>"required|in:active,inactive"
         ]);
 
         $user=auth('sanctum')->user();
@@ -43,12 +44,32 @@ class plansController extends Controller
             "features"=>$request->features,
             "duration_days"=>$request->duration_days,
             "price"=>$request->price,
-            "status"=>'active'
+            "status"=>$request->status
         ]);
 
         return response()->json([
             "message"=>"Plan created successfully",
             "plan"=>$plan
         ],201);
+    }
+
+    public function getAllPlans(){
+        $user=auth('sanctum')->user();
+        if(!$user){
+            return response()->json([
+                "message"=>"Unauthenticated"
+            ],401);
+        }
+        if($user->role!="admin"){
+            return response()->json([
+                "message"=>"Unauthorized Access"
+            ],403);
+        }
+
+        $plans=Plan::all();
+        return response()->json([
+            "message"=>"Plans fetched successfully",
+            "plans"=>$plans
+        ],200);
     }
 }

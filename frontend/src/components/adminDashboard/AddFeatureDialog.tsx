@@ -69,7 +69,6 @@ const AddFeatureDialog=({open,setOpen,addFeature,features,standardFeatures}:{ope
         });
     }
 
-    
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogContent>
@@ -87,7 +86,7 @@ const AddFeatureDialog=({open,setOpen,addFeature,features,standardFeatures}:{ope
                     <div className="flex flex-col gap-2">
                         <Label>Feature Value Type</Label>
                         <NativeSelect className="w-full" value={feature.type} onChange={(e)=>setFeature({...feature,type:e.target.value as "number" | "boolean" | "string"})}>
-                            <NativeSelectOption disabled selected className="bg-card text-text-strong text-sm">Select Feature Type</NativeSelectOption>
+                            <NativeSelectOption disabled value={""} className="bg-card text-text-strong text-sm">Select Feature Type</NativeSelectOption>
                             <NativeSelectOption value="number">Number</NativeSelectOption>
                             <NativeSelectOption value="string">Text</NativeSelectOption>
                             <NativeSelectOption value="boolean">Yes/No</NativeSelectOption>
