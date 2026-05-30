@@ -22,7 +22,7 @@ export const usePlanStore=create<PlansStore>((set)=>({
     getAllPlans:async()=>{
         set({isGettingAllPlans:true});
         try{
-            const response=await axiosInstance.get('/plans');
+            const response=await axiosInstance.get('/admin/plans');
             set({allPlans:response.data.plans});
             console.log(response.data.plans);
         }catch(error:any){
@@ -37,7 +37,7 @@ export const usePlanStore=create<PlansStore>((set)=>({
     createPlan:async(plan:Plan)=>{
         set({isCreatingPlan:true});
         try {
-            const response= await axiosInstance.post('/plans/create-plan',plan);
+            const response= await axiosInstance.post('/admin/plans/create-plan',plan);
             set((state)=>({allPlans:[...state.allPlans,response.data.plan]}));
             console.log(response.data.plan);
             toast.success(response.data.message || 'Plan created successfully');

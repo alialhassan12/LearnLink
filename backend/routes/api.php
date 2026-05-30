@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\adminController;
 use App\Http\Controllers\Api\authController;
 use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
@@ -36,8 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // admin routes
     Route::middleware(['checkRole:admin'])->group(function(){
-        Route::get('/plans',[plansController::class,'getAllPlans'])->name('get-all-plans');
-        Route::post('/plans/create-plan',[plansController::class,'createPlan'])->name('create-new-plan');
+        Route::get('/admin/users',[adminController::class,'getUsers'])->name('get-users');
+        Route::get('/admin/plans',[plansController::class,'getAllPlans'])->name('get-all-plans');
+        Route::post('/admin/plans/create-plan',[plansController::class,'createPlan'])->name('create-new-plan');
     });
 
     // teacher routes
