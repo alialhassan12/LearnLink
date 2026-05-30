@@ -43,6 +43,10 @@ class User extends Authenticatable
         )->with('participants')->with('lastMessage')->orderBy('updated_at','desc');
     }
 
+    public function subscription(){
+        return $this->hasOne(Subscription::class);
+    }
+
     // Casts
     protected function casts(): array
     {

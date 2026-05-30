@@ -170,7 +170,6 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
             set({teacherCourses:response.data.courses});
             return true;
         }catch(error:any){
-            toast.error(error.response?.data?.message || "An error occurred");
             return false;
         }finally{
             set({isGettingTeacherCourses:false});

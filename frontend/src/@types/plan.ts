@@ -14,6 +14,7 @@ export interface Plan{
     features:PlanFeatures;
     duration_days:number;
     price:number;
+    is_free:boolean;
     status:string;
     created_at?:string;
     updated_at?:string;

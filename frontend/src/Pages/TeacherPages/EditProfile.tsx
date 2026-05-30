@@ -72,7 +72,7 @@ const EditProfile=()=>{
     const handleAddSubject=()=>{
         if(formData.subjects.includes(addSubjectField.trim()))return;
         if(!addSubjectField.trim())return;
-        setFormData((prev)=>({...prev,subjects:[...prev.subjects,addSubjectField]}));
+        setFormData((prev)=>({...prev,subjects:[...prev.subjects,addSubjectField.toLocaleLowerCase()]}));
         setAddSubjectField("");
     };
     const handleRemoveSubject=(index:number)=>{
@@ -81,7 +81,7 @@ const EditProfile=()=>{
     const handleAddLanguage=()=>{
         if(formData.languages.includes(addLanguageField.trim()))return;
         if(!addLanguageField.trim())return;
-        setFormData((prev)=>({...prev,languages:[...prev.languages,addLanguageField]}));
+        setFormData((prev)=>({...prev,languages:[...prev.languages,addLanguageField.toLocaleLowerCase()]}));
         setAddLanguageField("");
     };
     const handleRemoveLanguage=(index:number)=>{

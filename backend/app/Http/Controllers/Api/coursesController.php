@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Course;
 use App\Models\CourseMaterial;
 use App\Models\CourseSection;
+use App\Services\SubscriptionService;
 use App\Services\SupabaseStorageService;
 use Exception;
 use Illuminate\Contracts\Auth\SupportsBasicAuth;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class coursesController extends Controller
 {
-    public function createCourse(Request $request,SupabaseStorageService $storage){
+    public function createCourse(Request $request,SupabaseStorageService $storage,SubscriptionService $subscriptionService){
         $request->validate([
             "category_id"=>"required|exists:categories,id",
             "title"=>"required|string",
@@ -49,6 +50,13 @@ class coursesController extends Controller
             return response()->json([
                 "success"=>false,
                 "message"=>"You are not authorized to complete this action",
+            ],403);
+        }
+        $canCreateCourse=$subscriptionService->canCreateCourse($user);
+        if(!$canCreateCourse){
+            return response()->json([
+                "success"=>false,
+                "message"=>"You exceeded the limit of course publishing.Upgrade your Subscription to publish more courses",
             ],403);
         }
 
@@ -101,6 +109,10 @@ class coursesController extends Controller
 
             return $course;
         });
+
+        if($course->thumbnail){
+            $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+        }
 
         return response()->json([
             "success"=>true,
@@ -196,6 +208,10 @@ class coursesController extends Controller
             }
             return $course;
         });
+
+        if($course->thumbnail && $course->thumbnail !== "/src/assets/default-thumbnail.jfif"){
+            $course->thumbnail=$storage->getPublicUrl($course->thumbnail);
+        }
 
         return response()->json([
             "message"=>"Course saved as draft successfully",
@@ -629,7 +645,8 @@ class coursesController extends Controller
             $fileName .= '.' . $ext;
         }
 
-        $mimeType = $disk->mimeType($material->path) ?: 'application/octet-stream';
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($fileContent) ?: 'application/octet-stream';
 
         return response($fileContent, 200, [
             'Content-Type' => $mimeType,

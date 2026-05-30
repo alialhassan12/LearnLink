@@ -22,6 +22,7 @@ class plansController extends Controller
 
             'duration_days'=>'required|integer|min:-1',
             'price'=>'required|numeric|min:0',
+            'is_free'=>'required|boolean',
             'status'=>"required|in:active,inactive"
         ]);
 
@@ -44,6 +45,7 @@ class plansController extends Controller
             "features"=>$request->features,
             "duration_days"=>$request->duration_days,
             "price"=>$request->price,
+            "is_free"=>$request->is_free,
             "status"=>$request->status
         ]);
 

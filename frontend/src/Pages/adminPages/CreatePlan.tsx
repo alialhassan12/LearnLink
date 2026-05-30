@@ -58,8 +58,9 @@ const CreatePlan = () => {
         type:string,
         price:number,
         duration:number,
+        is_free:boolean,
         status:string
-    }>({planName:"",planDescription:"",type:"",price:1,duration:1,status:"active"});
+    }>({planName:"",planDescription:"",type:"",price:1,duration:1,is_free:false,status:"active"});
 
     const [customFeatures,setCustomFeatures]=useState<CustomFeature[]>([]);
 
@@ -69,7 +70,7 @@ const CreatePlan = () => {
         setCustomFeatures(prev => prev.filter(f => f.name !== name));
     };
     const clearForm=()=>{
-        setFormData({planName:"",planDescription:"",type:"",price:1,duration:1,status:"active"});
+        setFormData({planName:"",planDescription:"",type:"",price:1,is_free:false,duration:1,status:"active"});
         setCustomFeatures([]);
         setStandardFeatures([
             {
@@ -118,17 +119,18 @@ const CreatePlan = () => {
         customFeatures.forEach((feature)=>{
             features[feature.name]=feature.value;
         });
-        
-        console.log(features);
+
         const data={
             title:formData.planName,
             description:formData.planDescription,
             type:formData.type,
             features:features,
             duration_days:formData.duration,
-            price:formData.price,
+            price:formData.is_free?0:formData.price,
+            is_free:formData.is_free,
             status:formData.status
         }
+        // console.log(data);
         const success=await createPlan(data);
         if(success){
             clearForm();
@@ -378,14 +380,23 @@ const CreatePlan = () => {
                             {/* amount */}
                             <div className="flex flex-col gap-2 w-full sm:w-auto">
                                 <label className="uppercase text-text-weak text-sm">Price (in USD)</label>
-                                <Input 
-                                    type="number" 
-                                    placeholder="Enter price in USD" 
-                                    className="h-10 text-text-strong w-full sm:w-52" 
-                                    min={1} 
-                                    value={formData.price}
-                                    onChange={(e)=>setFormData({...formData,price:Number(e.target.value)})}
-                                />
+                                <div className="flex items-center gap-2">
+                                    <Input 
+                                        type="number" 
+                                        placeholder="Enter price in USD" 
+                                        className="h-10 text-text-strong w-full sm:w-52" 
+                                        min={1} 
+                                        disabled={formData.is_free}
+                                        value={formData.is_free?0:formData.price}
+                                        onChange={(e)=>setFormData({...formData,price:Number(e.target.value)})}
+                                    />
+                                    <Switch 
+                                        checked={formData.is_free}
+                                        onCheckedChange={(checked)=>setFormData({...formData,is_free:checked,price:0})}
+                                        className="cursor-pointer"
+                                    />
+                                    <span className="text-text-weak">Free</span>
+                                </div>
                             </div>
                             {/* status */}
                             <div className="flex flex-col gap-2 w-full sm:w-auto">

@@ -66,7 +66,7 @@ const MessagesLayout=()=>{
         if(conversations?.length === 0){
             getConversations();
         }
-    },[conversations]);
+    },[]);
 
     const filteredConversation=conversations.filter((conversation)=>{
         return conversation.participants.some((p)=>p.user.name.toLowerCase().includes(search.toLowerCase()));

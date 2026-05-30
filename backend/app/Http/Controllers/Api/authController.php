@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Plan;
 use App\Models\Student;
+use App\Models\Subscription;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class authController extends Controller
@@ -20,21 +23,34 @@ class authController extends Controller
             'role' => 'required|string|in:student,teacher',
         ]);
 
-        $user=User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>$request->password,
-            'role'=>$request->role,
-        ]);
-        if($request->role=='student'){
-            Student::create([
-                'user_id'=>$user->id,
+        $user=DB::transaction(function() use ($request){
+            $user=User::create([
+                'name'=>$request->name,
+                'email'=>$request->email,
+                'password'=>$request->password,
+                'role'=>$request->role,
             ]);
-        }else if($request->role=='teacher'){
-            Teacher::create([
-                'user_id'=>$user->id,
-            ]);
-        }
+            if($request->role=='student'){
+                Student::create([
+                    'user_id'=>$user->id,
+                ]);
+            }else if($request->role=='teacher'){
+                Teacher::create([
+                    'user_id'=>$user->id,
+                ]);
+            }
+            $plan=Plan::where('is_free',true)->first();
+            if($plan){
+                Subscription::create([
+                    'user_id'=>$user->id,
+                    'plan_id'=>$plan->id,
+                    'start_at'=>now(),
+                    'end_at'=>now()->addDays($plan->duration_days),
+                ]);
+            }
+
+            return $user;
+        });
 
         $token=$user->createToken('api_token')->plainTextToken;
 

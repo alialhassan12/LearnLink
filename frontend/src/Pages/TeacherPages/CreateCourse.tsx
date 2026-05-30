@@ -69,7 +69,6 @@ const CreateCourse=()=>{
         if(saved){
             clearCourseAndSectionData();
             navigate("/dashboard/my-courses");
-            toast.success("Course saved successfully");
         }
     }
 
