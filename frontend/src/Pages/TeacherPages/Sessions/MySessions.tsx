@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLiveSessionStore } from "../../../store/liveSessionsStore";
-import { Calendar, Clock, ClockCheck, Video, MessageSquare } from "lucide-react";
+import { Calendar, Clock, ClockCheck, Video, MessageSquare, VideoOff } from "lucide-react";
 import { Separator } from "../../../components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
@@ -207,6 +207,7 @@ const MySessions = () => {
                         })
                     ) : (
                         <div className="text-center py-12 border border-dashed border-border rounded-xl col-span-full">
+                            <VideoOff className="h-10 w-10 text-text-weak mx-auto" />
                             <p className="text-muted-foreground font-medium">No sessions found for this category</p>
                         </div>
                     )}

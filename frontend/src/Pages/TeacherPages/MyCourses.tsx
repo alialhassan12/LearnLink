@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
-import { Plus } from "lucide-react";
+import { FileX, Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { useEffect, useState} from "react";
 import { useCourseStore } from "../../store/courseStore";
@@ -8,13 +8,15 @@ import { Separator } from "../../components/ui/separator";
 import { Skeleton } from "../../components/ui/skeleton";
 
 const MyCourses=()=>{
-    const {teacherCourses,getTeacherCourses,isGettingTeacherCourses}=useCourseStore();
+    const {teacherCourses,getTeacherCourses,isGettingTeacherCourses,maxCoursesAllowed}=useCourseStore();
     const [filterTabs,setFilterTabs]=useState<string>("all");
     const navigate=useNavigate();
 
     useEffect(()=>{
-        if(teacherCourses.length === 0) getTeacherCourses();
-    },[teacherCourses.length,teacherCourses]);
+        getTeacherCourses();
+    },[getTeacherCourses]);
+
+    const coursesPublishedCount=teacherCourses.filter((course)=>course.status==="published").length;
 
     const filteredCourses=filterTabs==="all"? teacherCourses : teacherCourses.filter((course)=>course.status===filterTabs);
 
@@ -40,6 +42,18 @@ const MyCourses=()=>{
                         <TabsTrigger value="published">Published</TabsTrigger>
                         <TabsTrigger value="draft">Draft</TabsTrigger>
                     </TabsList>
+                    {
+                        isGettingTeacherCourses?(
+                            <Skeleton className="h-5 w-32" />
+                        ):(
+                            <p className="text-sm text-text-weak">
+                                {coursesPublishedCount}/{maxCoursesAllowed} courses published
+                                {coursesPublishedCount>=maxCoursesAllowed && (
+                                    <span className="text-red-500  line-clamp-2">Upgrade your subscription to publish more courses. You can still save courses as draft.</span>
+                                )}
+                            </p>
+                        )
+                    }
                     {/* courses section */}
                     <div className="border-t border-border pt-4">
                         {isGettingTeacherCourses ? (
@@ -123,8 +137,11 @@ const MyCourses=()=>{
                             </div>
                         )}
                         {!isGettingTeacherCourses && filteredCourses.length === 0 && (
-                            <div className="flex items-center justify-center py-10">
-                                <p className="text-text-weak">No courses found</p>
+                            <div className="flex items-center justify-center py-10 w-full border border-dashed border-border rounded-lg">
+                                <div className="flex flex-col gap-2 items-center justify-center">
+                                    <FileX className="h-10 w-10 text-text-weak" />
+                                    <p className="text-text-weak text-center font-medium">No courses Found</p>
+                                </div>
                             </div>
                         )}
                     </div>

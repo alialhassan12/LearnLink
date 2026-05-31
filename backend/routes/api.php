@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // admin routes
     Route::middleware(['checkRole:admin'])->group(function(){
         Route::get('/admin/users',[adminController::class,'getUsers'])->name('get-users');
+        Route::put('/admin/users/suspend',[adminController::class,'suspendUser'])->name('suspend-user');
+        Route::put('/admin/users/activate',[adminController::class,'activateUser'])->name('activate-user');
         Route::get('/admin/plans',[plansController::class,'getAllPlans'])->name('get-all-plans');
         Route::post('/admin/plans/create-plan',[plansController::class,'createPlan'])->name('create-new-plan');
     });

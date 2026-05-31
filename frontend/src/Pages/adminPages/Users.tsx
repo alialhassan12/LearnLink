@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAdminStore } from "../../store/adminDashboardStores/adminStore";
 import { Button } from "../../components/ui/button";
-import { Search, UserPlus, MoreVertical, Eye, Ban } from "lucide-react";
+import { Search, UserPlus, MoreVertical, Eye, Ban, CheckCircle2 } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "../../components/ui/avatar";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -15,6 +15,7 @@ import {
     PaginationPrevious
 } from "../../components/ui/pagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
+import { Spinner } from "../../components/ui/spinner";
 
 const getPageNumbers = (current: number, last: number) => {
     const pages: (number | string)[] = [];
@@ -33,8 +34,19 @@ const getPageNumbers = (current: number, last: number) => {
 };
 
 const Users = () => {
-    const { users, userPaginationData, isGettingAllUsers, getAllUsers } = useAdminStore();
+    const { 
+        users,
+        userPaginationData,
+        isGettingAllUsers,
+        getAllUsers,
+        suspendUser,
+        activateUser,
+        isSuspendingUser,
+        isActivatingUser,
+    } = useAdminStore();
+    
     const [searchInput, setSearchInput] = useState<string>("");
+    const [selectedUserId,setSelectedUserId]=useState<number | null>(null);
 
     useEffect(() => {
         getAllUsers();
@@ -174,12 +186,13 @@ const Users = () => {
 
                                             {/* STATUS */}
                                             <td className="px-6 py-4 align-middle">
-                                                {statusLower === "active" ? (
+                                                {statusLower === "active" && (
                                                     <span className="inline-flex items-center gap-1.5 text-xs text-text-strong font-medium">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] shrink-0"></span>
                                                         Active
                                                     </span>
-                                                ) : (
+                                                )}
+                                                {statusLower === "inactive" && (
                                                     <span className="inline-flex items-center gap-1.5 text-xs text-text-strong font-medium">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] shrink-0"></span>
                                                         Suspended
@@ -207,24 +220,44 @@ const Users = () => {
                                             {/* ACTIONS */}
                                             <td className="px-6 py-4 align-middle text-center">
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-text-weak hover:text-text-strong rounded-full hover:bg-neutral-800/30 cursor-pointer"
-                                                        >
+                                                    <DropdownMenuTrigger
+                                                        disabled={selectedUserId === user.id && (isActivatingUser || isSuspendingUser)}
+                                                        className={`p-2 text-text-weak hover:text-text-strong rounded-full hover:bg-neutral-800/30 cursor-pointer`}
+                                                    >
+                                                        {selectedUserId === user.id && (isActivatingUser || isSuspendingUser) ?
+                                                            <Spinner/> :
                                                             <MoreVertical className="h-4 w-4" />
-                                                        </Button>
+                                                        }
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent className="p-2 w-40 text-text-weak">
                                                         <DropdownMenuItem className="flex items-center cursor-pointer">
                                                             <Eye/>
                                                             <p>View User</p>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="flex items-center cursor-pointer">
-                                                            <Ban/>
-                                                            <p>Suspend User</p>
-                                                        </DropdownMenuItem>
+                                                        {statusLower === "active" && (
+                                                            <DropdownMenuItem 
+                                                                onClick={() => {
+                                                                    setSelectedUserId(user.id);
+                                                                    suspendUser(user.id);
+                                                                }}
+                                                                className="flex items-center cursor-pointer"
+                                                            >
+                                                                <Ban/>
+                                                                <p>Suspend User</p>
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        {statusLower === "inactive" && (
+                                                            <DropdownMenuItem 
+                                                                onClick={() => {
+                                                                    setSelectedUserId(user.id);
+                                                                    activateUser(user.id);
+                                                                }}
+                                                                className="flex items-center cursor-pointer"
+                                                            >
+                                                                <CheckCircle2/>
+                                                                <p>Activate User</p>
+                                                            </DropdownMenuItem>
+                                                        )}
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </td>

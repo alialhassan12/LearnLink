@@ -37,4 +37,70 @@ class adminController extends Controller
             ]
         ]);
     }
+
+    public function suspendUser(Request $request){
+        $request->validate([
+            "user_id"=>"required|exists:users,id"
+        ]);
+
+        $user=auth('sanctum')->user();
+        if(!$user || $user->role !='admin'){
+            return response()->json([
+                "message"=>"Unauthorized Access"
+            ],401);
+        }
+        
+        $targetedUser=User::whereId($request->user_id)->first();
+        if(!$targetedUser){
+            return response()->json([
+                "message"=>"User Not Found",
+            ],404);
+        }
+        if($targetedUser->role=='admin'){
+            return response()->json([
+                "message"=>"Admin Cannot be Suspended",
+            ],403);
+        }
+
+        $targetedUser->status='inactive';
+        $targetedUser->save();
+
+        return response()->json([
+            "message"=>"User Suspended",
+            "user"=>$targetedUser
+        ]);
+    }
+
+    public function activateUser(Request $request){
+        $request->validate([
+            "user_id"=>"required|exists:users,id"
+        ]);
+
+        $user=auth('sanctum')->user();
+        if(!$user || $user->role !='admin'){
+            return response()->json([
+                "message"=>"Unauthorized Access"
+            ],401);
+        }
+        
+        $targetedUser=User::whereId($request->user_id)->first();
+        if(!$targetedUser){
+            return response()->json([
+                "message"=>"User Not Found",
+            ],404);
+        }
+        if($targetedUser->role=='admin'){
+            return response()->json([
+                "message"=>"Admin's status cannot be changed",
+            ],403);
+        }
+
+        $targetedUser->status='active';
+        $targetedUser->save();
+
+        return response()->json([
+            "message"=>"User Activated",
+            "user"=>$targetedUser
+        ]);
+    }
 }

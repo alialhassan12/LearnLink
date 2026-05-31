@@ -16,6 +16,7 @@ class conversationsController extends Controller
             ],401);
         }
         $conversations=$user->conversations->load('participants.user', 'lastMessage.sender');
+
         
         return response()->json([
             'conversations'=>$conversations,

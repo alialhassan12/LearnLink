@@ -40,6 +40,7 @@ interface CourseStore{
     //all courses
     courses:Course[];
     coursePaginationData:CoursePaginationData | null;
+    maxCoursesAllowed:number;
     getCourses:(page?:number)=>Promise<boolean>;
     isGettingCourses:boolean,
 
@@ -163,13 +164,19 @@ export const useCourseStore = create<CourseStore>((set,get) => ({
 
     isGettingTeacherCourses:false,
     teacherCourses:[],
+    maxCoursesAllowed:0,
     getTeacherCourses:async()=>{
         set({isGettingTeacherCourses:true});
         try{
             const response=await axiosInstance.get('/courses/my-courses');
-            set({teacherCourses:response.data.courses});
+            set({
+                teacherCourses:response.data.courses,
+                maxCoursesAllowed:response.data.max_courses_allowed
+            });
+            console.log(response.data);
             return true;
         }catch(error:any){
+            toast.error(error.response?.data?.message || "An error occurred");
             return false;
         }finally{
             set({isGettingTeacherCourses:false});

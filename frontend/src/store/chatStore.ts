@@ -28,6 +28,7 @@ export const useChatStore=create<ChatState>((set)=>({
     activeConversation:null,
     setActiveConversation:(conversation:Conversation|null)=>set({activeConversation:conversation}),
     messages:[],
+    setMessages:(messages:Message[])=>set({messages}),
 
     isGettingConversations:false,
     getConversations:async()=>{
@@ -45,11 +46,16 @@ export const useChatStore=create<ChatState>((set)=>({
 
     isGettingMessages:false,
     getMessages:async(conversation_id:number)=>{
+        if (conversation_id < 0) {
+            set({messages:[]});
+            return;
+        }
         set({isGettingMessages:true});
         try {
             const response=await axiosInstance.post('/messages/conversation',{'conversation_id':conversation_id});
             set({messages:response.data.messages});
         } catch (error:any) {
+            set({messages:[]});
             console.log('error getting messages:',error?.response?.data);
         }finally{
             set({isGettingMessages:false});
@@ -77,8 +83,74 @@ export const useChatStore=create<ChatState>((set)=>({
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            // set((state)=>({messages:[...state.messages,response.data.message]}));
-            // console.log('message sent:',response.data.message);
+            
+            const sentMessage = response.data.message;
+            if (sentMessage) {
+                set((state) => {
+                    const nextState: Partial<ChatState> = {};
+                    
+                    // Add the message locally
+                    const messageExists = state.messages.some(m => String(m.id) === String(sentMessage.id));
+                    if (!messageExists) {
+                        nextState.messages = [...state.messages, sentMessage];
+                    }
+                    
+                    // If the active conversation is temporary or its ID doesn't match the new message's conversation ID, update it
+                    if (state.activeConversation && state.activeConversation.id !== sentMessage.conversation_id) {
+                        const updatedActiveConv = {
+                            ...state.activeConversation,
+                            id: sentMessage.conversation_id
+                        };
+                        nextState.activeConversation = updatedActiveConv;
+                        
+                        nextState.conversations = state.conversations.map(conv => 
+                            conv.id === state.activeConversation!.id 
+                                ? { ...conv, id: sentMessage.conversation_id, last_message: sentMessage, updated_at: sentMessage.created_at }
+                                : conv
+                        );
+                    } else {
+                        nextState.conversations = state.conversations.map(conv => {
+                            if (conv.id === sentMessage.conversation_id) {
+                                return {
+                                    ...conv,
+                                    last_message: sentMessage,
+                                    updated_at: sentMessage.created_at
+                                };
+                            }
+                            return conv;
+                        });
+                    }
+                    
+                    if (nextState.conversations) {
+                        nextState.conversations.sort((a, b) => {
+                            const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+                            const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+                            return timeB - timeA;
+                        });
+                    }
+                    
+                    return nextState;
+                });
+                
+                // Fetch the actual conversation records from the backend in the background to ensure everything is completely in sync
+                // We do NOT await this request so that the message sending status is cleared immediately.
+                const activeConv = useChatStore.getState().activeConversation;
+                if (activeConv) {
+                    axiosInstance.get('/messages/conversations')
+                        .then((convsResponse) => {
+                            const updatedConvs = convsResponse.data.conversations;
+                            const matchingConv = updatedConvs.find((c: Conversation) => c.id === sentMessage.conversation_id);
+                            
+                            set({
+                                conversations: updatedConvs,
+                                activeConversation: matchingConv || activeConv
+                            });
+                        })
+                        .catch((err) => {
+                            console.error('Failed to sync conversations after sending first message:', err);
+                        });
+                }
+            }
         } catch (error:any) {
             console.log('error sending message:',error?.response?.data);
         }finally{

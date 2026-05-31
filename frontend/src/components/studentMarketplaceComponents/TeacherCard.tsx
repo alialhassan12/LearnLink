@@ -14,11 +14,20 @@ const TeacherCard = ({ teacher }: { teacher: Teacher }) => {
             <div data-aos="fade-up" className="group flex flex-col md:flex-row gap-6 bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
                 {/* teacher image */}
                 <div className="relative w-full md:w-48 h-48 md:h-48 shrink-0">
-                    <img 
-                        className="w-full h-full rounded-xl object-cover shadow-sm group-hover:scale-[1.02] transition-transform duration-500" 
-                        src={teacher.avatar} 
-                        alt={teacher.name}
-                    />
+                    {
+                        teacher.avatar?(
+                            <img 
+                                className="w-full h-full rounded-xl object-cover shadow-sm group-hover:scale-[1.02] transition-transform duration-500" 
+                                src={teacher.avatar} 
+                                alt={teacher.name}
+                            />
+                        ):
+                        (
+                            <div className="w-full h-full rounded-xl bg-gray-300/30 flex items-center justify-center">
+                                <span className="text-gray-400 text-5xl">{teacher.name.charAt(0).toUpperCase()}</span>
+                            </div>
+                        )
+                    }
                     <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-border flex items-center gap-1 shadow-sm">
                         <span className="text-primary font-bold text-sm">${teacher.hourly_rate}</span>
                         <span className="text-[10px] text-text-weak font-medium">/hr</span>

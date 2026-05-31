@@ -161,9 +161,9 @@ const MessagesLayout=()=>{
             setFile(file);
         }
     }
-    const handleSelectConversation=(conversation:Conversation)=>{
+    const handleSelectConversation=async(conversation:Conversation)=>{
         setActiveConversation(conversation);
-        getMessages(conversation.id);
+        await getMessages(conversation.id);
     }
 
     return (
@@ -188,14 +188,6 @@ const MessagesLayout=()=>{
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1">
                     {isGettingConversations ? (
                         <ConversationsSkeleton />
-                    ) : conversations.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                                <MessageSquare className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                            <p className="font-medium text-lg">No messages yet</p>
-                            <p className="text-muted-foreground text-sm mt-1">Start a conversation to see it here.</p>
-                        </div>
                     ) : (
                         filteredConversation.map((conversation)=>{
                             const isDirect = conversation.type === 'direct';
@@ -207,7 +199,7 @@ const MessagesLayout=()=>{
                                     key={conversation.id} 
                                     onClick={() => handleSelectConversation(conversation)}
                                     className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-200 ${
-                                        isActive ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-muted/60'
+                                        isActive ? 'bg-primary text-primary-foreground shadow-md pointer-events-none' : 'hover:bg-muted/60'
                                     }`}
                                 >
                                     <Avatar className="h-12 w-12 border-2 border-background shadow-sm">

@@ -409,13 +409,15 @@ class coursesController extends Controller
         }
 
         $courses=$teacher->courses()->with('category')->get();
-        
-        if($courses->isEmpty()){
-            return response()->json([
-                "success"=>false,
-                "message"=>"No courses found"
-            ],404);
-        }
+
+        $maxCoursesAllowed=$user->subscription->plan->features['max_courses'];
+
+        // if($courses->isEmpty()){
+        //     return response()->json([
+        //         "success"=>false,
+        //         "message"=>"No courses found"
+        //     ],404);
+        // }
 
         // Add public url to thumbnail
         $courses->each(function($course) use ($storage){
@@ -425,7 +427,8 @@ class coursesController extends Controller
         return response()->json([
             "success"=>true,
             "message"=>"Courses fetched successfully",
-            "courses"=>$courses
+            "courses"=>$courses,
+            "max_courses_allowed"=>$maxCoursesAllowed
         ],200);
     }
 

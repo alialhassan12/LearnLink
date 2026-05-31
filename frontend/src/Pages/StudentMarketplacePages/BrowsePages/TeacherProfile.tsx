@@ -170,7 +170,7 @@ const TeacherProfile = () => {
             return;
         }
 
-        const newConversationId=conversations.length+1;
+        const newConversationId = -teacher.user_id;
 
         const newConversation:Conversation={
             id:newConversationId,
@@ -234,7 +234,7 @@ const TeacherProfile = () => {
                         {/* languages */}
                         <div className="flex flex-row text-sm text-text-weak gap-1.5 items-center bg-bg-1 px-3 py-1.5 rounded-full border border-border">
                             <Globe className="w-4 h-4 text-primary"/>
-                            <span className="font-medium">{teacher?.languages.join(", ")}</span>
+                            <span className="font-medium">{teacher?.languages?.join(", ")}</span>
                         </div>
                         {/* location */}
                         <div className="flex flex-row text-sm text-text-weak gap-1.5 items-center bg-bg-1 px-3 py-1.5 rounded-full border border-border">
@@ -260,7 +260,7 @@ const TeacherProfile = () => {
                     <div className="flex flex-col gap-4">
                         <h2 className="text-xl font-bold text-text-strong">Subjects & Expertise</h2>
                         <div className="flex flex-row gap-2 flex-wrap">
-                            {teacher?.subjects.map((subject,index)=>(
+                            {teacher?.subjects?.map((subject,index)=>(
                                 <span key={index} className="text-sm text-text-strong font-semibold bg-card border border-border px-4 py-2 rounded-xl shadow-sm hover:border-primary/50 transition-colors">
                                     {subject}
                                 </span>
@@ -373,7 +373,7 @@ const TeacherProfile = () => {
                             >
                                 <NativeSelectOption value="" disabled>Select a Subject</NativeSelectOption>
                                 {
-                                    teacher?.subjects.map((subject)=>{
+                                    teacher?.subjects?.map((subject)=>{
                                         return(
                                             <NativeSelectOption key={subject} value={subject}>
                                                 {subject}
