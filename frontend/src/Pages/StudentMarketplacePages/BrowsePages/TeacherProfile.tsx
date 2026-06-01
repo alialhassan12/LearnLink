@@ -104,7 +104,7 @@ const TeacherProfile = () => {
     const {authUser}=useAuthStore();
     const {teacher,getTeacherById,isGettingTeacherById}=useBrowseStore();
     const {createBooking,isCreatingBooking}=useBookingStore();
-    const {addConversation,setActiveConversation,conversations}=useChatStore();
+    const {addConversation,setActiveConversation,conversations,getMessages}=useChatStore();
     const navigate=useNavigate();
 
     const day_of_week=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -166,6 +166,7 @@ const TeacherProfile = () => {
         const conversation=conversations.find((c)=>c.participants.some((p)=>p.user_id===teacher.user_id));
         if(conversation){
             setActiveConversation(conversation);
+            getMessages(conversation.id);
             navigate('/marketplace/chat');
             return;
         }

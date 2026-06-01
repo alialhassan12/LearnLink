@@ -219,7 +219,8 @@ const SessionView =()=>{
             {/* top section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <p className="text-xl font-semibold text-text-strong">Student : {teacherSelectedSession?.student?.user?.name}</p>
+                    <p className="text-xl font-semibold capitalize text-primary">{teacherSelectedSession?.subject}</p>
+                    <p className="text-sm font-medium text-text-strong">Student : {teacherSelectedSession?.student?.user?.name}</p>
                     <div className="flex flex-row gap-2">
                         <div className="flex items-center gap-2">
                             <Calendar className="text-primary w-5 h-5"/>

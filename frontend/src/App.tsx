@@ -13,6 +13,7 @@ import { useLiveSessionStore } from './store/liveSessionsStore';
 import SessionRoom from './Pages/SessionRoom';
 import { useCourseEnrollmentStore } from './store/studentmarketplaceStores/courseEnrollmentStore';
 import AdminDashboard from './Pages/AdminDashboard';
+import { useChatStore } from './store/chatStore';
 
 // Wrapper for routes that require the user to be logged in
 const ProtectedRoute = ({ children,allowedRoles }: { children: React.ReactNode,allowedRoles:string[] }) => {
@@ -57,20 +58,21 @@ function App() {
   const { checkAuth } = useAuthStore();
   const {token,url,session_id}=useLiveSessionStore();
   const {getEnrolledCoursesIds}=useCourseEnrollmentStore();
+  const {getConversations}=useChatStore();
 
+  const initialize = async () => {
+    const loggedIn = await checkAuth();
+    // If user is logged in and is a student, fetch enrolled courses ids
+    if (loggedIn && useAuthStore.getState().authUser?.role === 'student'){
+      await getEnrolledCoursesIds();
+    }
+    await getConversations();
+  };
+  
   useEffect(() => {
     Aos.init({
       duration: 1000
     });
-    
-    const initialize = async () => {
-      const loggedIn = await checkAuth();
-      // If user is logged in and is a student, fetch enrolled courses
-      if (loggedIn && useAuthStore.getState().authUser?.role === 'student'){
-        await getEnrolledCoursesIds();
-      }
-    };
-    
     initialize();
   }, []);
 

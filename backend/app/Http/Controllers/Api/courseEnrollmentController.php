@@ -90,7 +90,7 @@ class courseEnrollmentController extends Controller
             ],403);
         }
 
-        $enrollments=CourseEnrollment::where('student_id',$student->id)->with('course.teacher.user')->get();
+        $enrollments=CourseEnrollment::where('student_id',$student->id)->with('course.teacher.user','course.category')->get();
         
         foreach($enrollments as $enrollment){
             if($enrollment->course->thumbnail){

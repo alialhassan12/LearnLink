@@ -19,7 +19,7 @@ const CourseCard=({course}:{course:Course})=>{
             </div>
             {/* course info */}
             <div className="flex flex-col gap-2 p-4">
-                <span className="text-[10px] text-primary uppercase font-medium tracking-wider">{course.category.title}</span>
+                <span className="text-[10px] text-primary uppercase font-medium tracking-wider">{course.category?.title}</span>
                 <p className="text-text-strong line-clamp-2 text-base font-medium">{course.title}</p>
                 <div className="flex items-center gap-2">
                     <Avatar>

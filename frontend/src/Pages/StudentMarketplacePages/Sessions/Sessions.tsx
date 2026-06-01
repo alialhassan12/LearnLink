@@ -114,9 +114,10 @@ const Sessions = ()=>{
                             </div>
 
                             <div className="space-y-4">
-                                <h2 className="text-3xl md:text-4xl font-bold text-text-strong leading-tight">
-                                    Next Session with <span className="text-primary">{nextSession?.teacher?.user?.name}</span>
-                                </h2>
+                                <div className="flex flex-col text-3xl md:text-4xl font-bold text-text-strong leading-tight">
+                                    <p>Next Session <span className="text-primary">{nextSession?.subject}</span></p>
+                                    <p>with <span className="text-primary">{nextSession?.teacher?.user?.name}</span></p>
+                                </div>
                                 <div className="flex flex-wrap gap-4 text-lg">
                                     <div className="flex items-center gap-2 bg-background/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-border">
                                         <Calendar className="text-primary w-5 h-5" />
@@ -181,6 +182,9 @@ const Sessions = ()=>{
                                                 </Avatar>
                                                 <div>
                                                     <p className="text-text-strong font-bold text-lg group-hover:text-primary transition-colors">{session.teacher?.user?.name}</p>
+                                                    <p className="text-md">
+                                                        Subject: <span className="text-primary font-semibold">{session.subject}</span>
+                                                    </p>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <span className={`text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full border ${
                                                             session.status === 'booked' ? 'bg-amber-50 text-amber-600 border-amber-200' :

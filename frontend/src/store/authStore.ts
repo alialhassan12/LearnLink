@@ -49,7 +49,9 @@ const useAuthStore=create<useAuthStoreInterface>((set)=>({
             set({authUser:response.data.user});
             return true;
         } catch (error:any) {
-            console.log(error.response.data.message);
+            localStorage.removeItem('token');
+            set({authUser:null});
+            toast.error(error.response.data.message);
             return false;
         } finally{
             set({isCheckingAuth:false});

@@ -129,7 +129,10 @@ const CourseDetails=()=>{
                         <div className="flex flex-col gap-3 mt-2">
                             {enrolledCoursesIds.includes(Number(id))
                                 ?(
-                                    <Button className="w-full py-6 text-base font-bold hover:scale-105 hover:bg-primary/80 active:scale-95 cursor-pointer">
+                                    <Button 
+                                        onClick={()=>navigate(`/marketplace/learnings/course/${course?.id}`)}
+                                        className="w-full py-6 text-base font-bold hover:scale-105 hover:bg-primary/80 active:scale-95 cursor-pointer"
+                                    >
                                         Go to Course
                                     </Button>
                                 )

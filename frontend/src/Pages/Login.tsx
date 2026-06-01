@@ -15,10 +15,12 @@ import Header from "../components/Header";
 import { Spinner } from "../components/ui/spinner";
 import { Button } from "../components/ui/button";
 import { useCourseEnrollmentStore } from "../store/studentmarketplaceStores/courseEnrollmentStore";
+import { useChatStore } from "../store/chatStore";
 
 const Login = () => {
     const {login,isloggingIn,authUser}=useAuthStore();
     const {getEnrolledCoursesIds}=useCourseEnrollmentStore();
+    const {getConversations}=useChatStore()
 
     const navigate=useNavigate();
     const [formData, setFormData] = useState<{
@@ -64,6 +66,7 @@ const Login = () => {
         // send request to backend
         const success = await login(formData);
         if(success){
+            getConversations();
             if(authUser?.role==='admin') navigate("/admin/dashboard");
             if(authUser?.role==='teacher') navigate('/dashboard');
             if(authUser?.role==='student'){ 

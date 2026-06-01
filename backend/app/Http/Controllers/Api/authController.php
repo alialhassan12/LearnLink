@@ -74,6 +74,12 @@ class authController extends Controller
             ],401);
         }
 
+        if($user->status == "inactive"){
+            return response()->json([
+                'message'=>'Your account has been suspended. Contact support for more information',
+            ],403);
+        }
+
         // update user avatar
         $avatarUrl=$user->avatar ? (new SupabaseStorageService)->getPublicUrl($user->avatar) : null;
         $user->avatar=$avatarUrl;
@@ -107,6 +113,12 @@ class authController extends Controller
             return response()->json([
                 'message'=>'User not found',
             ],404); 
+        }
+
+        if($user->status == "inactive"){
+            return response()->json([
+                'message'=>'Your account has been suspended. Contact support for more information',
+            ],403);
         }
 
         // update user avatar
