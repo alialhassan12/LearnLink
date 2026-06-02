@@ -42,6 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/users/activate',[adminController::class,'activateUser'])->name('activate-user');
         Route::get('/admin/plans',[plansController::class,'getAllPlans'])->name('get-all-plans');
         Route::post('/admin/plans/create-plan',[plansController::class,'createPlan'])->name('create-new-plan');
+        Route::get("/admin/categories",[categoriesController::class,'listCategoriesToAdmin'])->name("list-admin-categories");
+        Route::post("/admin/categories/new",[categoriesController::class,'createCategory'])->name("create-category");
+        Route::put("/admin/categories/update",[categoriesController::class,'updateCategory'])->name("update-category");
+        Route::delete("/admin/categories/delete/{id}",[categoriesController::class,'deleteCategory'])->name("delete-category");
+        Route::put("/admin/categories/change-status",[categoriesController::class,'changeCategoryStatus'])->name("change-category-status");
     });
 
     // teacher routes

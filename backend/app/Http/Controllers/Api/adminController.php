@@ -16,7 +16,7 @@ class adminController extends Controller
                 "message"=>"Unauthorized Access"
             ],401);
         }
-        $users=User::with("subscription.plan")->where('role','!=','admin')
+        $users=User::with("subscription.plan")->where('role','!=','admin')->orderBy("created_at")
             ->paginate(4)->through(function($users) use($storage){
                 if($users->avatar){
                     $users->avatar=$storage->getPublicUrl($users->avatar);

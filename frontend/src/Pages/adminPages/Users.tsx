@@ -145,7 +145,7 @@ const Users = () => {
                                             key={user.id}
                                             className="hover:bg-gray-900/5 transition-colors duration-150"
                                         >
-                                            {/* USER */}
+                                            {/* USER */}    
                                             <td className="px-6 py-4 align-middle">
                                                 <div className="flex items-center gap-3">
                                                     <Avatar size="lg" className="border border-border/30 shadow-sm">
@@ -221,15 +221,19 @@ const Users = () => {
                                             <td className="px-6 py-4 align-middle text-center">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger
+                                                        asChild
                                                         disabled={selectedUserId === user.id && (isActivatingUser || isSuspendingUser)}
                                                         className={`p-2 text-text-weak hover:text-text-strong rounded-full hover:bg-neutral-800/30 cursor-pointer`}
                                                     >
-                                                        {selectedUserId === user.id && (isActivatingUser || isSuspendingUser) ?
-                                                            <Spinner/> :
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        }
+                                                        <Button  variant="ghost">
+                                                            {selectedUserId === user.id && (isActivatingUser || isSuspendingUser) ?
+                                                                <Spinner/> 
+                                                                :
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            }
+                                                        </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="p-2 w-40 text-text-weak">
+                                                    <DropdownMenuContent className="p-2 w-40 text-text-weak" align="end">
                                                         <DropdownMenuItem className="flex items-center cursor-pointer">
                                                             <Eye/>
                                                             <p>View User</p>

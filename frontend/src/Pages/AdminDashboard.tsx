@@ -12,6 +12,7 @@ import AdminContentDashboard from "./adminPages/AdminContentDashboard";
 import Plans from "./adminPages/Plans";
 import Users from "./adminPages/Users";
 import CreatePlan from "./adminPages/CreatePlan";
+import Categories from "./adminPages/Categories";
 
 const AdminDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -54,6 +55,7 @@ const AdminDashboard=()=>{
                             <Route index element={<Plans/>}/>
                             <Route path="new" element={<CreatePlan/>}/>
                         </Route>
+                        <Route path="/categories" element={<Categories/>}/>
                     </Routes>
                 </div>
                 
