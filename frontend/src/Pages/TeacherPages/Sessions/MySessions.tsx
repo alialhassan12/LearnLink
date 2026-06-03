@@ -7,14 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avat
 import { Skeleton } from "../../../components/ui/skeleton";
 import { Button } from "../../../components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useChatStore } from "../../../store/chatStore";
-import useAuthStore from "../../../store/authStore";
-import type { Conversation } from "../../../@types/conversation";
-import type { user } from "../../../@types/user";
+import MessageButton from "../../../components/MessageButton";
 
 const MySessions = () => {
-    const { authUser } = useAuthStore();
-    const { conversations, setActiveConversation, addConversation, getMessages } = useChatStore();
     const { getTeacherLiveSessions, teacherLiveSessions, isGettingTeacherLiveSessions } = useLiveSessionStore();
     const [filterTabs, setFilterTabs] = useState<string>("all");
     const filteredSessions = teacherLiveSessions.filter((session) => filterTabs === "all" || filterTabs === session.status);
@@ -44,50 +39,6 @@ const MySessions = () => {
             icon: Calendar
         }
     ];
-
-    const handleSendMessage = async (user: user) => {
-        // check if conversation exist
-        const conversation = conversations.find((c) => c.participants?.some((p) => p.user_id === user.id));
-        if (conversation) {
-            setActiveConversation(conversation);
-            getMessages(conversation.id);
-            navigate('/dashboard/chat');
-            return;
-        }
-        const newConversationId = conversations.length + 1;
-
-        const newConversation: Conversation = {
-            id: newConversationId,
-            type: 'direct',
-            participants: [
-                {
-                    id: 0,
-                    user_id: user.id,
-                    user: {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        avatar: user.avatar,
-                        role: 'student'
-                    }
-                },
-                {
-                    id: 1,
-                    user_id: authUser!.id,
-                    user: {
-                        id: authUser!.id,
-                        name: authUser!.name,
-                        email: authUser!.email,
-                        avatar: authUser!.avatar,
-                        role: authUser!.role as 'student' | 'teacher'
-                    }
-                }
-            ]
-        }
-        setActiveConversation(newConversation);
-        addConversation(newConversation);
-        navigate('/dashboard/chat');
-    };
 
     if (isGettingTeacherLiveSessions) {
         return <MySessionsSkeleton />;
@@ -190,17 +141,17 @@ const MySessions = () => {
                                             {session.status == "booked" ? "Start Session" : "View Session"}
                                         </Button>
 
-                                        <Button 
+                                        <MessageButton
+                                            recieverUser={session.student.user}
                                             variant="outline" 
-                                            size="sm" 
-                                            className="h-10 w-full text-muted-foreground hover:text-primary hover:bg-primary/10 cursor-pointer"
-                                            onClick={() => handleSendMessage(session.student?.user as user)}
+                                            className="h-10 w-full mt-2 text-muted-foreground hover:text-primary hover:bg-primary/10 ml-auto md:ml-0 cursor-pointer"
+                                            
                                         >
                                             <div className="flex w-full items-center justify-center gap-2">
-                                                <MessageSquare className="w-4 h-4" /> 
+                                                <MessageSquare  /> 
                                                 <p>Message</p>
                                             </div>
-                                        </Button>
+                                        </MessageButton>
                                     </div>
                                 </div>
                             );

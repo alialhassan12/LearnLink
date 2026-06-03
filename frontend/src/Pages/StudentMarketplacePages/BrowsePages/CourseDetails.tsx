@@ -99,9 +99,9 @@ const CourseDetails=()=>{
                             <div className="flex flex-col gap-2 flex-1">
                                 <div >
                                     <p className="font-bold text-lg text-text-strong">{course?.teacher?.user?.name}</p>
-                                    <p className="text-primary font-medium text-sm">{course?.teacher?.headline}</p>
+                                    <p className="text-primary font-medium text-sm ">{course?.teacher?.headline}</p>
                                 </div>
-                                <p className="text-text-weak text-sm sm:text-base">{course?.teacher?.bio}</p>
+                                <p className="text-text-weak text-sm sm:text-base line-clamp-2">{course?.teacher?.bio}</p>
                             </div>
                             <div className="flex flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0">
                                 <Button variant="outline" className="w-full sm:w-auto cursor-pointer hover:bg-primary/90 hover:scale-105 transition-all" onClick={()=>navigate(`/marketplace/browse/teachers/${course?.teacher_id}`)}>

@@ -1,4 +1,4 @@
-import { Calendar, Check, ClipboardCheck, ClipboardClock, ClipboardX, Clock, MessageSquare, User, X } from "lucide-react";
+import { Calendar, Check, ClipboardCheck, ClipboardClock, ClipboardX, Clock, MessageSquare, X } from "lucide-react";
 import useBookingStore from "../../store/bookingStore";
 import { useEffect, useState } from "react";
 import { Separator } from "../../components/ui/separator";
@@ -6,18 +6,11 @@ import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import { Spinner } from "../../components/ui/spinner";
-import { useChatStore } from "../../store/chatStore";
-import { useNavigate } from "react-router-dom";
-import type { Conversation } from "../../@types/conversation";
-import useAuthStore from "../../store/authStore";
-import type { user } from "../../@types/user";
+import MessageButton from "../../components/MessageButton";
 
 const Bookings = () => {
-    const {authUser}=useAuthStore();
     const {teacherBookings,isGettingTeacherBookings,getTeacherBookings,isRejectingBooking,rejectBooking,approveBooking,isApprovingBooking}=useBookingStore();
-    const {conversations,setActiveConversation,addConversation,getMessages}=useChatStore();
     const [selectedBooking,setSelectedBooking]=useState<number | null>(null);
-    const navigate=useNavigate();
     const pendingBookings=teacherBookings.filter((booking)=>booking.status==="pending");
     const approvedBookings=teacherBookings.filter((booking)=>booking.status==="approved");
     const rejectedBookings=teacherBookings.filter((booking)=>booking.status==="rejected");
@@ -50,51 +43,6 @@ const Bookings = () => {
     }
     const handleApproveBooking=async(booking_id:number)=>{
         await approveBooking(booking_id);
-    }
-
-    const handleSendMessage=async (user:user)=>{
-        // check if conversation exist
-        const conversation=conversations.find((c)=>c.participants.some((p)=>p.user_id===user.id));
-        if(conversation){
-            console.log(conversation);
-            setActiveConversation(conversation);
-            getMessages(conversation.id);
-            navigate('/dashboard/chat');
-            return;
-        }
-        const newConversationId=conversations.length+1;
-
-        const newConversation: Conversation={
-            id:newConversationId,
-            type:'direct',
-            participants:[
-                {
-                    id:0,
-                    user_id:user.id,
-                    user:{
-                        id:user.id,
-                        name:user.name,
-                        email:user.email,
-                        avatar:user.avatar,
-                        role:'teacher'
-                    }
-                },
-                {
-                    id:1,
-                    user_id:authUser!.id,
-                    user:{
-                        id:authUser!.id,
-                        name:authUser!.name,
-                        email:authUser!.email,
-                        avatar:authUser!.avatar,
-                        role:authUser!.role as 'student' | 'teacher'
-                    }
-                }
-            ]
-        }
-        setActiveConversation(newConversation);
-        addConversation(newConversation);
-        navigate('/dashboard/chat')
     }
 
     if(isGettingTeacherBookings){
@@ -228,17 +176,17 @@ const Bookings = () => {
                                             </div>
                                         )}
                                         {/* message btn */}
-                                        <Button 
+                                        <MessageButton
+                                            recieverUser={booking.student.user}
                                             variant="outline" 
-                                            size="sm" 
                                             className="h-10 w-full mt-2 text-muted-foreground hover:text-primary hover:bg-primary/10 ml-auto md:ml-0 cursor-pointer"
-                                            onClick={()=>handleSendMessage(booking.student.user as user)}
+                                            
                                         >
                                             <div className="flex w-full items-center justify-center gap-2">
                                                 <MessageSquare  /> 
                                                 <p>Message</p>
                                             </div>
-                                        </Button>
+                                        </MessageButton>
                                     </div>
                                 </div>
                             );

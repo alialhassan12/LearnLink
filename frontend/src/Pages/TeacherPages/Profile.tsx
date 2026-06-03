@@ -91,16 +91,16 @@ const Profile=()=>{
                 {/* user avatar */}
                 <div className='flex-shrink-0'>
                     <Avatar className='w-24 h-24 border-2 border-primary'>
-                        <AvatarImage src={teacher?.avatar} alt={teacher?.name} />
+                        <AvatarImage src={teacher?.user?.avatar} alt={teacher?.user?.name} />
                         <AvatarFallback className='bg-primary text-white text-4xl'>
-                            {teacher?.name?.charAt(0)?.toUpperCase()}
+                            {teacher?.user?.name?.charAt(0)?.toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
                 </div>
                 {/* user info  */}
                 <div className='flex flex-col flex-1 w-full'>
                     <div className='flex flex-row justify-between items-center'>
-                        <p className='text-lg font-medium text-text-strong'>Dr. {teacher?.name}</p>
+                        <p className='text-lg font-medium text-text-strong'>Dr. {teacher?.user?.name}</p>
                         <Button 
                             onClick={()=>navigate("edit")}
                             className='h-10 px-4 hover:bg-primary/80 cursor-pointer'
@@ -109,7 +109,7 @@ const Profile=()=>{
                         </Button>
                     </div>
                     <p className='text-sm text-text-weak mt-1'>{teacher?.headline ? teacher?.headline : 'No Headline Yet'}</p>
-                    <p className='text-sm text-text-weak'>{teacher?.email}</p>
+                    <p className='text-sm text-text-weak'>{teacher?.user?.email}</p>
                     <p className='text-sm text-text-weak'>{teacher?.location ? teacher?.location : 'No Location Yet'}</p>
                 </div>
             </div>

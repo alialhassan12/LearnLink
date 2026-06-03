@@ -9,15 +9,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avat
 import useAuthStore  from "../../../store/authStore";
 import { Spinner } from "../../../components/ui/spinner";
 import { toast } from "sonner";
-import { useChatStore } from "../../../store/chatStore";
-import type { user } from "../../../@types/user";
-import type { Conversation } from "../../../@types/conversation";
+import MessageButton from "../../../components/MessageButton";
 
 const SessionView = () => {
     const {id}=useParams();
     const {authUser}=useAuthStore();
     const {studentSelectedSession,isGettingStudentSelectedSession,getStudentSelectedSession,getToken,isGettingToken}=useLiveSessionStore();
-    const {conversations,setActiveConversation,addConversation,getMessages}=useChatStore();
     const navigate=useNavigate();
     const [selectedMaterialId,setSelectedMaterialId]=useState<number|null>(null);
     const [isDownloadingMaterial,setIsDownloadingMaterial]=useState<boolean>(false);
@@ -58,50 +55,6 @@ const SessionView = () => {
         }
     }
 
-    const handleSendMessage=async (user:user)=>{
-        // check if conversation exist
-        const conversation=conversations.find((c)=>c.participants.some((p)=>p.user_id===user.id));
-        if(conversation){
-            setActiveConversation(conversation);
-            getMessages(conversation.id);
-            navigate('/marketplace/chat');
-            return;
-        }
-        const newConversationId=conversations.length+1;
-
-        const newConversation: Conversation={
-            id:newConversationId,
-            type:'direct',
-            participants:[
-                {
-                    id:0,
-                    user_id:user.id,
-                    user:{
-                        id:user.id,
-                        name:user.name,
-                        email:user.email,
-                        avatar:user.avatar,
-                        role:'teacher'
-                    }
-                },
-                {
-                    id:1,
-                    user_id:authUser!.id,
-                    user:{
-                        id:authUser!.id,
-                        name:authUser!.name,
-                        email:authUser!.email,
-                        avatar:authUser!.avatar,
-                        role:authUser!.role as 'student' | 'teacher'
-                    }
-                }
-            ]
-        }
-        setActiveConversation(newConversation);
-        addConversation(newConversation);
-        navigate('/marketplace/chat');
-    }
-    
     if(isGettingStudentSelectedSession){
         return (<SessionViewSkeleton/>);
     }
@@ -141,14 +94,14 @@ const SessionView = () => {
                         >
                             {isGettingToken ? <Spinner className="text-background"/>: <span className="flex items-center gap-2 text-lg">Join Session <ArrowRight size={20}/></span>}
                         </Button>
-                        <Button 
+                        <MessageButton 
                             disabled={isGettingToken}
                             variant="outline"
-                            onClick={()=>handleSendMessage(studentSelectedSession?.teacher.user as user)}
+                            recieverUser={studentSelectedSession.teacher.user}
                             className="flex-1 py-7 px-8 cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl bg-background/50 backdrop-blur-sm border-border hover:bg-background/80 font-bold" 
                         >
                             <span className="flex items-center gap-2 text-lg">Message <Mail size={20}/></span>
-                        </Button>
+                        </MessageButton>
                     </div>
                 </div>
 

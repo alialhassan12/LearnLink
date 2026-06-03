@@ -16,34 +16,21 @@ class teacherController extends Controller
                 'message'=>'User not found',
             ],404); 
         }
-        $teacher=$user->teacher;
+        $teacher=Teacher::where('user_id',$user->id)->with('user','availabilities')->first();
         if(!$teacher){
             return response()->json([
                 'message'=>'Teacher not found',
             ],404); 
         }
 
-        if($user->avatar){
-            $user->avatar=$storage->getPublicUrl($user->avatar);
+
+        if($teacher->user && $teacher->user->avatar){
+            $teacher->user->avatar=$storage->getPublicUrl($teacher->user->avatar);
         }
 
         return response()->json([
             'message'=>'Teacher profile found successfully',
-            'teacher'=>[
-                'name'=>$user->name,
-                'email'=>$user->email,
-                'avatar'=>$user->avatar,
-                'bio'=>$teacher->bio,
-                'location'=>$teacher->location,
-                'headline'=>$teacher->headline,
-                'hourly_rate'=>$teacher->hourly_rate,
-                'subjects'=>$teacher->subjects,
-                'languages'=>$teacher->languages,
-                'availabilities'=>$teacher->availabilities,
-                'created_at'=>$user->created_at,
-                'updated_at'=>$user->updated_at,
-                'courses_count'=>$teacher->courses->count(),
-            ],
+            'teacher'=>$teacher,
         ],200); 
     }
 
@@ -102,6 +89,18 @@ class teacherController extends Controller
         }else{
             $user->update([
                 'name'=>$request->name,
+                'avatar'=>null,
+            ]);
+        }
+        
+        if($request->has('subjects') && count($request->subjects)>0){
+            $teacher->update([
+                'subjects'=>$request->subjects,
+            ]);
+        }
+        if($request->has('languages') && count($request->languages)>0){
+            $teacher->update([
+                'languages'=>$request->languages,
             ]);
         }
 
@@ -109,8 +108,6 @@ class teacherController extends Controller
             'headline'=>$request->headline,
             'location'=>$request->location,
             'bio'=>$request->bio,
-            'subjects'=>$request->subjects,
-            'languages'=>$request->languages,
             'hourly_rate'=>$request->hourly_rate,
         ]);
         
@@ -239,23 +236,7 @@ class teacherController extends Controller
 
         return response()->json([
             'message'=>'Teacher profile found successfully',
-            'teacher'=>[
-                'id'=>$teacher->id,
-                'user_id'=>$teacher->user_id,
-                'name'=>$teacher->user->name,
-                'email'=>$teacher->user->email,
-                'avatar'=>$teacher->user->avatar,
-                'bio'=>$teacher->bio,
-                'headline'=>$teacher->headline,
-                'hourly_rate'=>$teacher->hourly_rate,
-                'subjects'=>$teacher->subjects,
-                'languages'=>$teacher->languages,
-                'created_at'=>$teacher->user->created_at,
-                'updated_at'=>$teacher->user->updated_at,
-                'courses_count'=>$teacher->publishedCourses->count(),
-                'courses'=>$teacher->publishedCourses,
-                'availabilities'=>$teacher->availabilities,
-            ],
+            'teacher'=>$teacher
         ],200); 
     }
 

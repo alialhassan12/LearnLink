@@ -11,15 +11,13 @@ import { useSessionMaterialsStore } from "../../../store/sessionMaterialsStore";
 import { Spinner } from "../../../components/ui/spinner";
 import { Skeleton } from "../../../components/ui/skeleton";
 import type { user } from "../../../@types/user";
-import type { Conversation } from "../../../@types/conversation";
-import { useChatStore } from "../../../store/chatStore";
+import MessageButton from "../../../components/MessageButton";
 
 const SessionView =()=>{
     const {id}=useParams();
     const {authUser}=useAuthStore();
     const {getToken,isGettingToken,teacherSelectedSession,isGettingTeacherSelectedSession,getTeacherSelectedSession}=useLiveSessionStore();
     const {sessionMaterials,setSessionMaterials,uploadMaterials,isuploadingMaterials,deleteSessionMaterial,isDeletingSessionMaterial}=useSessionMaterialsStore();
-    const {conversations,setActiveConversation,addConversation,getMessages}=useChatStore();
     const navigate=useNavigate();
     const [selectedMaterialId,setSelectedMaterialId]=useState<number|null>(null);
 
@@ -126,49 +124,6 @@ const SessionView =()=>{
             await getToken(roomName,Number(id));
             navigate(`/room/${roomName}`);
         }
-    }
-    const handleSendMessage=async (user:user)=>{
-        // check if conversation exist
-        const conversation=conversations.find((c)=>c.participants.some((p)=>p.user_id===user.id));
-        if(conversation){
-            setActiveConversation(conversation);
-            getMessages(conversation.id);
-            navigate('/dashboard/chat');
-            return;
-        }
-        const newConversationId=conversations.length+1;
-
-        const newConversation: Conversation={
-            id:newConversationId,
-            type:'direct',
-            participants:[
-                {
-                    id:0,
-                    user_id:user.id,
-                    user:{
-                        id:user.id,
-                        name:user.name,
-                        email:user.email,
-                        avatar:user.avatar,
-                        role:'teacher'
-                    }
-                },
-                {
-                    id:1,
-                    user_id:authUser!.id,
-                    user:{
-                        id:authUser!.id,
-                        name:authUser!.name,
-                        email:authUser!.email,
-                        avatar:authUser!.avatar,
-                        role:authUser!.role as 'student' | 'teacher'
-                    }
-                }
-            ]
-        }
-        setActiveConversation(newConversation);
-        addConversation(newConversation);
-        navigate('/dashboard/chat');
     }
 
     const calculateTimeLeft=()=>{
@@ -294,15 +249,15 @@ const SessionView =()=>{
                             </>
                             }
                         </Button>
-                        <Button 
+                        <MessageButton 
+                            recieverUser={teacherSelectedSession?.student?.user as user}
                             className="flex-1 py-8 px-10 cursor-pointer hover:scale-105 hover:text-primary transition-all duration-300 rounded-xl bg-text-strong/80  " 
                             variant="outline"
-                            onClick={()=>handleSendMessage(teacherSelectedSession?.student?.user as user)}
                             disabled={isGettingToken}
                         >
                             Message Student   
                             <Mail/>
-                        </Button>
+                        </MessageButton>
                     </div>
                 </div>
                 {/* details card */}

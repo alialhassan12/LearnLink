@@ -34,10 +34,11 @@ class studentController extends Controller
         
         
 
-        if($user->avatar){
-            $user->avatar = $storage->getPublicUrl($user->avatar);
-        }
         $student->load('user');
+
+        if($student->user && $student->user->avatar){
+            $student->user->avatar = $storage->getPublicUrl($student->user->avatar);
+        }
 
         return response()->json([
             "message"=>"Student details fetched successfully",

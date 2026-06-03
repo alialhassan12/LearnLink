@@ -46,6 +46,8 @@ const BrowseTeachers = () => {
 
     // handlers
 
+    const isLoading=isGettingFilters || isGettingTeachers;
+    
     return (
         <div className="px-10 py-10">
 
@@ -93,7 +95,7 @@ const BrowseTeachers = () => {
                                 <TeacherFilterSection 
                                     subjects={subjects} 
                                     languages={languages} 
-                                    isGettingFilters={isGettingFilters} 
+                                    isGettingFilters={isLoading} 
                                 />
                             </div>
                         </SheetContent>
@@ -106,7 +108,7 @@ const BrowseTeachers = () => {
                         <TeacherFilterSection 
                             subjects={subjects} 
                             languages={languages} 
-                            isGettingFilters={isGettingFilters} 
+                            isGettingFilters={isLoading} 
                         />
                     </div>
                 </aside>
@@ -116,22 +118,13 @@ const BrowseTeachers = () => {
                     {/* sort by */}
                     <div data-aos="fade-left" className="flex flex-row justify-between items-center">
                         <div className="text-xl font-bold text-text-strong">
-                            {isGettingTeachers ? <Skeleton className="h-6 w-32" /> : `${teachers.length} Teachers Found`}
+                            {isLoading ? <Skeleton className="h-6 w-32" /> : `${teachers.length} Teachers Found`}
                         </div>
-                        {/* <div className="flex items-center gap-2">
-                            <span className="text-sm text-text-weak hidden sm:inline">Sort by:</span>
-                            <NativeSelect className="h-9 w-[140px] text-sm">
-                                <NativeSelectOption value="popular">Most Popular</NativeSelectOption>
-                                <NativeSelectOption value="price-low">Price: Low to High</NativeSelectOption>
-                                <NativeSelectOption value="price-high">Price: High to Low</NativeSelectOption>
-                                <NativeSelectOption value="rating">Highest Rated</NativeSelectOption>
-                            </NativeSelect>
-                        </div> */}
                     </div>
 
                     {/* teacher results */}
                     <div className="grid grid-cols-1 gap-4">
-                        {isGettingTeachers ? (
+                        {isLoading ? (
                             Array.from({ length: 4 }).map((_, i) => (
                                 <TeacherCardSkeleton key={i} />
                             ))

@@ -4,9 +4,9 @@ import type { user } from "./user";
 export interface Teacher {
     id: number;    
     user_id:number;
-    name: string;
-    email: string;
-    avatar: string;
+    name?:string,
+    email?:string,
+    avatar?:string,
     bio: string;
     headline: string;
     location: string;
@@ -22,5 +22,6 @@ export interface Teacher {
     }[];
     courses_count?: number;
     courses?: Course[];
+    publishedCourses?:Course[];
     user?:user;
 }

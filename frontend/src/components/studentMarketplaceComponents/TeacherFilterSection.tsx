@@ -36,28 +36,33 @@ const TeacherFilterSection = ({ subjects, languages, isGettingFilters }: { subje
                             </div>
                         ))
                     ) : (
-                        subjects.map((subject, i) => (
-                            <div key={i} className="flex flex-row items-center gap-2 group cursor-pointer">
-                                <Checkbox
-                                    id={`filter-subject-${subject}`}
-                                    value={subject}
-                                    checked={teacherFilter.subjects.includes(subject)}
-                                    onCheckedChange={()=>{
-                                        setTeacherFilter({
-                                            ...teacherFilter,
-                                            subjects:teacherFilter.subjects.includes(subject)?teacherFilter.subjects.filter((s)=>s!==subject):[...teacherFilter.subjects,subject]
-                                        });
-                                    }}
-                                    className="border-text-weak group-hover:border-primary"
-                                />
-                                <label 
-                                    htmlFor={`filter-subject-${subject}`} 
-                                    className="text-sm text-text-weak group-hover:text-text-strong cursor-pointer transition-colors"
-                                >
-                                    {subject}
-                                </label>
-                            </div>
-                        ))
+                        subjects.map((subject, i) => {
+                            if(subject){
+                                return (
+                                    <div key={i} className="flex flex-row items-center gap-2 group cursor-pointer">
+                                        <Checkbox
+                                            id={`filter-subject-${subject}`}
+                                            value={subject}
+                                            checked={teacherFilter.subjects.includes(subject)}
+                                            onCheckedChange={()=>{
+                                                setTeacherFilter({
+                                                    ...teacherFilter,
+                                                    subjects:teacherFilter.subjects.includes(subject)?teacherFilter.subjects.filter((s)=>s!==subject):[...teacherFilter.subjects,subject]
+                                                });
+                                            }}
+                                            className="border-text-weak group-hover:border-primary"
+                                        />
+                                        <label 
+                                            htmlFor={`filter-subject-${subject}`} 
+                                            className="text-sm text-text-weak group-hover:text-text-strong cursor-pointer transition-colors"
+                                        >
+                                            {subject}
+                                        </label>
+                                    </div>
+                                );
+                            }
+                            return;
+                        })
                     )}
                 </div>
             </div>
@@ -77,11 +82,16 @@ const TeacherFilterSection = ({ subjects, languages, isGettingFilters }: { subje
                     ) : (
                         <>
                             <NativeSelectOption value="all">All Languages</NativeSelectOption>
-                            {languages.map((language, i) => (
-                                <NativeSelectOption key={i} value={language}>
-                                    {language}
-                                </NativeSelectOption>
-                            ))}
+                            {languages.map((language, i) => {
+                                if(language){
+                                    return(
+                                        <NativeSelectOption key={i} value={language}>
+                                            {language}
+                                        </NativeSelectOption>
+                                    );
+                                }
+                                return;
+                            })}
                         </>
                     )}
                 </NativeSelect>

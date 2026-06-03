@@ -6,16 +6,10 @@ import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import type { user } from "../../@types/user";
-import type { Conversation } from "../../@types/conversation";
-import { useChatStore } from "../../store/chatStore";
-import useAuthStore from "../../store/authStore";
-import { useNavigate } from "react-router-dom";
+import MessageButton from "../../components/MessageButton";
 
 const MyBookings = () => {
-    const {authUser}=useAuthStore();
     const { studentBookings, getStudentBookings, isGettingStudentBookings } = useBookingStore();
-    const {conversations,setActiveConversation,addConversation,getMessages}=useChatStore();
-    const navigate=useNavigate();
     const [filterTabs, setFilterTabs] = useState("all");
 
     useEffect(() => {
@@ -49,50 +43,6 @@ const MyBookings = () => {
             bg: "bg-amber-100"
         }
     ];
-
-    const handleSendMessage=async (user:user)=>{
-        // check if conversation exist
-        const conversation=conversations.find((c)=>c.participants.some((p)=>p.user_id===user.id));
-        if(conversation){
-            setActiveConversation(conversation);
-            getMessages(conversation.id);
-            navigate('/marketplace/chat');
-            return;
-        }
-        const newConversationId=conversations.length+1;
-
-        const newConversation: Conversation={
-            id:newConversationId,
-            type:'direct',
-            participants:[
-                {
-                    id:0,
-                    user_id:user.id,
-                    user:{
-                        id:user.id,
-                        name:user.name,
-                        email:user.email,
-                        avatar:user.avatar,
-                        role:'teacher'
-                    }
-                },
-                {
-                    id:1,
-                    user_id:authUser!.id,
-                    user:{
-                        id:authUser!.id,
-                        name:authUser!.name,
-                        email:authUser!.email,
-                        avatar:authUser!.avatar,
-                        role:authUser!.role as 'student' | 'teacher'
-                    }
-                }
-            ]
-        }
-        setActiveConversation(newConversation);
-        addConversation(newConversation);
-        navigate('/marketplace/chat');
-    }
 
     if (isGettingStudentBookings) {
         return <SkeletonBookingState />;
@@ -162,7 +112,7 @@ const MyBookings = () => {
                                             <Avatar className="h-16 w-16 border-2 border-background ring-2 ring-primary/10 shadow-sm">
                                                 <AvatarImage src={booking.teacher?.user?.avatar} />
                                                 <AvatarFallback className="bg-primary/5 text-primary text-xl font-bold">
-                                                    {booking.teacher?.name?.[0].toUpperCase()}
+                                                    {booking.teacher?.user.name?.[0].toUpperCase()}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background ${
@@ -205,14 +155,14 @@ const MyBookings = () => {
 
                                     {/* Actions */}
                                     <div className="flex items-center gap-3">
-                                        <Button 
+                                        <MessageButton 
                                             variant="outline" 
-                                            onClick={()=>handleSendMessage(booking.teacher.user as user)}
+                                            recieverUser={booking?.teacher?.user as user}
                                             className="flex-1 lg:flex-none h-11 px-6 rounded-xl border-primary/20 hover:bg-primary/5 hover:border-primary/40 text-primary transition-all duration-300"
                                         >
                                             <MessageSquare className="w-4 h-4 mr-2" />
                                             Message Teacher
-                                        </Button>
+                                        </MessageButton>
                                     </div>
                                 </div>
                             </div>

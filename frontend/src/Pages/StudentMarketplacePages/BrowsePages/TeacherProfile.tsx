@@ -15,6 +15,8 @@ import useAuthStore from "../../../store/authStore";
 import type { Conversation } from "../../../@types/conversation";
 import { NativeSelect, NativeSelectOption } from "../../../components/ui/native-select";
 import { Textarea } from "../../../components/ui/textarea";
+import MessageButton from "../../../components/MessageButton";
+import type { user } from "../../../@types/user";
 
 const TeacherProfileSkeleton = () => (
     <div className="flex flex-col gap-10 px-4 py-6 md:px-10 md:py-10 max-w-7xl mx-auto animate-pulse">
@@ -225,11 +227,11 @@ const TeacherProfile = () => {
             {/* teacher basic info */}
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                 <Avatar className="h-32 w-32 md:h-48 md:w-48 border-4 border-card shadow-xl shrink-0">
-                    <AvatarFallback className="text-4xl md:text-6xl">{teacher?.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    <AvatarImage src={teacher?.avatar} className="object-cover" />
+                    <AvatarFallback className="text-4xl md:text-6xl">{teacher?.user?.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={teacher?.user?.avatar} className="object-cover" />
                 </Avatar>
                 <div className="flex flex-col text-center md:text-left md:pt-4">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-text-strong">{teacher?.name}</h1>
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-text-strong">{teacher?.user?.name}</h1>
                     <p className="text-lg text-primary font-medium mt-1">{teacher?.headline}</p>
                     <div className="flex flex-row items-center justify-center md:justify-start gap-3 mt-4 flex-wrap">
                         {/* languages */}
@@ -253,7 +255,7 @@ const TeacherProfile = () => {
                 <div className="flex flex-col gap-8 flex-1">
                     {/* bio */}
                     <div className="flex flex-col border border-border bg-card rounded-2xl p-6 shadow-sm gap-4">
-                        <h2 className="text-xl font-bold text-text-strong">About {teacher?.name.split(" ")[0]}</h2>
+                        <h2 className="text-xl font-bold text-text-strong">About {teacher?.user?.name.split(" ")[0]}</h2>
                         <p className="text-base text-text-weak leading-relaxed">{teacher?.bio}</p>
                     </div>
 
@@ -307,9 +309,9 @@ const TeacherProfile = () => {
 
                     {/* courses taught by the teacher */}
                     <div className="flex flex-col gap-6">
-                        <h2 className="text-xl font-bold text-text-strong">Courses by {teacher?.name.split(" ")[0]}</h2>
+                        <h2 className="text-xl font-bold text-text-strong">Courses by {teacher?.user?.name.split(" ")[0]}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {teacher?.courses?.map((course,index)=>{
+                            {teacher?.publishedCourses?.map((course,index)=>{
                                     if(course.status!="published"){
                                         return null;
                                     }
@@ -411,13 +413,13 @@ const TeacherProfile = () => {
                                     "Book Session"
                                 )}
                             </Button>
-                            <Button
-                                onClick={handleMessageTeacher}
+                            <MessageButton
+                                recieverUser={teacher?.user as user} 
                                 variant="outline" 
                                 className="w-full h-11 cursor-pointer font-bold rounded-xl hover:bg-muted transition-colors"
                             >
                                 Message Teacher
-                            </Button>
+                            </MessageButton>
                         </div>
                     </div>
                 </div>

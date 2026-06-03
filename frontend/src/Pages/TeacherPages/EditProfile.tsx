@@ -28,9 +28,9 @@ const EditProfile=()=>{
         hourlyRate:number,
         availability:Array<{day_of_week:string, start_time:string, end_time:string}>,
     }>({
-        name:teacher?.name || '',
+        name:teacher?.user?.name || '',
         headline:teacher?.headline || '',
-        avatar:teacher?.avatar || new File([],''),
+        avatar:teacher?.user?.avatar || new File([],''),
         location:teacher?.location || '',
         bio:teacher?.bio || '',
         subjects:teacher?.subjects || [],
@@ -72,7 +72,7 @@ const EditProfile=()=>{
     const handleAddSubject=()=>{
         if(formData.subjects.includes(addSubjectField.trim()))return;
         if(!addSubjectField.trim())return;
-        setFormData((prev)=>({...prev,subjects:[...prev.subjects,addSubjectField.toLocaleLowerCase()]}));
+        setFormData((prev)=>({...prev,subjects:[...prev.subjects,addSubjectField.toLocaleLowerCase().trim()]}));
         setAddSubjectField("");
     };
     const handleRemoveSubject=(index:number)=>{
@@ -81,7 +81,7 @@ const EditProfile=()=>{
     const handleAddLanguage=()=>{
         if(formData.languages.includes(addLanguageField.trim()))return;
         if(!addLanguageField.trim())return;
-        setFormData((prev)=>({...prev,languages:[...prev.languages,addLanguageField.toLocaleLowerCase()]}));
+        setFormData((prev)=>({...prev,languages:[...prev.languages,addLanguageField.toLocaleLowerCase().trim()]}));
         setAddLanguageField("");
     };
     const handleRemoveLanguage=(index:number)=>{

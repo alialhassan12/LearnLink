@@ -33,6 +33,8 @@ const BrowseCourses=()=>{
         }
     },[getCategories]);
 
+    const isLoading=isGettingCategories || isGettingCourses;
+
     return (
         <div className="px-10 py-10">
             {/* top search bar */}
@@ -77,7 +79,7 @@ const BrowseCourses=()=>{
                             <div className="py-6 overflow-y-auto h-full">
                                 <CourseFilterSection 
                                     categories={categories}
-                                    isGettingFilters={isGettingCategories}
+                                    isGettingFilters={isLoading}
                                 />
                             </div>
                         </SheetContent>
@@ -89,7 +91,7 @@ const BrowseCourses=()=>{
                     <div data-aos="fade-right" className="sticky top-24 flex flex-col gap-6 p-6 bg-bg-1 border border-border rounded-xl shadow-sm">
                         <CourseFilterSection 
                             categories={categories}
-                            isGettingFilters={isGettingCategories}
+                            isGettingFilters={isLoading}
                         />
                     </div>
                 </aside>
@@ -97,7 +99,7 @@ const BrowseCourses=()=>{
                 {/* courses grid */}
                 <main className="flex-1 flex flex-col gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {isGettingCourses ? (
+                        {isLoading ? (
                             Array.from({ length: 4 }).map((_, i) => (
                                 <CourseCardSkeleton key={i} />
                             ))
