@@ -7,9 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Button } from "../../components/ui/button";
 import { Spinner } from "../../components/ui/spinner";
 import MessageButton from "../../components/MessageButton";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 
 const Bookings = () => {
-    const {teacherBookings,isGettingTeacherBookings,getTeacherBookings,isRejectingBooking,rejectBooking,approveBooking,isApprovingBooking}=useBookingStore();
+    const {teacherBookings,isGettingTeacherBookings,getTeacherBookings,isRejectingBooking,rejectBooking,approveBooking,isApprovingBooking,max_live_sessions,current_live_sessions}=useBookingStore();
     const [selectedBooking,setSelectedBooking]=useState<number | null>(null);
     const pendingBookings=teacherBookings.filter((booking)=>booking.status==="pending");
     const approvedBookings=teacherBookings.filter((booking)=>booking.status==="approved");
@@ -67,6 +68,25 @@ const Bookings = () => {
                         <div className="text-3xl font-bold">{card.value}</div>
                     </div>
                 ))}
+            </div>
+            {/* Live Sessions Tracker */}
+            <div className="flex flex-col items-center gap-1 text-foreground mb-4">
+                <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <p className="font-medium">Live Sessions Tracker: {current_live_sessions} / {max_live_sessions} per month</p>
+                </div>
+                <div className="w-full bg-primary/10 rounded-full h-2 dark:bg-primary/20">
+                    <div className="bg-primary h-2 rounded-full" style={{width: `${(current_live_sessions / max_live_sessions) * 100}%`}}></div>
+                </div>
+                {
+                    (current_live_sessions/max_live_sessions)*100 === 100 && (
+                        <div className="text-sm font-medium text-destructive w-full text-left p-2">
+                            <p>You have reached your monthly limit of live sessions.</p>
+                            <p>You cant approve new booking until next month.</p>
+                            <p>Upgrade your subscription to increase your live sessions limit.</p>
+                        </div>
+                    )
+                }
             </div>
             <Separator className="my-4"/>
             {/* filter section */}

@@ -85,6 +85,8 @@ class liveSessionsController extends Controller
             ],401);
         }
 
+        $max_live_sessions=$user->subscription->plan->features['sessions_per_month'];
+
         $bookings=$teacher->approvedBookings()->with('liveSession','student.user')->get();
         $live_sessions=[];
         foreach($bookings as $booking){
@@ -99,7 +101,8 @@ class liveSessionsController extends Controller
 
         return response()->json([
             "message"=>"Live sessions fetched successfully",
-            "live_sessions"=>$live_sessions
+            "live_sessions"=>$live_sessions,
+            "max_live_sessions"=>$max_live_sessions
         ],200);
     }
 

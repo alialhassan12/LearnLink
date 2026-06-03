@@ -22,6 +22,6 @@ export interface Teacher {
     }[];
     courses_count?: number;
     courses?: Course[];
-    publishedCourses?:Course[];
+    published_courses?:Course[];
     user?:user;
 }

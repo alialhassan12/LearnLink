@@ -95,6 +95,7 @@ const useBrowseStore=create<BrowseStoreState>((set,get)=>({
         try {
             const response = await axiosInstance.get(`/teacher/${id}`);
             set({teacher:response.data.teacher});
+            console.log("teacher:",response.data.teacher);
         } catch (error:any) {
             toast.error(error.response?.data?.message);
         } finally {

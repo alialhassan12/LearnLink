@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\LiveSession;
 use App\Models\Student;
+use App\Models\Subscription;
 use App\Models\Teacher;
+use App\Services\SubscriptionService;
 use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +57,7 @@ class bookingsController extends Controller
         ],200); 
     }
 
-    public function getTeacherBookings(Request $request, SupabaseStorageService $storage){
+    public function getTeacherBookings(Request $request, SupabaseStorageService $storage, SubscriptionService $subscriptionService){
         $user=$request->user();
         if(!$user){
             return response()->json([
@@ -70,6 +72,15 @@ class bookingsController extends Controller
             ],401); 
         }
 
+        $subscription = Subscription::with('plan')
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+
+        $max_live_sessions = $subscription ? ($subscription->plan->features['sessions_per_month'] ?? 0) : 0;
+        $current_live_sessions = $subscriptionService->getLiveSessionsCreatedCount($user);
+        
+
         $bookings=Booking::with('student.user')->where('teacher_id',$teacher->id)->orderBy('scheduled_date','asc')->get();
 
         foreach($bookings as $booking){
@@ -81,6 +92,8 @@ class bookingsController extends Controller
         return response()->json([
             'message'=>'Bookings fetched successfully',
             'bookings'=>$bookings,
+            'max_live_sessions'=>$max_live_sessions,
+            'current_live_sessions'=>$current_live_sessions
         ],200);
     }
 
@@ -155,7 +168,7 @@ class bookingsController extends Controller
         ],200);
     }
 
-    public function approveBooking(Request $request,SupabaseStorageService $storage){
+    public function approveBooking(Request $request,SupabaseStorageService $storage,SubscriptionService $subscriptionService){
         $request->validate([
             'booking_id'=>'required|exists:bookings,id'
         ]);
@@ -173,6 +186,12 @@ class bookingsController extends Controller
             ],401);
         }
 
+        if(!$subscriptionService->canCreateLiveSession($user)){
+            return response()->json([
+                'message'=>'You have reached the maximum number of live sessions allowed per month. Please upgrade your subscription plan or wait for the next month.',
+            ],429);
+        }
+
         $booking = $teacher->bookings()->find($request->booking_id);
         if(!$booking){
             return response()->json([
@@ -185,12 +204,12 @@ class bookingsController extends Controller
             ],400);
         }
 
-        DB::transaction(function() use ($booking) {
+        DB::transaction(function() use ($booking,$teacher) {
             LiveSession::create([
                 'booking_id'=>$booking->id,
                 'scheduled_date'=>$booking->scheduled_date,
                 'scheduled_day'=>$booking->scheduled_day,
-                'scheduled_time'=>$booking->scheduled_time,
+                'scheduled_time'=>$booking->scheduled_time, 
                 'subject'=>$booking->subject,
                 'student_note'=>$booking->student_note,
             ]);
@@ -206,10 +225,13 @@ class bookingsController extends Controller
                 $b->student->user->avatar=$storage->getPublicUrl($b->student->user->avatar);
             }
         }
+
+        $current_live_sessions = $subscriptionService->getLiveSessionsCreatedCount($user);
         
         return response()->json([
             'message'=>'Booking approved successfully',
             'bookings'=>$bookings,
+            'current_live_sessions'=>$current_live_sessions,
         ],200);
     }
 }

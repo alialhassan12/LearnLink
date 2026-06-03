@@ -17,9 +17,11 @@ interface BookingStore{
     rejectBooking:(booking_id:number)=>Promise<void>;
     isApprovingBooking:boolean;
     approveBooking:(booking_id:number)=>Promise<void>;
+    max_live_sessions:number;
+    current_live_sessions:number;
 }
 
-const useBookingStore =create<BookingStore>((set)=>({
+const useBookingStore =create<BookingStore>((set,get)=>({
     newBooking:null,
     
     isCreatingBooking:false,
@@ -43,7 +45,11 @@ const useBookingStore =create<BookingStore>((set)=>({
         set({isGettingTeacherBookings:true});
         try{
             const response=await axiosInstance.get('/bookings/teacher-bookings');
-            set({teacherBookings:response.data.bookings});
+            set({
+                teacherBookings:response.data.bookings,
+                max_live_sessions:response.data.max_live_sessions,
+                current_live_sessions:response.data.current_live_sessions
+            });
         }
         catch(error){
             toast.error('Failed to get teacher bookings: ',error.response?.data?.message || 'Unknown error');
@@ -87,15 +93,21 @@ const useBookingStore =create<BookingStore>((set)=>({
         set({isApprovingBooking:true});
         try{
             const response=await axiosInstance.post('/bookings/approve-booking',{booking_id});
-            set({teacherBookings:response.data.bookings});
+            set({
+                teacherBookings:response.data.bookings,
+                current_live_sessions:response.data.current_live_sessions
+            });
             toast.success(response.data.message);
         }
-        catch(error){
-            toast.error('Failed to approve booking: ',error.response?.data?.message || 'Unknown error');
+        catch(error:any){
+            toast.error(error.response?.data?.message);
         } finally{
             set({isApprovingBooking:false});
         }
-    }
+    },
+
+    max_live_sessions:0,
+    current_live_sessions:0
 
 }));
 

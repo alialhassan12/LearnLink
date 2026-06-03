@@ -111,16 +111,6 @@ const MyCourses=()=>{
                                                 >
                                                     View Course
                                                 </Button>
-                                                {/* {course.status==="draft" && (
-                                                    <Button className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
-                                                        Publish
-                                                    </Button>
-                                                )}
-                                                {course.status==="published" && (
-                                                    <Button variant="outline" className="h-10 px-4 hover:bg-primary/80 cursor-pointer">
-                                                        Unpublish
-                                                    </Button>
-                                                )} */}
                                             </div>
                                         </div>
                                         {/* badge */}

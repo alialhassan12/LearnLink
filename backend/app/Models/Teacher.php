@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
-#[Fillable(['user_id','headline','location','bio','subjects','languages','hourly_rate'])]
+#[Fillable(['user_id','headline','location','bio','subjects','languages','hourly_rate','sessions_created'])]
 class Teacher extends Model
 {
     // Relations
