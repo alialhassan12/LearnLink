@@ -1,4 +1,4 @@
-import { GraduationCap } from "lucide-react";
+import { Eye, EyeOff, GraduationCap } from "lucide-react";
 import { Input } from "../components/ui/input";
 import {
     Field,
@@ -20,7 +20,7 @@ import { useChatStore } from "../store/chatStore";
 const Login = () => {
     const {login,isloggingIn,authUser}=useAuthStore();
     const {getEnrolledCoursesIds}=useCourseEnrollmentStore();
-    const {getConversations}=useChatStore()
+    const {getConversations}=useChatStore();
 
     const navigate=useNavigate();
     const [formData, setFormData] = useState<{
@@ -32,6 +32,7 @@ const Login = () => {
     });
     const [error, setError] = useState<string>('');
     const [hasError, setHasError] = useState<boolean>(false);
+    const [showPassword,setShowPassword]=useState<boolean>(false);
     
     // handlers
     const handleChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -101,7 +102,25 @@ const Login = () => {
                                 </Field>
                                 <Field>
                                     <FieldLabel>Password</FieldLabel>
-                                    <Input type="password" onChange={handleChange} disabled={isloggingIn} name="password" placeholder="********" className="py-5" aria-invalid={hasError} ></Input>
+                                    <div className="relative">
+                                        <Input 
+                                            type={showPassword ? "text" : "password"} 
+                                            onChange={handleChange} 
+                                            disabled={isloggingIn} 
+                                            name="password" 
+                                            placeholder="••••••••" 
+                                            className="py-5 pr-10" 
+                                            aria-invalid={hasError} 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={()=>setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors"
+                                            disabled={isloggingIn}
+                                        >
+                                            {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                        </button>
+                                    </div>
                                     <FieldDescription className="text-xs">
                                         <Link to="/auth/forget-password" className="text-primary">Forget your password?</Link>
                                     </FieldDescription>

@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\adminController;
+use App\Http\Controllers\Api\aiChatController;
+use App\Http\Controllers\Api\aiMessages;
+use App\Http\Controllers\Api\aiMessagesController;
+use App\Http\Controllers\Api\aiRequestController;
 use App\Http\Controllers\Api\authController;
 use App\Http\Controllers\Api\bookingsController;
 use App\Http\Controllers\Api\categoriesController;
@@ -22,6 +26,7 @@ Broadcast::routes(['middleware' => ['auth:sanctum']]);
 // public routes
 Route::post('/auth/register',[authController::class,'register'])->name('register_new_user');
 Route::post('/auth/login',[authController::class,'login'])->name('login_user');
+Route::post('/ai/messages/new',[aiMessagesController::class,'sendMessage'])->name('send-ai-message');
 
 // auth routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -34,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages/send',[messageController::class,'send'])->name('send-message');
     Route::get('/messages/conversations',[conversationsController::class,'getConversations'])->name('get-conversations');
     Route::post('/messages/conversation',[messageController::class,'getMessagesByConversation'])->name('get-messages');
+    Route::post('/ai/messages',[aiMessagesController::class,'getMessages'])->name('get-ai-messages');
+    
+    Route::get('/ai/chats',[aiChatController::class,'getChats'])->name('get-user-ai-chats');
 
     // admin routes
     Route::middleware(['checkRole:admin'])->group(function(){

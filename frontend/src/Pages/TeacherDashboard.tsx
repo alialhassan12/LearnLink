@@ -8,7 +8,7 @@ import MyCourses from "./TeacherPages/MyCourses";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import useAuthStore from "../store/authStore";
-import { Bell } from "lucide-react";
+import { Bell, Sparkles } from "lucide-react";
 import CreateCourse from "./TeacherPages/CreateCourse";
 import PublishedSuccessful from "./TeacherPages/PublishedSuccessful";
 import Profile from "./TeacherPages/Profile";
@@ -19,6 +19,8 @@ import SessionView from "./TeacherPages/Sessions/SessionView";
 import MessagesLayout from "./MessagesLayout";
 import CourseDetails from "./TeacherPages/CourseDetails";
 import EditCourse from "./TeacherPages/EditCourse";
+import { Button } from "../components/ui/button";
+import AiAssistantLayout from "./AiAssistantLayout";
 
 const TeacherDashboard=()=>{
     const {authUser}=useAuthStore();
@@ -37,6 +39,14 @@ const TeacherDashboard=()=>{
                             <SidebarTrigger />
                         </div>
                         <div className="flex items-center gap-4">
+                            <Button 
+                                variant={'secondary'} 
+                                className={`cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary flex ${location.pathname==='/dashboard/ai-assistant'? 'text-primary ':''}`}
+                                onClick={()=>navigate("/dashboard/ai-assistant")}
+                            >
+                                <Sparkles className={`w-4 h-4 ${location.pathname==='/dashboard/ai-assistant'? 'animate-bounce':''}`}/>
+                                <p className="font-medium">AI Assistant</p>
+                            </Button>
                             <ThemeToggle />
                             <Bell className="cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary text-text-strong" />
                             <div className="flex items-center gap-2">
@@ -74,6 +84,7 @@ const TeacherDashboard=()=>{
                             <Route index element={<Profile/>}></Route>
                             <Route path="edit" element={<EditProfile/>}></Route>
                         </Route>
+                        <Route path="ai-assistant" element={<AiAssistantLayout/>}/>
                     </Routes>
                 </div>
                 

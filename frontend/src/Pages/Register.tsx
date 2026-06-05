@@ -1,4 +1,4 @@
-import { BookOpen, ChartArea, GraduationCap } from "lucide-react";
+import { BookOpen, ChartArea, Eye, EyeOff, GraduationCap } from "lucide-react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { Input } from "../components/ui/input";
@@ -21,6 +21,8 @@ const Register = () => {
 
     const {register,isRegistering,authUser}=useAuthStore();
     const navigate=useNavigate();
+    const [showPassword,setShowPassword]=useState<boolean>(false);
+    const [showPasswordConfirmation,setShowPasswordConfirmation]=useState<boolean>(false);
 
     const [formData,setFormData]=useState<{
         name:string;
@@ -216,16 +218,27 @@ const Register = () => {
                             </Field>
                             <Field>
                                 <FieldLabel>Password</FieldLabel>
-                                <Input 
-                                    type="password" 
-                                    name="password" 
-                                    placeholder="********" 
-                                    className="py-5" 
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    disabled={isRegistering}
-                                    aria-invalid={hasError.password}
-                                />
+                                <div className="relative">
+                                    <Input 
+                                        type={showPassword ? "text" : "password"}
+                                        name="password" 
+                                        placeholder="••••••••" 
+                                        className="py-5 pr-10" 
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        disabled={isRegistering}
+                                        aria-invalid={hasError.password}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={()=>setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors"
+                                        disabled={isRegistering}
+                                    >
+                                        {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                    </button>
+                                </div>
+
                                 {
                                     hasError.password && (
                                         <FieldDescription className="text-xs text-red-500">
@@ -236,16 +249,26 @@ const Register = () => {
                             </Field>
                             <Field>
                                 <FieldLabel>Confirm Password</FieldLabel>
-                                <Input 
-                                    type="password" 
-                                    name="password_confirmation" 
-                                    placeholder="********" 
-                                    className="py-5" 
-                                    disabled={isRegistering}
-                                    value={formData.password_confirmation}
-                                    onChange={handleInputChange}
-                                    aria-invalid={hasError.password_confirmation}
-                                />
+                                <div className="relative">
+                                    <Input 
+                                        type={showPasswordConfirmation ? "text" : "password"}
+                                        name="password_confirmation" 
+                                        placeholder="••••••••" 
+                                        className="py-5 pr-10" 
+                                        disabled={isRegistering}
+                                        value={formData.password_confirmation}
+                                        onChange={handleInputChange}
+                                        aria-invalid={hasError.password_confirmation}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={()=>setShowPasswordConfirmation(!showPasswordConfirmation)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors"
+                                        disabled={isRegistering}
+                                    >
+                                        {showPasswordConfirmation ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                    </button>
+                                </div>
                                 {
                                     hasError.password_confirmation && (
                                         <FieldDescription className="text-xs text-red-500">

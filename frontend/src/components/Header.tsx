@@ -3,7 +3,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import useAuthStore from "../store/authStore";
 import { Separator } from "./ui/separator";
-import { Bell } from "lucide-react";
+import { Bell, Sparkle, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 
 const Header = () => {
@@ -77,8 +77,16 @@ const Header = () => {
             // if user is student
             authUser?.role==='student'?
                 <div className="flex flex-row items-center gap-2">
+                    <Button 
+                        variant={'secondary'} 
+                        className={`cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary flex ${location.pathname==='/marketplace/ai-assistant'? 'text-primary ':''}`}
+                        onClick={()=>navigate("/marketplace/ai-assistant")}
+                    >
+                        <Sparkles className={`w-4 h-4 ${location.pathname==='/marketplace/ai-assistant'? 'animate-bounce':''}`}/>
+                        <p className="font-medium">AI Assistant</p>
+                    </Button>
                     <ThemeToggle/>
-                    <Bell className="cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary text-text-strong" />
+                    <Bell className="cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out hover:text-primary " />
                     <div className="flex items-center gap-2">
                         <Separator orientation="vertical" />
                         <Avatar className="cursor-pointer" onClick={()=>navigate("/marketplace/profile")}>

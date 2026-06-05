@@ -66,8 +66,8 @@ const useBookingStore =create<BookingStore>((set,get)=>({
             const response=await axiosInstance.get('/bookings/student-bookings');
             set({studentBookings:response.data.bookings});
         }
-        catch(error){
-            toast.error('Failed to get student bookings: ',error.response?.data?.message || 'Unknown error');
+        catch(error:any){
+            toast.error(error.response?.data?.message);
         } finally{
             set({isGettingStudentBookings:false});
         }
@@ -78,11 +78,17 @@ const useBookingStore =create<BookingStore>((set,get)=>({
         set({isRejectingBooking:true});
         try{
             const response=await axiosInstance.post('/bookings/reject-booking',{booking_id});
-            set({teacherBookings:response.data.bookings});
+            set((state)=>{
+                const booking=response.data.booking;
+                const teacherBookings=state.teacherBookings?.filter((b)=>b.id!==booking_id);
+                return {
+                    teacherBookings: [...teacherBookings, booking]
+                };
+            });
             toast.success(response.data.message);
         }
-        catch(error){
-            toast.error('Failed to reject booking: ',error.response?.data?.message || 'Unknown error');
+        catch(error:any){
+            toast.error(error.response?.data?.message);
         } finally{
             set({isRejectingBooking:false});
         }
@@ -93,9 +99,13 @@ const useBookingStore =create<BookingStore>((set,get)=>({
         set({isApprovingBooking:true});
         try{
             const response=await axiosInstance.post('/bookings/approve-booking',{booking_id});
-            set({
-                teacherBookings:response.data.bookings,
-                current_live_sessions:response.data.current_live_sessions
+            set((state)=>{
+                const booking=response.data.booking;
+                const teacherBookings=state.teacherBookings?.filter((b)=>b.id!==booking_id);
+                return {
+                    teacherBookings: [...teacherBookings, booking],
+                    current_live_sessions:response.data.current_live_sessions
+                };
             });
             toast.success(response.data.message);
         }
