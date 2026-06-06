@@ -97,7 +97,7 @@ const SessionView = () => {
                         <MessageButton 
                             disabled={isGettingToken}
                             variant="outline"
-                            recieverUser={studentSelectedSession.teacher.user}
+                            recieverUser={studentSelectedSession?.teacher?.user}
                             className="flex-1 py-7 px-8 cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl bg-background/50 backdrop-blur-sm border-border hover:bg-background/80 font-bold" 
                         >
                             <span className="flex items-center gap-2 text-lg">Message <Mail size={20}/></span>

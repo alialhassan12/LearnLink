@@ -9,6 +9,7 @@ interface AiMessagesStore{
     getAiMessages:(chatId:number)=>Promise<void>;
 
     isReceivingAiMessage:boolean;
+    addMessage:(message:AiMessage)=>void;
     sendMessageToAi:(chatId:number | null,content:string,chatTitle?:string)=>Promise<any>;
 }
 
@@ -39,7 +40,7 @@ export const useAiMessagesStore=create<AiMessagesStore>((set)=>({
             });
             const incomingMessage = response.data.ai_message;
             set((state)=>({
-                aiMessages:[...state.aiMessages, incomingMessage]
+                aiMessages:[...state.aiMessages, incomingMessage],
             }));
             return response.data;
         } catch (error:any) {
@@ -48,5 +49,10 @@ export const useAiMessagesStore=create<AiMessagesStore>((set)=>({
         }finally{
             set({isReceivingAiMessage:false});
         }
+    },
+    addMessage:(message:AiMessage)=>{
+        set((state)=>{
+            return {aiMessages:[...state.aiMessages, message]};
+        })
     }
 }))

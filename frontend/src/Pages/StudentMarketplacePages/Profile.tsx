@@ -233,35 +233,35 @@ const Profile = () => {
                                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-2">
                                                 <div className="flex items-center gap-4">
                                                     <Avatar className="h-12 w-12 border border-border shadow-sm ring-2 ring-primary/5">
-                                                        <AvatarImage src={booking.teacher?.user?.avatar || undefined} />
+                                                        <AvatarImage src={booking?.teacher?.user?.avatar || undefined} />
                                                         <AvatarFallback className="bg-primary/5 text-primary font-bold text-base">
-                                                            {booking.teacher?.name?.[0].toUpperCase()}
+                                                            {booking?.teacher?.user?.name?.[0].toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div className="space-y-1">
                                                         <h4 className="font-bold text-text-strong group-hover:text-primary transition-colors text-base">
-                                                            {booking.teacher?.user?.name}
+                                                            {booking?.teacher?.user?.name}
                                                         </h4>
                                                         <p className="text-xs text-text-weak">
-                                                            Subject: <span className="text-primary font-semibold">{booking.subject}</span>
+                                                            Subject: <span className="text-primary font-semibold">{booking?.subject}</span>
                                                         </p>
                                                         <div className="flex flex-wrap items-center gap-2 pt-0.5">
                                                             <span className="flex items-center gap-1 text-[11px] font-medium text-text-weak bg-secondary/50 px-2 py-0.5 rounded-md">
                                                                 <Calendar className="w-3.5 h-3.5 text-primary" />
-                                                                {booking.scheduled_day}, {booking.scheduled_date}
+                                                                {booking?.scheduled_day}, {booking?.scheduled_date}
                                                             </span>
                                                             <span className="flex items-center gap-1 text-[11px] font-medium text-text-weak bg-secondary/50 px-2 py-0.5 rounded-md">
                                                                 <Clock className="w-3.5 h-3.5 text-primary" />
-                                                                {booking.scheduled_time}
+                                                                {booking?.scheduled_time}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex sm:flex-col items-end justify-between sm:justify-center w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-border/40 gap-1.5">
-                                                    <div className="text-lg font-black text-text-strong">${booking.price}</div>
+                                                    <div className="text-lg font-black text-text-strong">${booking?.price}</div>
                                                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider border ${
-                                                        booking.status === 'approved' 
+                                                        booking?.status === 'approved' 
                                                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50' 
                                                             : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50'
                                                     }`}>

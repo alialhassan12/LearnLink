@@ -23,10 +23,9 @@ class studentController extends Controller
             ],403);
         }
 
-        //TODO:get student completed sessions
         $sessions = Booking::where('student_id', $student->id)
         ->where('status', 'approved')
-        ->with('liveSession')->get();
+        ->with('liveSession','teacher.user')->get();
 
         $completedSessions=$sessions->filter(function($session){
             return $session->liveSession->status==='completed';
@@ -38,6 +37,13 @@ class studentController extends Controller
 
         if($student->user && $student->user->avatar){
             $student->user->avatar = $storage->getPublicUrl($student->user->avatar);
+        }
+        if($sessions->count()>0){
+            $sessions->each(function($session) use($storage){
+                if($session->teacher->user && $session->teacher->user->avatar){
+                    $session->teacher->user->avatar = $storage->getPublicUrl($session->teacher->user->avatar);
+                }
+            });
         }
 
         return response()->json([

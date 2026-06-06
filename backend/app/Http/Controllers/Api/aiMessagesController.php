@@ -56,17 +56,27 @@ class aiMessagesController extends Controller
             // call gemini api
             $aiResponse=$aiService->generate($request->prompt);
 
-            return response()->json($aiResponse);
+            if($aiResponse==null){
+                return response()->json([
+                    "message"=>"Failed to connect to AI server"
+                ],500);
+            }
 
-            $aiText=$aiResponse['candidates'][0]['content']['parts'][0]['text'];
-            $aiTokenUsage=$aiResponse['usageMetadata']['totalTokenCount'];
+            // extract data from ai response 
+            // for gemini
+            // $aiText=$aiResponse['candidates'][0]['content']['parts'][0]['text'];
+            // $aiTokenUsage=$aiResponse['usageMetadata']['totalTokenCount'];
 
-            // update token usage
-            $subscription->tokens_used+=$aiTokenUsage;
-            $subscription->save();
+            // for ollama model
+            $aiText=$aiResponse['response'];
+            $aiTokenUsage=$aiResponse['prompt_eval_count']+$aiResponse['eval_count'];
 
-            // save user and ai messages
-            $aiMessage=DB::transaction(function()use($chat,$request,$aiText,$aiTokenUsage){
+            $aiMessage=DB::transaction(function()use($chat,$request,$aiText,$aiTokenUsage,$subscription){
+                // update token usage
+                $subscription->tokens_used+=$aiTokenUsage;
+                $subscription->save();
+                
+                // save user and ai messages
                 AiMessage::create([
                     "ai_chat_id"=>$chat->id,
                     "role"=>"user",

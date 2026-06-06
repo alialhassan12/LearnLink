@@ -164,13 +164,14 @@ const renderMessageContent = (content: string) => {
 
 // Main Component
 const AiAssistantLayout = () => {
-    const { aiChats, getAiChats, isGettingAiChats } = useAiChatStore();
+    const { aiChats, getAiChats, isGettingAiChats,setAiChats } = useAiChatStore();
     const { 
         aiMessages, 
         getAiMessages, 
         isGettingAiMessages, 
         sendMessageToAi, 
-        isReceivingAiMessage 
+        isReceivingAiMessage ,
+        addMessage
     } = useAiMessagesStore();
     const { authUser } = useAuthStore();
 
@@ -182,20 +183,6 @@ const AiAssistantLayout = () => {
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    // SEO optimizations
-    useEffect(() => {
-        document.title = "AI Study Assistant | LearnLink";
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc) {
-            metaDesc.setAttribute("content", "Get instant study, coding, and writing advice with the LearnLink AI Assistant.");
-        } else {
-            const meta = document.createElement("meta");
-            meta.name = "description";
-            meta.content = "Get instant study, coding, and writing advice with the LearnLink AI Assistant.";
-            document.head.appendChild(meta);
-        }
-    }, []);
 
     // Fetch all chats on load
     useEffect(() => {
@@ -217,7 +204,7 @@ const AiAssistantLayout = () => {
 
     useEffect(() => {
         scrollToBottom();
-    }, [aiMessages, pendingPrompt, isReceivingAiMessage]);
+    }, [pendingPrompt, isReceivingAiMessage]);
 
     // Adjust input textarea height dynamically
     useEffect(() => {
@@ -273,6 +260,17 @@ const AiAssistantLayout = () => {
         setPendingPrompt(promptToSend);
         setErrorMessage(null);
 
+        addMessage({
+            id: -1,
+            ai_chat_id: selectedChatId || -1,
+            role: "user",
+            type:"text",
+            content: promptToSend,
+            tokens_used:0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
         try {
             if (selectedChatId === null) {
                 // Create new chat
@@ -280,14 +278,16 @@ const AiAssistantLayout = () => {
                 const result = await sendMessageToAi(null, promptToSend, title);
                 
                 if (result?.chat?.id) {
+                    setAiChats(result.chat);
                     setSelectedChatId(result.chat.id);
-                    await getAiChats();
                 }
             } else {
                 // Continue chat
-                await sendMessageToAi(selectedChatId, promptToSend);
-                await getAiMessages(selectedChatId);
-        }
+                const result=await sendMessageToAi(selectedChatId, promptToSend);
+                if(result?.ai_message){
+                    // addMessage(result.ai_message);
+                }
+            }
         } catch (err: any) {
             setErrorMessage(err?.response?.data?.message || "An error occurred while communicating with the AI. Please try again.");
         } finally {
@@ -379,25 +379,25 @@ const AiAssistantLayout = () => {
                         </h4>
                         <div className="space-y-0.5">
                             {groupChats.map((chat) => {
-                            const isActive = selectedChatId === chat.id;
-                            return (
-                                <button
-                                key={chat.id}
-                                id={`chat-history-item-${chat.id}`}
-                                onClick={() => {
-                                    setSelectedChatId(chat.id);
-                                    setMobileOpen(false);
-                                }}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all duration-200 group cursor-pointer ${
-                                    isActive 
-                                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15" 
-                                    : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
-                                }`}
-                                >
-                                <MessageSquare className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground/70 group-hover:text-primary transition-colors"}`} />
-                                <span className="truncate flex-1">{chat.title}</span>
-                                </button>
-                            );
+                                const isActive = selectedChatId === chat.id;
+                                return (
+                                    <button
+                                    key={chat.id}
+                                    id={`chat-history-item-${chat.id}`}
+                                    onClick={() => {
+                                        setSelectedChatId(chat.id);
+                                        setMobileOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all duration-200 group cursor-pointer ${
+                                        isActive 
+                                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15" 
+                                        : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                                    }`}
+                                    >
+                                    <MessageSquare className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground/70 group-hover:text-primary transition-colors"}`} />
+                                    <span className="truncate flex-1">{chat.title}</span>
+                                    </button>
+                                );
                             })}
                         </div>
                         </div>
@@ -417,7 +417,7 @@ const AiAssistantLayout = () => {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{authUser?.name}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-primary/80">Student Portal</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-primary/80">{authUser?.role} Portal</p>
                     </div>
                 </div>
                 </div>
@@ -489,7 +489,7 @@ const AiAssistantLayout = () => {
                     {selectedChatId === null && aiMessages.length === 0 && !pendingPrompt ? (
                         
                         /* Welcoming Starter Page (Empty State) */
-                        <div className="max-w-2xl mx-auto h-full flex flex-col justify-center py-10 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                        <div className="max-w-2xl mx-auto flex flex-col justify-center py-10 animate-in fade-in slide-in-from-bottom-3 duration-500">
                             <div className="flex flex-col items-center text-center space-y-4 mb-10">
                                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center shadow-lg shadow-primary/20">
                                     <Sparkles className="h-7 w-7 text-white animate-pulse" />
@@ -602,7 +602,7 @@ const AiAssistantLayout = () => {
                             )}
 
                             {/* Optimistic Pending User Message */}
-                            {isReceivingAiMessage && pendingPrompt && (
+                            {/* {isReceivingAiMessage && pendingPrompt && (
                                 <div className="flex gap-3 max-w-[85%] md:max-w-[78%] self-end ml-auto flex-row-reverse opacity-70 animate-in fade-in duration-300">
                                     <Avatar className="h-8 w-8 shrink-0 shadow-sm border border-background">
                                         <AvatarImage src={authUser?.avatar} />
@@ -620,7 +620,7 @@ const AiAssistantLayout = () => {
                                         </span>
                                     </div>
                                 </div>
-                        )}
+                        )} */}
 
                         {/* Typing Response Loading Indicator */}
                         {isReceivingAiMessage && (

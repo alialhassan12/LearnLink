@@ -135,7 +135,7 @@ const Sessions = ()=>{
                             </p>
 
                             <Button
-                                onClick={() => navigate(`/marketplace/live-sessions/${nextSession.id}`)}
+                                onClick={() => navigate(`/marketplace/live-sessions/${nextSession?.id}`)}
                                 className="w-full sm:w-fit h-12 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 Join Preparation Room

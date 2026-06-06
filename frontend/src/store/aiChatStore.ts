@@ -4,6 +4,7 @@ import axiosInstance from "../lib/axios";
 
 interface AiChatStore{
     aiChats:AiChat[];
+    setAiChats:(chats:AiChat)=>void;
 
     isGettingAiChats:boolean;
     getAiChats:()=>Promise<void>;
@@ -11,6 +12,16 @@ interface AiChatStore{
 
 export const useAiChatStore=create<AiChatStore>((set)=>({
     aiChats:[],
+    setAiChats:(chat:AiChat):void=>{
+        set((state)=>{
+            const exists=state.aiChats.some((c:AiChat)=>c.id===chat.id);
+            if(exists){
+                return {aiChats:state.aiChats.map((c:AiChat)=>c.id===chat.id ? chat : c)};
+            }else{
+                return {aiChats:[...state.aiChats, chat]};
+            }
+        });
+    },
 
     isGettingAiChats:false,
     getAiChats:async()=>{
