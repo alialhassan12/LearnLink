@@ -35,8 +35,10 @@ return [
         ],
     ],
 
-    'gemini'=>[
-        'api_key'=>env('GEMINI_API_KEY')
+    'google_ai'=>[
+        'model'=>env('GOOGLE_MODEL'),
+        'api_key'=>env('GOOGLE_AI_API_KEY'),
+        'url'=>env('GOOGLE_AI_URL')
     ],
     'ollama'=>[
         'model'=>env('OLLAMA_MODEL')

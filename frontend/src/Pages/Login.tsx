@@ -1,4 +1,4 @@
-import { Eye, EyeOff, GraduationCap } from "lucide-react";
+import { Eye, EyeClosed, GraduationCap } from "lucide-react";
 import { Input } from "../components/ui/input";
 import {
     Field,
@@ -118,7 +118,7 @@ const Login = () => {
                                             className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors"
                                             disabled={isloggingIn}
                                         >
-                                            {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                            {showPassword ? <EyeClosed size={20}/> : <Eye size={20}/>}
                                         </button>
                                     </div>
                                     <FieldDescription className="text-xs">

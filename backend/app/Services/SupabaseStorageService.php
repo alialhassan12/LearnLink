@@ -62,6 +62,16 @@ class SupabaseStorageService{
         return $path;
     }
 
+    public function uploadAiChatDocuments(UploadedFile $file,int $user_id,string $fileTitle):string{
+        $ext=$file->getClientOriginalExtension();
+        $fileName=strtolower($fileTitle) . '-' . time() . '.' . $ext;
+        $path="ai_chat_documents/" . strval($user_id) . "/" . $fileName;
+
+        $this->disk->put($path,file_get_contents($file));
+
+        return $path;
+    }
+
     public function deleteSessionMaterial(string $path):bool{
         return $this->disk->delete($path);
     }

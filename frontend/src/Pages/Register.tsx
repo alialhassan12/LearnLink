@@ -1,4 +1,4 @@
-import { BookOpen, ChartArea, Eye, EyeOff, GraduationCap } from "lucide-react";
+import { BookOpen, ChartArea, Eye, EyeClosed, GraduationCap } from "lucide-react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { Input } from "../components/ui/input";
@@ -235,7 +235,7 @@ const Register = () => {
                                         className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors"
                                         disabled={isRegistering}
                                     >
-                                        {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                        {showPassword ? <EyeClosed size={20}/> : <Eye size={20}/>}
                                     </button>
                                 </div>
 
@@ -266,7 +266,7 @@ const Register = () => {
                                         className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary transition-colors"
                                         disabled={isRegistering}
                                     >
-                                        {showPasswordConfirmation ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                        {showPasswordConfirmation ? <EyeClosed size={20}/> : <Eye size={20}/>}
                                     </button>
                                 </div>
                                 {

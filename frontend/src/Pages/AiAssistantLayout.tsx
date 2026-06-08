@@ -19,7 +19,10 @@ import {
     Loader2, 
     Menu, 
     MessageSquare,
-    AlertTriangle
+    AlertTriangle,
+    Paperclip,
+    X,
+    File as FileIcon,
 } from "lucide-react";
 
 // Sub-component for code blocks with copy-to-clipboard functionality
@@ -171,7 +174,8 @@ const AiAssistantLayout = () => {
         isGettingAiMessages, 
         sendMessageToAi, 
         isReceivingAiMessage ,
-        addMessage
+        addMessage,
+        sendMessageWithFileToAi
     } = useAiMessagesStore();
     const { authUser } = useAuthStore();
 
@@ -180,9 +184,11 @@ const AiAssistantLayout = () => {
     const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [selectedFile,setSelectedFile]=useState<File|null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const fileInpRef = useRef<HTMLInputElement>(null);
 
     // Fetch all chats on load
     useEffect(() => {
@@ -244,6 +250,13 @@ const AiAssistantLayout = () => {
         return groups;
     };
 
+    const handleFileChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
+        const file=e.target.files[0];
+        if(file){
+            setSelectedFile(file);
+        }
+    }
+
     const handleNewChat = () => {
         setSelectedChatId(null);
         setErrorMessage(null);
@@ -253,45 +266,89 @@ const AiAssistantLayout = () => {
     };
 
     const handleSend = async (customPrompt?: string) => {
-        const promptToSend = (customPrompt || input).trim();
-        if (!promptToSend || isReceivingAiMessage) return;
+        if(!selectedFile){
+            const promptToSend = (customPrompt || input).trim();
+            if (!promptToSend || isReceivingAiMessage) return;
 
-        setInput("");
-        setPendingPrompt(promptToSend);
-        setErrorMessage(null);
+            setInput("");
+            setPendingPrompt(promptToSend);
+            setErrorMessage(null);
 
-        addMessage({
-            id: -1,
-            ai_chat_id: selectedChatId || -1,
-            role: "user",
-            type:"text",
-            content: promptToSend,
-            tokens_used:0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        });
+            addMessage({
+                id: -1,
+                ai_chat_id: selectedChatId || -1,
+                role: "user",
+                type:"text",
+                content: promptToSend,
+                tokens_used:0,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            });
 
-        try {
-            if (selectedChatId === null) {
-                // Create new chat
-                const title = promptToSend.split(" ").slice(0, 4).join(" ") || "New Chat";
-                const result = await sendMessageToAi(null, promptToSend, title);
-                
-                if (result?.chat?.id) {
-                    setAiChats(result.chat);
-                    setSelectedChatId(result.chat.id);
+            try {
+                if (selectedChatId === null) {
+                    // Create new chat
+                    const title = promptToSend.split(" ").slice(0, 4).join(" ") || "New Chat";
+                    const result = await sendMessageToAi(null, promptToSend, title);
+                    
+                    if (result?.chat?.id) {
+                        setAiChats(result.chat);
+                        setSelectedChatId(result.chat.id);
+                    }
+                } else {
+                    // Continue chat
+                    const result=await sendMessageToAi(selectedChatId, promptToSend);
+                    if(result?.ai_message){
+                        // addMessage(result.ai_message);
+                    }
                 }
-            } else {
-                // Continue chat
-                const result=await sendMessageToAi(selectedChatId, promptToSend);
-                if(result?.ai_message){
-                    // addMessage(result.ai_message);
-                }
+            } catch (err: any) {
+                setErrorMessage(err?.response?.data?.message || "An error occurred while communicating with the AI. Please try again.");
+            } finally {
+                setPendingPrompt(null);
             }
-        } catch (err: any) {
-            setErrorMessage(err?.response?.data?.message || "An error occurred while communicating with the AI. Please try again.");
-        } finally {
-            setPendingPrompt(null);
+        }else{
+            const promptToSend = (customPrompt || input).trim();
+            if (!promptToSend && !selectedFile || isReceivingAiMessage) return;
+            addMessage({
+                id:new Date().getTime(),
+                ai_chat_id: selectedChatId || -1,
+                role:"user",
+                type:"file",
+                content:promptToSend,
+                tokens_used:0,
+                file_name: selectedFile.name,
+                file_path: selectedFile,
+                file_type:selectedFile.type,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            });
+            setSelectedFile(null);
+            setInput("");
+            setPendingPrompt(promptToSend);
+            setErrorMessage(null);
+            try {
+                if (selectedChatId === null) {
+                    // Create new chat
+                    const title = promptToSend.split(" ").slice(0, 4).join(" ") || "New Chat";
+                    const result = await sendMessageWithFileToAi(null, promptToSend, selectedFile,title);
+                    
+                    if (result?.chat?.id) {
+                        setAiChats(result.chat);
+                        setSelectedChatId(result.chat.id);
+                    }
+                } else {
+                    // Continue chat
+                    const result=await sendMessageWithFileToAi(selectedChatId, promptToSend, selectedFile);
+                    if(result?.ai_message){
+                        // addMessage(result.ai_message);
+                    }
+                }
+            } catch (err: any) {
+                setErrorMessage(err?.response?.data?.message || "An error occurred while communicating with the AI. Please try again.");
+            } finally {
+                setPendingPrompt(null);
+            }
         }
     };
 
@@ -559,6 +616,12 @@ const AiAssistantLayout = () => {
                                 <>
                                     {aiMessages.map((message) => {
                                         const isUser = message.role === "user";
+                                        const messageType=message.type;
+                                        let fileType="";
+                                        if(messageType ==="file"){
+                                            fileType=message.file_type;
+                                        }
+                                        
                                         return (
                                             <div 
                                                 key={message.id}
@@ -582,45 +645,60 @@ const AiAssistantLayout = () => {
                                                 )}
 
                                                 {/* Content Box */}
-                                                <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
-                                                    <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-xs ${
-                                                                isUser 
-                                                                ? "bg-primary text-primary-foreground rounded-tr-xs" 
-                                                                : "bg-card text-card-foreground border border-border/60 rounded-tl-xs"
-                                                            }`}
-                                                    >
-                                                        {renderMessageContent(message.content)}
+                                                {messageType=== "text" &&(
+                                                    <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
+                                                        <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-xs ${
+                                                                    isUser 
+                                                                    ? "bg-primary text-primary-foreground rounded-tr-xs" 
+                                                                    : "bg-card text-card-foreground border border-border/60 rounded-tl-xs"
+                                                                }`}
+                                                        >
+                                                            {renderMessageContent(message.content)}
+                                                        </div>
+                                                        <span className="text-[10px] text-muted-foreground/60 px-1 mt-0.5">
+                                                            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-[10px] text-muted-foreground/60 px-1 mt-0.5">
-                                                        {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
-                                                </div>
+                                                )}
+                                                {messageType=== "file" &&(
+                                                    <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
+                                                        <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-xs ${
+                                                                    isUser 
+                                                                    ? "bg-primary text-primary-foreground rounded-tr-xs" 
+                                                                    : "bg-card text-card-foreground border border-border/60 rounded-tl-xs"
+                                                                }`}
+                                                        >
+                                                            {fileType.startsWith("image/") ? (
+                                                                <img 
+                                                                    src={message.file_path instanceof File?URL.createObjectURL(message.file_path as File): message.file_path}
+                                                                    alt={message.file_name}
+                                                                    className="max-w-xs rounded-lg"
+                                                                />
+                                                            ) : (
+                                                                <a 
+                                                                    href={message.file_path instanceof File?URL.createObjectURL(message.file_path as File): message.file_path} 
+                                                                    target="_blank" rel="noopener noreferrer" 
+                                                                    className="flex items-center gap-2 hover:underline font-bold bg-card text-card-foreground border-border border-2 rounded-md p-2"
+                                                                >
+                                                                    <FileIcon className="h-4 w-4" />
+                                                                    {message.file_name}
+                                                                </a>
+                                                            )}
+                                                            <div className="mt-2">
+                                                                {renderMessageContent(message?.content || "")}
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-[10px] text-muted-foreground/60 px-1 mt-0.5">
+                                                            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                
                                             </div>
                                         );
                                     })}
                                 </>
                             )}
-
-                            {/* Optimistic Pending User Message */}
-                            {/* {isReceivingAiMessage && pendingPrompt && (
-                                <div className="flex gap-3 max-w-[85%] md:max-w-[78%] self-end ml-auto flex-row-reverse opacity-70 animate-in fade-in duration-300">
-                                    <Avatar className="h-8 w-8 shrink-0 shadow-sm border border-background">
-                                        <AvatarImage src={authUser?.avatar} />
-                                        <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
-                                            {authUser?.name?.charAt(0).toUpperCase() || "U"}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex flex-col gap-1 items-end">
-                                        <div className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed bg-primary text-primary-foreground rounded-tr-xs shadow-xs">
-                                            <p className="whitespace-pre-wrap">{pendingPrompt}</p>
-                                        </div>
-                                        <span className="text-[10px] text-muted-foreground/50 flex items-center gap-1">
-                                            <Loader2 className="h-3 w-3 animate-spin" />
-                                            Sending...
-                                        </span>
-                                    </div>
-                                </div>
-                        )} */}
 
                         {/* Typing Response Loading Indicator */}
                         {isReceivingAiMessage && (
@@ -658,8 +736,51 @@ const AiAssistantLayout = () => {
                             </div>
                         )}
 
+                        {/* file preview */}
+                        {selectedFile &&(
+                            <div className="p-4 bg-muted/30 rounded-xl border border-border/50 flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 flex-1">
+                                    {selectedFile.type.startsWith("image/") ?(
+                                        <img src={URL.createObjectURL(selectedFile)} alt="preview" className="w-20 h-20 rounded-lg" />
+                                    ) :(
+                                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                            <FileIcon className="h-5 w-5 text-primary" />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="truncate text-sm font-medium text-foreground">{selectedFile.name}</p>
+                                        <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                                    </div>
+                                </div>
+                                <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/20 hover:text-red-600 cursor-pointer" onClick={()=>setSelectedFile(null)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+
                         {/* Input Capsule */}
                         <div className="relative flex items-end gap-2 bg-muted/50 p-2 rounded-2xl border border-border/70 focus-within:border-primary/50 focus-within:bg-card transition-all duration-300 shadow-inner">
+                            
+                            <Button
+                                variant="default"
+                                size="icon"
+                                className="rounded-full hover:bg-primary bg-transparent text-text-strong hover:text-white cursor-pointer transition-all duration-200 hover:scale-105 rotate-[-45deg]"
+                                onClick={()=>{
+                                    if(fileInpRef.current){
+                                        fileInpRef.current.click();
+                                    }
+                                }}
+                            >
+                                <Paperclip />
+                            </Button>
+                            <input 
+                                type="file" 
+                                ref={fileInpRef} 
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                                className="hidden" 
+                                onChange={(e)=>handleFileChange(e)} 
+                            />
+                            
                             <textarea
                                 id="ai-assistant-textarea"
                                 ref={textareaRef}
@@ -675,7 +796,7 @@ const AiAssistantLayout = () => {
                             <Button
                                 id="ai-assistant-send-button"
                                 onClick={() => handleSend()}
-                                disabled={!input.trim() || isReceivingAiMessage}
+                                disabled={!input.trim() && !selectedFile || isReceivingAiMessage}
                                 size="icon"
                                 className="h-9 w-9 rounded-xl shrink-0 shadow-md transition-all duration-300 hover:scale-105 bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer disabled:opacity-40 disabled:scale-100 disabled:pointer-events-none"
                             >

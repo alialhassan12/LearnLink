@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable('ai_chat_id', 'role', 'content', 'type', 'tokens_used')]
+#[Fillable('ai_chat_id', 'role', 'content','file_name','file_path','file_type', 'type', 'tokens_used')]
 class AiMessage extends Model
 {
 

@@ -5,6 +5,9 @@ export interface AiMessage{
     content:string;
     type:string;
     tokens_used:number;
+    file_name?:string;
+    file_path?:string | File;
+    file_type?:string;
     created_at:string;
     updated_at:string;
 }
